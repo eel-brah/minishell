@@ -6,11 +6,41 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/24 10:57:20 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/24 15:19:44 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
+
+int	ft_cd(char **args)
+{
+	// PWD OLDPWD
+	char			*home;
+	char			*target;
+
+	if (count_args(args) < 1)
+	{
+		home = getenv("HOME");
+		if (!home)
+		{
+			ft_putstr_fd("cd: HOME not set\n", 2);
+			return (1);
+		}
+		target = home;
+	}
+	else
+		target = args[0];
+	if (*target)
+	{
+		if (chdir(target))
+		{
+			ft_putstr_fd("cd: ", 2);
+			perror(target);
+			return (1);
+		}
+	}
+	return (0);
+}
 
 int	ft_echo(char **args)
 {

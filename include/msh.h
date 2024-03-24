@@ -40,12 +40,12 @@ typedef struct s_exec
 	char	**eargv;
 }	t_exec;
 
-typedef struct s_pipe 
+typedef struct s_div
 {
 	int		type;
 	t_node	*left;
 	t_node	*right;
-}	t_pipe;
+}	t_div;
 
 typedef struct s_redirection
 {
@@ -62,8 +62,8 @@ typedef struct s_redirection
 
 #define WORD 'w'
 #define PIPELINE 'p'
-#define AND 'a'
-#define OR 'o'
+#define OAND 'a'
+#define OOR 'o'
 #define OUTPUT_REDIRECTION 'r'
 #define INPUT_REDIRECTION 'R'
 #define APPEND_REDIRECTION 'd'
@@ -76,6 +76,9 @@ typedef struct s_redirection
 #define EXEC 1
 #define PIPE 2
 #define RED  3
+#define AND  4
+#define OR   5
+
 
 size_t	count_args(char **ptrs);
 void	free_cmdtree(t_node *tree);
@@ -83,6 +86,8 @@ int		ft_echo(char **args);
 int		ft_env(char **env, char **args);
 int		ft_pwd(char **args);
 // int		ft_unset(char **env, char **args);
+int		ft_cd(char **args);
+int		built_in(char *prg, char **args, char **env);
 
 void	ft_printenv(char **env);
 char	**ptrs_realloc(char **tokens, char *arg);

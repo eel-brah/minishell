@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/24 10:13:49 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/24 18:04:05 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 bool	get_token_cmp2(char *p, char *r)
 {
 	if (!ft_strncmp(p, "&&", 2))
-		*r = AND;
+		*r = OAND;
 	else if (!ft_strncmp(p, "||", 2))
-		*r = OR;
+		*r = OOR;
 	else if (!ft_strncmp(p, "<<", 2))
 		*r = HEREDOC;
 	else if (!ft_strncmp(p, ">>", 2))
@@ -85,6 +85,43 @@ char	get_token(char **s, char **st, char **et)
 	if (et)
 		*et = p;
 	*s = p;
+	return (r);
+}
+
+char	token_peek(char *p)
+{
+	char	r;
+	bool	Q;
+	char	q;
+
+	Q = false;
+	while (*p && ft_strchr(WHITESPACES, *p))
+		p++;
+	if (!*p)
+		r = 0;
+	else if (get_token_cmp2(p, &r))
+		p += 2;
+	else if (get_token_cmp1(p, &r))
+		p += 1;
+	else
+	{
+		while (*p && ((!ft_strchr(WHITESPACES, *p) && (!ft_strchr(SYMBOL, *p)
+			|| (*p == '&' && *(p + 1) != '&'))) || Q))
+		{
+			if ((*p == '\"' || *p == '\'') && (!Q || (Q && *p == q)))
+			{
+				q = *p;
+				Q = !Q;
+			}
+			p++;
+		}
+		if (Q)
+		{
+			ft_putendl_fd("Synax errur 4", 2);
+			return ('e');
+		}
+		r = WORD;
+	}
 	return (r);
 }
 
@@ -167,27 +204,28 @@ t_exec	*create_exec()
 	return (cmd);
 }
 
-t_node	*create_pipe(t_node *left, t_node *right)
+t_node	*diversion(t_node *left, t_node *right, int token)
 {
-	t_pipe *pipe;
+	t_div *node;
 
 	if (!right)
 	{
 		free_cmdtree(left);
 		return (NULL);
 	}
-	pipe = malloc(sizeof(*pipe));
-	if (!pipe)
+	node = malloc(sizeof(*node));
+	if (!node)
 	{
 		free_cmdtree(right);
 		free_cmdtree(left);
 		return (NULL);
 	}
-	pipe->type = PIPE;
-	pipe->left = left;
-	pipe->right = right;
-	return ((t_node*)pipe);
+	node->type = token;
+	node->left = left;
+	node->right = right;
+	return ((t_node*)node);
 }
+
 
 t_node	*add_redirection(t_redirection *red, t_node *node)
 {
@@ -280,7 +318,7 @@ t_node	*parse_exec(char **pcmd)
 		free_cmdtree((t_node *)cmd);
 		return (NULL);
 	}
-	while (!peek(pcmd, "|"))
+	while (!peek(pcmd, "|") && token_peek(*pcmd) != OAND && token_peek(*pcmd) != OOR)
 	{
 		r = get_token(pcmd, &st, &et);
 		if (r == 'e')
@@ -327,10 +365,10 @@ t_node	*parse_pipe(char **pcmd)
 	node = parse_exec(pcmd);
 	if (!node)
 		return (NULL);
-	if (peek(pcmd, "|"))
+	if (token_peek(*pcmd) == PIPELINE)
 	{
 		get_token(pcmd, 0, 0);
-		node = create_pipe(node, parse_pipe(pcmd));
+		node = diversion(node, parse_pipe(pcmd), PIPE);
 		if (!node)
 			return (NULL);
 	}
@@ -340,7 +378,7 @@ t_node	*parse_pipe(char **pcmd)
 void	parse_cmd_term(t_node *node)
 {
 	t_exec			*exec;
-	t_pipe			*pipe;
+	t_div			*dev;
 	t_redirection	*red;
 	int				i;
 
@@ -359,17 +397,51 @@ void	parse_cmd_term(t_node *node)
 	}
 	else if (node->type == PIPE)
 	{
-		pipe = (t_pipe*)node;
-		parse_cmd_term(pipe->left);
-		parse_cmd_term(pipe->right);
+		dev = (t_div*)node;
+		parse_cmd_term(dev->left);
+		parse_cmd_term(dev->right);
 	}
+	else if (node->type == AND)
+	{
+		dev = (t_div*)node;
+		parse_cmd_term(dev->left);
+		parse_cmd_term(dev->right);
+	}
+	else if (node->type == OR)
+	{
+		dev = (t_div*)node;
+		parse_cmd_term(dev->left);
+		parse_cmd_term(dev->right);
+	}
+}
+
+t_node	*pars_operators(char **pcmd)
+{
+	t_node	*node;
+	char	token;
+
+	node = parse_pipe(pcmd);
+	if (!node)
+		return (NULL);
+	token = token_peek(*pcmd);
+	if (token == OAND || token == OOR)
+	{
+		get_token(pcmd, 0, 0);
+		if (token == OAND)
+			node = diversion(node, pars_operators(pcmd), AND);
+		else
+			node = diversion(node, pars_operators(pcmd), OR);
+		if (!node)
+			return (NULL);
+	}
+	return (node);
 }
 
 t_node	*parse_cmd(char *cmd)
 {
 	t_node	*tree;
 
-	tree = parse_pipe(&cmd);
+	tree = pars_operators(&cmd);
 	if (!tree)
 		return (NULL);
 	parse_cmd_term(tree);
@@ -381,17 +453,26 @@ void	execute(t_node *node, char **env)
 {
 	t_exec			*cmd;
 	t_redirection	*red;
-	t_pipe			*pipeline;
-	pid_t			pe[2];
+	t_div			*div;
+	pid_t			pe[3];
 	int				p[2];
-	int				r;
+	static int		r;
 	int				or;
 	
 	if (node->type == EXEC)
 	{
 		cmd = (t_exec *)node;
 		if (cmd->argv)
-			exec_cmd(cmd->argv[0], cmd->argv, env);
+		{
+			// built in exit status && built in in pipeline
+			r = built_in(cmd->argv[0], cmd->argv, env);
+			if (r != -1)
+				return ;
+			pe[2] = fork();
+			if (pe[2] == 0)
+				exec_cmd(cmd->argv[0], cmd->argv, env);
+			waitpid(pe[2], &r, 0);
+		}
 	}
 	else if (node->type == RED)
 	{
@@ -400,51 +481,66 @@ void	execute(t_node *node, char **env)
 		if(or < 0)
 		{
 			perror("open");
-			exit(1);
+			return ;
 		}
 		dup2(or, red->fd);
 		execute(red->node, env);
 	}
 	else if (node->type == PIPE)
 	{
-		pipeline = (t_pipe*)node;
+		div = (t_div*)node;
 		if(pipe(p) < 0)
 		{
 			perror("pipe");
-			exit(1);
+			return ;
 		}
 		pe[0] = fork();
 		if (pe[0] < 0)
 		{
 			perror("fork");
-			exit(1);
+			return ;
 		}
 		if (!pe[0])
 		{
 			dup2(p[1], 1);
 			close(p[1]);
 			close(p[0]);
-			execute(pipeline->left, env);
+			execute(div->left, env);
+			exit(0);
 		}
 		pe[1] = fork();
 		if (pe[1] < 0)
 		{
 			perror("fork");
-			exit(1);
+			return ;
 		}
 		if (!pe[1])
 		{
 			dup2(p[0], 0);
 			close(p[1]);
 			close(p[0]);
-			execute(pipeline->right, env);
+			execute(div->right, env);
+			exit(0);
 		}
 		close(p[0]);
 		close(p[1]);
 		waitpid(pe[0], &r, 0);
 		waitpid(pe[1], &r, 0);
 	}
-	exit(0);
+	else if (node->type == AND)
+	{
+		div = (t_div*)node;
+		execute(div->left, env);
+		if (!r)
+			execute(div->right, env);
+	}
+	else if (node->type == OR)
+	{
+		div = (t_div*)node;
+		execute(div->left, env);
+		if (r)
+			execute(div->right, env);
+	}
 }
 
 void	pre_trv(t_node *node) 
@@ -460,10 +556,10 @@ void	pre_trv(t_node *node)
 		printf("EXEX: %s\n", ((t_exec *)ptr)->argv[0]);
 		return ;
 	}
-	else if (node->type == PIPE)
-		printf("PIPE\n");
-	pre_trv(((t_pipe *)node)->left);
-	pre_trv(((t_pipe *)node)->right);
+	else
+		printf("%i\n", node->type);
+	pre_trv(((t_div *)node)->left);
+	pre_trv(((t_div *)node)->right);
 }
 
 void fu()
@@ -475,7 +571,7 @@ void	free_cmdtree(t_node *tree)
 {
 	t_exec			*cmd;
 	t_redirection	*red;
-	t_pipe			*pipeline;
+	t_div			*pipeline;
 
 	if (!tree)
 		return ;
@@ -494,7 +590,7 @@ void	free_cmdtree(t_node *tree)
 	}
 	else if (tree->type == PIPE)
 	{
-		pipeline = (t_pipe *)tree;
+		pipeline = (t_div *)tree;
 		free_cmdtree((t_node *)pipeline->left);
 		free_cmdtree((t_node *)pipeline->right);
 		free(pipeline);
@@ -533,17 +629,16 @@ int	main(int argc, char **argv, char **env)
 {
 	char	*cmd;
 	t_node	*tree;
-	int		pid;
-	int	r;
+	// int		pid;
+	// int	r;
 	char	*prompt;
 	char	**_env;
 
 	(void) argc;
 	(void) argv;
-	// _env = create_env(env);
-	// if (!_env)
-	// 	return (1);
-	_env = env;
+	_env = create_env(env);
+	if (!_env)
+		return (1);
 	// atexit(fu);
 	while (1)
 	{
@@ -558,18 +653,8 @@ int	main(int argc, char **argv, char **env)
 			free(prompt);
 			continue;
 		}
-		pid = fork();
-		if (pid < 0)
-		{
-			free_cmdtree(tree);
-			free(cmd);
-			free(prompt);
-			perror("fork");
-			continue;
-		}
-		if(pid == 0)
-			execute(tree, _env);
-		wait(&r);
+		execute(tree, _env);
+		// pre_trv(tree);
 		free_cmdtree(tree);
 		free(cmd);
 		free(prompt);
