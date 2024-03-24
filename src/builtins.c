@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/24 09:19:27 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/24 10:57:20 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@ int	ft_echo(char **args)
 	unsigned int	i;
 	bool			new_line;
 
-	if (!args)
-		return (0);
+	// if (!args)
+	// 	return (0);
 	new_line = true;
-	while (!ft_strncmp(args[0], "-n", 2) && count_args(args) > 0)
+	while (count_args(args) > 0 && !ft_strncmp(args[0], "-n", 2))
 	{
 		i = 1;
 		while (args[0][i] == 'n')
@@ -56,11 +56,18 @@ int	ft_env(char **env, char **args)
 int	ft_pwd(char **args)
 {
 	char	*s;
+	int		i;
 
 	if (count_args(args) && **args == '-')
 	{
-		print_error("pwd", "usage: pwd");
-		return (1);
+		i = 0;
+		while (args[0][i] == '-')
+			i++;
+		if (args[0][i])
+		{
+			print_error("pwd", "usage: pwd");
+			return (1);
+		}
 	}
 	s = getcwd(NULL, 0);
 	if (!s)
@@ -73,41 +80,41 @@ int	ft_pwd(char **args)
 	return (0);
 }
 
-int	ft_unset(char **env, char **args)
-{
-	unsigned int	i;
-	unsigned int	j;
-	unsigned int	r;
+// int	ft_unset(char **env, char **args)
+// {
+// 	unsigned int	i;
+// 	unsigned int	j;
+// 	unsigned int	r;
 
-	r = 0;
-	while (*args)
-	{
-		if (is_valid_variable_name(*args))
-		{
-			i = 0;
-			while (env[i])
-			{
-				if (!ft_strncmp(env[i], *args, ft_strlen(*args)) 
-					&& env[i][ft_strlen(*args)] == '=')
-				{
-					free(env[i]);
-					j = i;
-					while (env[j])
-					{
-						env[j] = env[j + 1];
-						j++;
-					}
-				}
-				i++;
-			}
-		}
-		else
-		{
-			print_error_2("unset", *args ,"not a valid identifier");
-			r = 1;
-		}
-		args++;
-	}
-	return (r);
-}
+// 	r = 0;
+// 	while (*args)
+// 	{
+// 		if (is_valid_variable_name(*args))
+// 		{
+// 			i = 0;
+// 			while (env[i])
+// 			{
+// 				if (!ft_strncmp(env[i], *args, ft_strlen(*args)) 
+// 					&& env[i][ft_strlen(*args)] == '=')
+// 				{
+// 					free(env[i]);
+// 					j = i;
+// 					while (env[j])
+// 					{
+// 						env[j] = env[j + 1];
+// 						j++;
+// 					}
+// 				}
+// 				i++;
+// 			}
+// 		}
+// 		else
+// 		{
+// 			print_error_2("unset", *args ,"not a valid identifier");
+// 			r = 1;
+// 		}
+// 		args++;
+// 	}
+// 	return (r);
+// }
 

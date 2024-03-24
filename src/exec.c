@@ -2,6 +2,32 @@
 
 extern char **environ;
 
+bool	built_in(char *prg, char **args, char **env)
+{
+	unsigned int size;
+
+	size = ft_strlen(prg);
+	if (size == ft_strlen("echo") 
+		&& !ft_strncmp(prg, "echo", size))
+	{
+		ft_echo(args + 1);
+		return (1);
+	}
+	else if (size == ft_strlen("pwd") 
+		&& !ft_strncmp(prg, "pwd", size))
+	{
+		ft_pwd(args + 1);
+		return (1);
+	}
+	else if (size == ft_strlen("env") 
+		&& !ft_strncmp(prg, "env", size))
+	{
+		ft_env(env, args + 1);
+		return (1);
+	}
+	return (0);
+}
+
 void	exec_cmd(char *prg, char **args, char **env)
 {
 	char	*path;
@@ -15,6 +41,8 @@ void	exec_cmd(char *prg, char **args, char **env)
 	char	*pr_denied;
 	bool	acc;
 
+	if (built_in(prg, args, env))
+		exit(0);
 	is_path = !!ft_strchr(prg, '/');
 	acc = access(prg, F_OK);
 	if (is_path && acc)

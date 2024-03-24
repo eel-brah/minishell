@@ -82,7 +82,7 @@ void	free_cmdtree(t_node *tree);
 int		ft_echo(char **args);
 int		ft_env(char **env, char **args);
 int		ft_pwd(char **args);
-int		ft_unset(char **env, char **args);
+// int		ft_unset(char **env, char **args);
 
 void	ft_printenv(char **env);
 char	**ptrs_realloc(char **tokens, char *arg);

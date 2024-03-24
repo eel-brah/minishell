@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/23 03:40:39 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/24 10:13:49 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -540,9 +540,10 @@ int	main(int argc, char **argv, char **env)
 
 	(void) argc;
 	(void) argv;
-	_env = create_env(env);
-	if (!_env)
-		return (1);
+	// _env = create_env(env);
+	// if (!_env)
+	// 	return (1);
+	_env = env;
 	// atexit(fu);
 	while (1)
 	{
@@ -573,7 +574,7 @@ int	main(int argc, char **argv, char **env)
 		free(cmd);
 		free(prompt);
 	}
-	double_free(_env);
+	// double_free(_env);
 	// rl_clear_history();
 }
 
