@@ -84,6 +84,7 @@ int		ft_env(char **env, char **args);
 int		ft_pwd(char **args);
 int		ft_unset(char **env, char **args);
 
+void	ft_printenv(char **env);
 char	**ptrs_realloc(char **tokens, char *arg);
 void	double_free(char **ptrs);
 void	print_error(char *source, char *error);

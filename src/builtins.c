@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/23 07:26:57 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/24 09:19:27 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int	ft_echo(char **args)
 	bool			new_line;
 
 	if (!args)
-		return ;
+		return (0);
 	new_line = true;
 	while (!ft_strncmp(args[0], "-n", 2) && count_args(args) > 0)
 	{
@@ -39,6 +39,7 @@ int	ft_echo(char **args)
 	}
 	if (new_line)
 		ft_putchar_fd('\n', 1);
+	return (0);
 }
 
 int	ft_env(char **env, char **args)
@@ -87,7 +88,7 @@ int	ft_unset(char **env, char **args)
 			while (env[i])
 			{
 				if (!ft_strncmp(env[i], *args, ft_strlen(*args)) 
-					&& env[ft_strlen(*args)] == '=')
+					&& env[i][ft_strlen(*args)] == '=')
 				{
 					free(env[i]);
 					j = i;

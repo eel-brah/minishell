@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/23 07:32:00 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/24 09:16:01 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,4 +121,10 @@ char	*ft_strrealloc(char *str, size_t size)
 	ft_strlcat(new_str, str, size);
 	free(str);
 	return (new_str);
+}
+
+void	ft_printenv(char **env)
+{
+	while (env && *env)
+		printf("%s\n", *env++);
 }
