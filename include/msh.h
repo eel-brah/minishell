@@ -29,7 +29,14 @@
 #include <errno.h>
 
 
-typedef struct s_node 
+typedef struct s_token
+{
+	int				type;
+	char			*s;	
+	struct s_token	*next;
+}	t_token;
+
+typedef struct s_node
 {
 	int	type;
 }	t_node;
@@ -38,7 +45,6 @@ typedef struct s_exec
 {
 	int		type;
 	char	**argv;
-	char	**eargv;
 }	t_exec;
 
 typedef struct s_div
@@ -54,7 +60,6 @@ typedef struct s_redirection
 	t_node	*node;
 	int		fd;
 	char	*file;
-	char	*efile;
 	int		flags;
 }	t_redirection;
 

@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/25 10:18:31 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/25 15:21:37 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,10 +181,10 @@ char	*get_cmd(char *prompt)
 	{
 		add_history(cmd); // return on error
 		// char *ptr = cmd;
-		cmd = ft_strtrim(cmd, WHITESPACES);
-		// free(ptr);
-		if (!cmd)
-			perror("malloc");
+		// cmd = ft_strtrim(cmd, WHITESPACES);
+		// // free(ptr);
+		// if (!cmd)
+		// 	perror("malloc");
 		return (cmd);
 	}
 	free (cmd);
@@ -200,7 +200,6 @@ t_exec	*create_exec()
 		return (NULL);
 	cmd->type = EXEC;
 	cmd->argv = NULL;
-	cmd->eargv = NULL;
 	return (cmd);
 }
 
@@ -248,7 +247,7 @@ t_node	*add_redirection(t_redirection *red, t_node *node)
 	return (t_node *)red;
 }
 
-t_node	*create_redirection(t_node *node, char *file, char *efile, int flags, int fd)
+t_node	*create_redirection(t_node *node, char *file, int flags, int fd)
 {
 	t_redirection	*red;
 
@@ -257,7 +256,6 @@ t_node	*create_redirection(t_node *node, char *file, char *efile, int flags, int
 		return (NULL);
 	red->type = RED;
 	red->file = file;
-	red->efile = efile;
 	red->flags = flags;
 	red->fd = fd;
 	return (add_redirection(red, node));
@@ -276,73 +274,66 @@ bool	peek(char **pcmd, char *set)
 	return (*ptr && ft_strchr(set, *ptr));
 }
 
-t_node	*parse_redirection(t_node *node, char **pcmd)
+t_node	*parse_redirection(t_node *node, t_token **list)
 {
-	char	red;
-	char	*st;
-	char	*et;
+	// char	red;
+	t_token	*next;
 
-	while (peek(pcmd, "<>"))
+	while (*list && ((*list)->type == INPUT_REDIRECTION || (*list)->type == OUTPUT_REDIRECTION || (*list)->type == APPEND_REDIRECTION || (*list)->type == HEREDOC))
 	{
-		red = get_token(pcmd, 0, 0);
-		if (red == HEREDOC || get_token(pcmd, &st, &et) != WORD)
+		next = (*list)->next;
+		if ((*list)->type == HEREDOC || !next || next->type != WORD)
 		{
 			ft_putendl_fd("Syntax error 3", 2);
 			return (NULL);
 		}
-		if (red == INPUT_REDIRECTION)
-			node = create_redirection(node, st, et, O_RDONLY, 0);
-		else if (red == OUTPUT_REDIRECTION)
-			node = create_redirection(node, st, et, O_WRONLY|O_CREAT|O_TRUNC, 1);
-		else if (red == APPEND_REDIRECTION)
-			node = create_redirection(node, st, et, O_WRONLY|O_CREAT|O_APPEND, 1);
+		if ((*list)->type == INPUT_REDIRECTION)
+			node = create_redirection(node, next->s, O_RDONLY, 0);
+		else if ((*list)->type == OUTPUT_REDIRECTION)
+			node = create_redirection(node, next->s, O_WRONLY|O_CREAT|O_TRUNC, 1);
+		else if ((*list)->type == APPEND_REDIRECTION)
+			node = create_redirection(node, next->s, O_WRONLY|O_CREAT|O_APPEND, 1);
+		// if (!node)
+		*list = next->next; 
 	}
 	return (node);
 }
 
-t_node	*parse_exec(char **pcmd)
+t_node	*parse_exec(t_token **list)
 {
 	t_exec	*cmd;
 	t_node	*node;
 	t_node	*tmp;
-	char	*st;
-	char	*et;
-	char	r;
+	// char	*st;
+	// char	*et;
+	// char	r;
 
 	cmd = create_exec();
 	if (!cmd)
 		return (NULL);
-	node = parse_redirection((t_node *)cmd, pcmd);
+	node = parse_redirection((t_node *)cmd, list);
 	if (!node)
 	{
 		free_cmdtree((t_node *)cmd);
 		return (NULL);
 	}
-	while (!peek(pcmd, "|") && token_peek(*pcmd) != OAND && token_peek(*pcmd) != OOR)
+	while (*list && (*list)->type != PIPELINE && (*list)->type != OAND && (*list)->type != OOR)
 	{
-		r = get_token(pcmd, &st, &et);
-		if (r == 'e')
-		{
-			free_cmdtree(node);
-			return (NULL);
-		}
-		if (r == 0)
-			break;
-		if (r != WORD)
+		if ((*list)->type != WORD)
 		{
 			free_cmdtree(node);
 			ft_putendl_fd("Syntax error 1", 2);
 			return (NULL);
 		}
-		cmd->argv = ptrs_realloc(cmd->argv, st);
-		cmd->eargv = ptrs_realloc(cmd->eargv, et);
-		if (!cmd->argv || !cmd->eargv)
+		cmd->argv = ptrs_realloc(cmd->argv, (*list)->s);
+		if (!cmd->argv)
 		{
 			free_cmdtree(node);
 			return (NULL);
 		}
+		(*list) = (*list)->next;
 		tmp = node;
-		node = parse_redirection(node, pcmd);
+		node = parse_redirection(node, list);
 		if (!node)
 		{
 			free_cmdtree(tmp);
@@ -358,105 +349,105 @@ t_node	*parse_exec(char **pcmd)
 	return (node);
 }
 
-t_node	*parse_pipe(char **pcmd)
+t_node	*parse_pipe(t_token **list)
 {
 	t_node	*node;
 
-	node = parse_exec(pcmd);
+	node = parse_exec(list);
 	if (!node)
 		return (NULL);
-	if (token_peek(*pcmd) == PIPELINE)
+	if (*list && (*list)->type == PIPELINE)
 	{
-		get_token(pcmd, 0, 0);
-		node = diversion(node, parse_pipe(pcmd), PIPE);
+		(*list) = (*list)->next;
+		node = diversion(node, parse_pipe(list), PIPE);
 		if (!node)
 			return (NULL);
 	}
 	return (node);
 }
 
-void	parse_cmd_term(t_node *node)
-{
-	t_exec			*exec;
-	t_div			*dev;
-	t_redirection	*red;
-	int				i;
+// void	parse_cmd_term(t_node *node)
+// {
+// 	t_exec			*exec;
+// 	t_div			*dev;
+// 	t_redirection	*red;
+// 	int				i;
 
-	i = 0;
-	if (node->type == EXEC)
-	{
-		exec = (t_exec*)node;
-		while (exec->argv && exec->argv[i]) // > file
-			*(exec->eargv[i++]) = 0;
-	}
-	else if (node->type == RED)
-	{
-		red = (t_redirection *)node;
-		*(red->efile) = 0;
-		parse_cmd_term(red->node);
-	}
-	else if (node->type == PIPE)
-	{
-		dev = (t_div*)node;
-		parse_cmd_term(dev->left);
-		parse_cmd_term(dev->right);
-	}
-	else if (node->type == AND)
-	{
-		dev = (t_div*)node;
-		parse_cmd_term(dev->left);
-		parse_cmd_term(dev->right);
-	}
-	else if (node->type == OR)
-	{
-		dev = (t_div*)node;
-		parse_cmd_term(dev->left);
-		parse_cmd_term(dev->right);
-	}
-}
+// 	i = 0;
+// 	if (node->type == EXEC)
+// 	{
+// 		exec = (t_exec*)node;
+// 		while (exec->argv && exec->argv[i]) // > file
+// 			*(exec->eargv[i++]) = 0;
+// 	}
+// 	else if (node->type == RED)
+// 	{
+// 		red = (t_redirection *)node;
+// 		*(red->efile) = 0;
+// 		parse_cmd_term(red->node);
+// 	}
+// 	else if (node->type == PIPE)
+// 	{
+// 		dev = (t_div*)node;
+// 		parse_cmd_term(dev->left);
+// 		parse_cmd_term(dev->right);
+// 	}
+// 	else if (node->type == AND)
+// 	{
+// 		dev = (t_div*)node;
+// 		parse_cmd_term(dev->left);
+// 		parse_cmd_term(dev->right);
+// 	}
+// 	else if (node->type == OR)
+// 	{
+// 		dev = (t_div*)node;
+// 		parse_cmd_term(dev->left);
+// 		parse_cmd_term(dev->right);
+// 	}
+// }
 
-t_node	*pars_or(char **pcmd)
+t_node	*pars_or(t_token **list)
 {
 	t_node	*node;
 
-	node = parse_pipe(pcmd);
+	node = parse_pipe(list);
 	if (!node)
-		return (NULL);
-	if (token_peek(*pcmd) == OOR)
+		return (NULL);	
+	if (*list && (*list)->type == OOR)
 	{
-		get_token(pcmd, 0, 0);
-		node = diversion(node, pars_or(pcmd), OR);
+		(*list) = (*list)->next;
+		node = diversion(node, pars_or(list), OR);
 		if (!node)
 			return (NULL);
 	}
 	return (node);
 }
 
-t_node	*pars_and(char **pcmd)
+t_node	*pars_and(t_token **list)
 {
 	t_node	*node;
 
-	node = pars_or(pcmd);
+	node = pars_or(list);
 	if (!node)
-		return (NULL);
-	if (token_peek(*pcmd) == OAND)
+		return (NULL);	
+	if (*list && (*list)->type == OAND)
 	{
-		get_token(pcmd, 0, 0);
-		node = diversion(node, pars_and(pcmd), AND);
+		(*list) = (*list)->next;
+		node = diversion(node, pars_and(list), AND);
 		if (!node)
 			return (NULL);
 	}
 	return (node);
 }
 
-t_node	*parse_cmd(char *cmd)
+t_node	*parse_cmd(t_token **list)
 {
 	t_node	*tree;
 
-	tree = pars_and(&cmd);
+	tree = pars_and(list);
 	if (!tree)
 		return (NULL);
-	parse_cmd_term(tree);
+	// parse_cmd_term(tree);
 	return (tree);
 }
 
@@ -470,7 +461,7 @@ void	execute(t_node *node, char **env)
 	int				p[2];
 	static int		r;
 	int				or;
-	
+
 	if (node->type == EXEC)
 	{
 		cmd = (t_exec *)node;
@@ -590,13 +581,15 @@ void	free_cmdtree(t_node *tree)
 	if (tree->type == EXEC)
 	{
 		cmd = (t_exec *)tree;
-		free(cmd->argv);
-		free(cmd->eargv);
+		double_free(cmd->argv);
+		// free(cmd->argv);
+		// free(cmd->eargv);
 		free(cmd);
 	}
 	else if (tree->type == RED)
 	{
 		red = (t_redirection *)tree;
+		free(red->file);
 		free_cmdtree((t_node *)red->node);
 		free(red);
 	}
@@ -637,12 +630,133 @@ char	**create_env(char **env)
 	return (ptr);
 }
 
+t_token	*new_list(int type, char *s)
+{
+	t_token	*new;
+
+	new = malloc(sizeof(t_token));
+	if (!new)
+		return (NULL);
+	new->type = type;
+	new->s = s;
+	new->next = NULL;
+	return (new);
+}
+
+void	lstadd_back(t_token **lst, t_token *new)
+{
+	t_token	*last;
+
+	if (!new || !lst)
+		return ;
+	last = *lst;
+	if (!last)
+	{
+		*lst = new;
+		return ;
+	}
+	while (last->next)
+		last = last->next;
+	last->next = new;
+}
+
+char	*strdup_v2(char *start, char *end)
+{
+	char			*s;
+	unsigned int	size;
+
+	if (!start || !end || start > end)
+		return (NULL);
+	size = (end - start) + 1;
+	s = malloc(size * sizeof(char));
+	if (!s)
+		return (NULL);
+	ft_strlcpy(s, start, size);
+	return (s);
+}
+
+void	free_list(t_token **token)
+{
+	t_token	*node;
+	t_token	*ptr;
+
+	if (!token)
+		return ;
+	node = *token;
+	while (node)
+	{
+		ptr = node;
+		node = node->next;
+		free(ptr->s);
+		free(ptr);
+	}
+	*token = NULL;
+}
+
+void	free_list_v2(t_token **token)
+{
+	t_token	*node;
+	t_token	*ptr;
+
+	if (!token)
+		return ;
+	node = *token;
+	while (node)
+	{
+		ptr = node;
+		node = node->next;
+		// free(ptr->s);
+		free(ptr);
+	}
+	*token = NULL;
+}
+
+t_token	*tokenizing(char *cmd)
+{
+	t_token	*list;
+	char	*st;
+	char	*et;
+	char	token;
+	char	*s;
+	t_token	*new;
+
+	list = NULL;
+	while (1)
+	{
+		token = get_token(&cmd, &st, &et);
+		if (token == 0)
+			return (list);
+		else if (token == 'e')
+		{
+			free_list(&list);
+			return (NULL);
+		}
+		s = strdup_v2(st, et);
+		if (!s)
+		{
+			free_list(&list);
+			return (NULL);
+		}
+		new = new_list(token, s);
+		if (!new)
+		{
+			free(s);
+			free_list(&list);
+			return (NULL);
+		}
+		lstadd_back(&list, new);
+	}
+	return (list);
+}
+
 int	main(int argc, char **argv, char **env)
 {
 	char	*cmd;
 	t_node	*tree;
 	char	*prompt;
 	char	**_env;
+	t_token	*list;
+	t_token	*ptr_list;
 
 	(void) argv;
 	if (argc > 1)
@@ -657,16 +771,22 @@ int	main(int argc, char **argv, char **env)
 		cmd = get_cmd(prompt);
 		if (!cmd)
 			continue;
-		tree = parse_cmd(cmd);
+		list = tokenizing(cmd);
+		if (!list)
+			continue;
+		ptr_list = list;
+		tree = parse_cmd(&list);
 		if (!tree)
 		{
 			free(cmd);
+			free_list_v2(&ptr_list);
 			free(prompt);
 			continue;
 		}
 		execute(tree, _env);
 		// pre_trv(tree);
 		free_cmdtree(tree);
+		free_list_v2(&ptr_list);
 		free(cmd);
 		free(prompt);
 	}
