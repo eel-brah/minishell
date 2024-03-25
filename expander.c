@@ -1,9 +1,6 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include "libft.h"
+#include "include/msh.h"
+
 typedef struct elem
 {
 	int	wild;
@@ -15,8 +12,8 @@ typedef struct elem
 }	t_elem;
 
 char	*match_pattern(char *pattern);
-int		check_pattern1(char *pattern, char *name);
 char	*delete_quotes(char *s, int index);
+
 int	is_alpha_num(int c)
 {
 	if (c <= 'z' && c >= 'a')
@@ -90,52 +87,6 @@ char    **ft_realloc(char **lines, char *line)
     free(tmp);
     return (lines);
 }
-
-// char	*ft_concat(char *word, char c)
-// {
-// 	int		i;
-// 	char	*res;
-// 	int		len;
-
-// 	i = 0;
-// 	len = 0;
-// 	if (word == NULL)
-// 	{
-// 		res = malloc(2);
-// 		if (!res)
-// 			return (NULL);
-// 		res[0] = c;
-// 		res[1] = '\0';
-// 	}
-// 	else
-// 	{
-// 		while (word[len])
-// 			len++;
-// 		res = malloc(len + 2);
-// 		if (!res)
-// 			return (NULL);
-// 		while (i < len)
-// 		{
-// 			res[i] = word[i];
-// 			i++;
-// 		}
-// 		res[i++] = c;
-// 		res[i] = '\0';
-// 	}
-// 	free(word);
-// 	return (res);
-// }
-
-// char	*ft_concat(char *word, char *s, int start, int end, int inquote, char quoute)
-// {
-// 	word = malloc((end - start) + 1);
-// 	while (start < end)
-// 	{
-// 		if (inquote || s[start] )
-// 		word[start] = s[start];
-// 		start++;
-// 	}
-// }
 
 char    *ft_strrealloc(char *str, size_t size)
 {
@@ -400,29 +351,8 @@ char	**expander(char *s, int here_doc, int expand)
 			}
 			else if (!is_exist(s[i], "\t\n\v\f\r ") || elem.qoute == 1)
 			{
-			// 	if (elem.index == elem.capacity - 1)
-			// 	{
-			// 		elem.capacity *= 2;
-			// 		arrt = ft_strrealloc(arr, elem.capacity);
-			// 		if (!arrt)
-			// 			return (free(arr), free_arr(res), perror("malloc"), NULL);
-			// 		arr = arrt;
-			// 	}
-			// 	if (s[i] == '*' && elem.qoute == 0)
-			// 	{
-			// 		elem.wild = 1;
-			// 	}
-			// 	if (s[i] == '$' && (elem.q == '\"' || elem.q == '\0' || here_doc) && is_exist(s[i + 1], "*@#?	$-!0") && expand)
-			// 		handle_dollar_special(s, &i, arr, &elem.index, elem.capacity);
-			// 	else if (s[i] == '$' && (elem.q == '\"' || elem.q == '\0' || here_doc) && expand)
-			// 	{
-			// 		if (handle_dollar(s, &i, arr, &elem.index, elem.capacity, elem.qoute, here_doc) == NULL)
-			// 			return (free(arr), free_arr(res), perror("malloc"), NULL);
-			// 	}
-			// 	else
-			// 		arr[elem.index++] = s[i];
-			if (handl_other_carac(&elem, arr, res, here_doc, expand, s, &i) == NULL)
-				return (NULL);
+				if (handl_other_carac(&elem, arr, res, here_doc, expand, s, &i) == NULL)
+					return (NULL);
 			}
 		}
 		i++;
@@ -572,10 +502,8 @@ char	*match_pattern(char *pattern)
 				i++;
 			}
 			arr[index++] = ' ';
-			//printf("%sl\n",st->d_name);
 		}
 	}
-	// arr[index--] = '\0';
 	closedir(dir);
 	if (!flag)
 		arr[index--] = '\0';
