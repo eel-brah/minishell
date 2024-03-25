@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/25 10:18:31 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/25 15:49:02 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,11 +180,11 @@ char	*get_cmd(char *prompt)
 	if (cmd && *cmd)
 	{
 		add_history(cmd); // return on error
-		// char *ptr = cmd;
-		cmd = ft_strtrim(cmd, WHITESPACES);
-		// free(ptr);
-		if (!cmd)
-			perror("malloc");
+		// // char *ptr = cmd;
+		// cmd = ft_strtrim(cmd, WHITESPACES);
+		// // free(ptr);
+		// if (!cmd)
+		// 	perror("malloc");
 		return (cmd);
 	}
 	free (cmd);
@@ -200,7 +200,6 @@ t_exec	*create_exec()
 		return (NULL);
 	cmd->type = EXEC;
 	cmd->argv = NULL;
-	cmd->eargv = NULL;
 	return (cmd);
 }
 
@@ -248,16 +247,17 @@ t_node	*add_redirection(t_redirection *red, t_node *node)
 	return (t_node *)red;
 }
 
-t_node	*create_redirection(t_node *node, char *file, char *efile, int flags, int fd)
+t_node	*create_redirection(t_node *node, char *file, int flags, int fd)
 {
 	t_redirection	*red;
 
+	if (file)
+		return (NULL);
 	red = malloc(sizeof(*red));
 	if (!red)
 		return (NULL);
 	red->type = RED;
 	red->file = file;
-	red->efile = efile;
 	red->flags = flags;
 	red->fd = fd;
 	return (add_redirection(red, node));
@@ -281,6 +281,7 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 	char	red;
 	char	*st;
 	char	*et;
+	char	*file;
 
 	while (peek(pcmd, "<>"))
 	{
@@ -290,12 +291,13 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 			ft_putendl_fd("Syntax error 3", 2);
 			return (NULL);
 		}
+		file = strdup_v2(st, et);
 		if (red == INPUT_REDIRECTION)
-			node = create_redirection(node, st, et, O_RDONLY, 0);
+			node = create_redirection(node, file, O_RDONLY, 0);
 		else if (red == OUTPUT_REDIRECTION)
-			node = create_redirection(node, st, et, O_WRONLY|O_CREAT|O_TRUNC, 1);
+			node = create_redirection(node, file, O_WRONLY|O_CREAT|O_TRUNC, 1);
 		else if (red == APPEND_REDIRECTION)
-			node = create_redirection(node, st, et, O_WRONLY|O_CREAT|O_APPEND, 1);
+			node = create_redirection(node, file, O_WRONLY|O_CREAT|O_APPEND, 1);
 	}
 	return (node);
 }
@@ -308,6 +310,7 @@ t_node	*parse_exec(char **pcmd)
 	char	*st;
 	char	*et;
 	char	r;
+	// char	*s;
 
 	cmd = create_exec();
 	if (!cmd)
@@ -318,7 +321,7 @@ t_node	*parse_exec(char **pcmd)
 		free_cmdtree((t_node *)cmd);
 		return (NULL);
 	}
-	while (!peek(pcmd, "|") && token_peek(*pcmd) != OAND && token_peek(*pcmd) != OOR)
+	while (token_peek(*pcmd) != PIPELINE && token_peek(*pcmd) != OAND && token_peek(*pcmd) != OOR)
 	{
 		r = get_token(pcmd, &st, &et);
 		if (r == 'e')
@@ -334,9 +337,8 @@ t_node	*parse_exec(char **pcmd)
 			ft_putendl_fd("Syntax error 1", 2);
 			return (NULL);
 		}
-		cmd->argv = ptrs_realloc(cmd->argv, st);
-		cmd->eargv = ptrs_realloc(cmd->eargv, et);
-		if (!cmd->argv || !cmd->eargv)
+		cmd->argv = ptrs_realloc(cmd->argv, strdup_v2(st, et));
+		if (!cmd->argv)
 		{
 			free_cmdtree(node);
 			return (NULL);
@@ -375,45 +377,45 @@ t_node	*parse_pipe(char **pcmd)
 	return (node);
 }
 
-void	parse_cmd_term(t_node *node)
-{
-	t_exec			*exec;
-	t_div			*dev;
-	t_redirection	*red;
-	int				i;
+// void	parse_cmd_term(t_node *node)
+// {
+// 	t_exec			*exec;
+// 	t_div			*dev;
+// 	t_redirection	*red;
+// 	int				i;
 
-	i = 0;
-	if (node->type == EXEC)
-	{
-		exec = (t_exec*)node;
-		while (exec->argv && exec->argv[i]) // > file
-			*(exec->eargv[i++]) = 0;
-	}
-	else if (node->type == RED)
-	{
-		red = (t_redirection *)node;
-		*(red->efile) = 0;
-		parse_cmd_term(red->node);
-	}
-	else if (node->type == PIPE)
-	{
-		dev = (t_div*)node;
-		parse_cmd_term(dev->left);
-		parse_cmd_term(dev->right);
-	}
-	else if (node->type == AND)
-	{
-		dev = (t_div*)node;
-		parse_cmd_term(dev->left);
-		parse_cmd_term(dev->right);
-	}
-	else if (node->type == OR)
-	{
-		dev = (t_div*)node;
-		parse_cmd_term(dev->left);
-		parse_cmd_term(dev->right);
-	}
-}
+// 	i = 0;
+// 	if (node->type == EXEC)
+// 	{
+// 		exec = (t_exec*)node;
+// 		while (exec->argv && exec->argv[i]) // > file
+// 			*(exec->eargv[i++]) = 0;
+// 	}
+// 	else if (node->type == RED)
+// 	{
+// 		red = (t_redirection *)node;
+// 		*(red->efile) = 0;
+// 		parse_cmd_term(red->node);
+// 	}
+// 	else if (node->type == PIPE)
+// 	{
+// 		dev = (t_div*)node;
+// 		parse_cmd_term(dev->left);
+// 		parse_cmd_term(dev->right);
+// 	}
+// 	else if (node->type == AND)
+// 	{
+// 		dev = (t_div*)node;
+// 		parse_cmd_term(dev->left);
+// 		parse_cmd_term(dev->right);
+// 	}
+// 	else if (node->type == OR)
+// 	{
+// 		dev = (t_div*)node;
+// 		parse_cmd_term(dev->left);
+// 		parse_cmd_term(dev->right);
+// 	}
+// }
 
 t_node	*pars_or(char **pcmd)
 {
@@ -456,7 +458,7 @@ t_node	*parse_cmd(char *cmd)
 	tree = pars_and(&cmd);
 	if (!tree)
 		return (NULL);
-	parse_cmd_term(tree);
+	// parse_cmd_term(tree);
 	return (tree);
 }
 
@@ -574,11 +576,6 @@ void	pre_trv(t_node *node)
 	pre_trv(((t_div *)node)->right);
 }
 
-void fu()
-{
-	system("leaks a.out");
-}
-
 void	free_cmdtree(t_node *tree)
 {
 	t_exec			*cmd;
@@ -590,13 +587,15 @@ void	free_cmdtree(t_node *tree)
 	if (tree->type == EXEC)
 	{
 		cmd = (t_exec *)tree;
-		free(cmd->argv);
-		free(cmd->eargv);
+		// free(cmd->argv);
+		// free(cmd->eargv);
+		double_free(cmd->argv);
 		free(cmd);
 	}
 	else if (tree->type == RED)
 	{
 		red = (t_redirection *)tree;
+		free(red->file);
 		free_cmdtree((t_node *)red->node);
 		free(red);
 	}
@@ -650,7 +649,6 @@ int	main(int argc, char **argv, char **env)
 	_env = create_env(env);
 	if (!_env)
 		return (1);
-	// atexit(fu);
 	while (1)
 	{
 		prompt = get_prompt();

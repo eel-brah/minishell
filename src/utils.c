@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/24 09:16:01 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/25 15:32:00 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ char	**ptrs_realloc(char **tokens, char *arg)
 	size_t	size;
 	char	**ntokens;
 
+	if (!arg)
+		return (NULL);
 	size = 2;
 	if (!tokens)
 		return (first_realloc(arg, size));
@@ -127,4 +129,19 @@ void	ft_printenv(char **env)
 {
 	while (env && *env)
 		printf("%s\n", *env++);
+}
+
+char	*strdup_v2(char *start, char *end)
+{
+	char			*s;
+	unsigned int	size;
+
+	if (!start || !end || start > end)
+		return (NULL);
+	size = (end - start) + 1;
+	s = malloc(size * sizeof(char));
+	if (!s)
+		return (NULL);
+	ft_strlcpy(s, start, size);
+	return (s);
 }

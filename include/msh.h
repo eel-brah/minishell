@@ -38,7 +38,6 @@ typedef struct s_exec
 {
 	int		type;
 	char	**argv;
-	char	**eargv;
 }	t_exec;
 
 typedef struct s_div
@@ -54,7 +53,6 @@ typedef struct s_redirection
 	t_node	*node;
 	int		fd;
 	char	*file;
-	char	*efile;
 	int		flags;
 }	t_redirection;
 
@@ -89,6 +87,7 @@ int		ft_pwd(char **args);
 // int		ft_unset(char **env, char **args);
 int		ft_cd(char **args);
 int		built_in(char *prg, char **args, char **env);
+char	*strdup_v2(char *start, char *end);
 
 void	ft_printenv(char **env);
 char	**ptrs_realloc(char **tokens, char *arg);
