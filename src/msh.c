@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/24 18:04:05 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/25 10:18:31 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -415,22 +415,34 @@ void	parse_cmd_term(t_node *node)
 	}
 }
 
-t_node	*pars_operators(char **pcmd)
+t_node	*pars_or(char **pcmd)
 {
 	t_node	*node;
-	char	token;
 
 	node = parse_pipe(pcmd);
 	if (!node)
 		return (NULL);
-	token = token_peek(*pcmd);
-	if (token == OAND || token == OOR)
+	if (token_peek(*pcmd) == OOR)
 	{
 		get_token(pcmd, 0, 0);
-		if (token == OAND)
-			node = diversion(node, pars_operators(pcmd), AND);
-		else
-			node = diversion(node, pars_operators(pcmd), OR);
+		node = diversion(node, pars_or(pcmd), OR);
+		if (!node)
+			return (NULL);
+	}
+	return (node);
+}
+
+t_node	*pars_and(char **pcmd)
+{
+	t_node	*node;
+
+	node = pars_or(pcmd);
+	if (!node)
+		return (NULL);
+	if (token_peek(*pcmd) == OAND)
+	{
+		get_token(pcmd, 0, 0);
+		node = diversion(node, pars_and(pcmd), AND);
 		if (!node)
 			return (NULL);
 	}
@@ -441,7 +453,7 @@ t_node	*parse_cmd(char *cmd)
 {
 	t_node	*tree;
 
-	tree = pars_operators(&cmd);
+	tree = pars_and(&cmd);
 	if (!tree)
 		return (NULL);
 	parse_cmd_term(tree);
@@ -454,7 +466,7 @@ void	execute(t_node *node, char **env)
 	t_exec			*cmd;
 	t_redirection	*red;
 	t_div			*div;
-	pid_t			pe[3];
+	pid_t			pid[3];
 	int				p[2];
 	static int		r;
 	int				or;
@@ -468,10 +480,10 @@ void	execute(t_node *node, char **env)
 			r = built_in(cmd->argv[0], cmd->argv, env);
 			if (r != -1)
 				return ;
-			pe[2] = fork();
-			if (pe[2] == 0)
+			pid[2] = fork();
+			if (pid[2] == 0)
 				exec_cmd(cmd->argv[0], cmd->argv, env);
-			waitpid(pe[2], &r, 0);
+			waitpid(pid[2], &r, 0);
 		}
 	}
 	else if (node->type == RED)
@@ -494,38 +506,38 @@ void	execute(t_node *node, char **env)
 			perror("pipe");
 			return ;
 		}
-		pe[0] = fork();
-		if (pe[0] < 0)
+		pid[0] = fork();
+		if (pid[0] < 0)
 		{
 			perror("fork");
 			return ;
 		}
-		if (!pe[0])
+		if (!pid[0])
 		{
 			dup2(p[1], 1);
 			close(p[1]);
 			close(p[0]);
 			execute(div->left, env);
-			exit(0);
+			exit(r >> 8);
 		}
-		pe[1] = fork();
-		if (pe[1] < 0)
+		pid[1] = fork();
+		if (pid[1] < 0)
 		{
 			perror("fork");
 			return ;
 		}
-		if (!pe[1])
+		if (!pid[1])
 		{
 			dup2(p[0], 0);
 			close(p[1]);
 			close(p[0]);
 			execute(div->right, env);
-			exit(0);
+			exit(r >> 8);
 		}
 		close(p[0]);
 		close(p[1]);
-		waitpid(pe[0], &r, 0);
-		waitpid(pe[1], &r, 0);
+		waitpid(pid[0], &r, 0);
+		waitpid(pid[1], &r, 0);
 	}
 	else if (node->type == AND)
 	{
@@ -629,13 +641,12 @@ int	main(int argc, char **argv, char **env)
 {
 	char	*cmd;
 	t_node	*tree;
-	// int		pid;
-	// int	r;
 	char	*prompt;
 	char	**_env;
 
-	(void) argc;
 	(void) argv;
+	if (argc > 1)
+		print_error("minishell", "Invalid number of arguments");
 	_env = create_env(env);
 	if (!_env)
 		return (1);

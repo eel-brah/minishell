@@ -40,14 +40,14 @@ void	exec_cmd(char *prg, char **args, char **env)
 	if (is_path && acc)
 	{
 		perror(prg);
-		exit(1);
+		exit(127);
 	}
 	else if (is_path && !acc)
 	{
 		if (access(prg, X_OK))
 		{
 			perror(prg);
-			exit(1);
+			exit(126);
 		}
 		if (stat(prg, &statbuf))
 		{
@@ -56,9 +56,8 @@ void	exec_cmd(char *prg, char **args, char **env)
 		}
 		if (S_ISDIR(statbuf.st_mode))
 		{
-			ft_putstr_fd(prg, 2);
-			ft_putstr_fd(": Is a directory\n", 2);
-			exit(1);
+			print_error(prg, "Is a directory");
+			exit(126);
 		}
 		pid = fork();
 		if (pid == -1)
@@ -113,15 +112,13 @@ void	exec_cmd(char *prg, char **args, char **env)
 			}
 			if (!paths[i] && pr_denied)
 			{
-				ft_putstr_fd(pr_denied, 2);
-				ft_putstr_fd(": Permission denied\n", 2);
-				exit(1);
+				print_error(pr_denied, "Permission denied");
+				exit(126);
 			}
 			else if (!paths[i])
 			{
-				ft_putstr_fd(prg, 2);
-				ft_putstr_fd(": command not found\n", 2);
-				exit(1);
+				print_error(prg, "command not found");
+				exit(127);
 			}
 			else
 			{
@@ -142,9 +139,8 @@ void	exec_cmd(char *prg, char **args, char **env)
 		}
 		else
 		{
-			ft_putstr_fd(prg, 2);
-			ft_putstr_fd(": command not found\n", 2);
-			exit(1);
+			print_error(prg, "command not found");
+			exit(127);
 		}
 	}
 	exit(0);
