@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/26 21:06:18 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:53:37 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -622,6 +622,8 @@ void	execute(t_node *node, char **env)
 			cmd->argv = tmp;
 			// exit(0);
 			// return ;
+			if (!cmd->argv[0])
+				return ;
 			r = built_in(cmd->argv[0], cmd->argv, env);
 			if (r != -1)
 				return ;
