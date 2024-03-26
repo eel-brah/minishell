@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   msh.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/26 15:15:24 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/03/26 18:00:05 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -504,7 +504,7 @@ char	**ptrs_realloc2(char **tokens, char **arg, int count, int index)
 	// int j = 0;
 	// int i = 0;
 	// char k[] = "0123456";
-	char **p1 = arg;
+	// char **p1 = arg;
 	char **p2 = tokens;
 	char **p = ntokens;
 	ft_memcpy ((char *) ntokens, (char *) tokens, index * sizeof (char *));
@@ -524,9 +524,50 @@ char	**ptrs_realloc2(char **tokens, char **arg, int count, int index)
 	// while (tokens[j])
 	// 	ntokens[i++] = tokens[j++];
 	*ntokens = NULL;
-	free(p1);
+	// free(p1);
 	free(p2);
 	return (p);
+}
+
+char	**expand_args(char **args)
+{
+	int i = 0;
+	int count = 0;
+	int j = 0;
+	char **ex = NULL;
+
+	while (args[i])
+	{
+		count = 0;
+		ex = expander(args[i], 0, 1);
+		if (!ex)
+			return (NULL);
+		while(ex[count])
+			count++;
+		if (count == 1)
+		{
+			free(args[i]);
+			args[i] = *ex;
+		}
+		else if (count > 1)
+		{
+			args = ptrs_realloc2(args, ex, count, i);
+		}
+		else
+		{
+			j = i;
+			char *ptr = args[j];
+			while (args[j])
+			{
+				args[j] = args[j + 1];
+				j++;
+			}
+			free(ptr);
+		}
+		i += count;
+		free(ex);
+	}
+	return (args);
 }
 
 // system calls returns
@@ -539,6 +580,7 @@ void	execute(t_node *node, char **env)
 	int				p[2];
 	static int		r;
 	int				or;
+	char **tmp;
 	
 	if (node->type == EXEC)
 	{
@@ -546,38 +588,12 @@ void	execute(t_node *node, char **env)
 		if (cmd->argv)
 		{
 			// built in exit status && built in in pipeline
-			int i = 0;
-			int count = 0;
-			while (cmd->argv[i])
-			{
-				count = 0;
-				char **ex = expander(cmd->argv[i], 0, 1);
-				if (!ex)
-				{
-					i++;
-					continue;
-				}
-				while(ex[count])
-					count++;
-				if (count == 1)
-				{
-					free(cmd->argv[i]);
-					cmd->argv[i] = *ex;
-					int j = 0;
-					while (cmd->argv[j])
-						printf("%s\n", cmd->argv[j++]);
-				}
-				else if (count > 1)
-				{
-					cmd->argv = ptrs_realloc2(cmd->argv, ex, count, i);
-					int j = 0;
-					while (cmd->argv[j])
-						printf("%s\n", cmd->argv[j++]);
-				}
-				i += count;
-				printf("%i\n", count);
-			}
-			exit(0);
+			tmp = expand_args(cmd->argv);
+			if (!tmp)
+				return ;
+			cmd->argv = tmp;
+			// exit(0);
+			// return ;
 			r = built_in(cmd->argv[0], cmd->argv, env);
 			if (r != -1)
 				return ;
