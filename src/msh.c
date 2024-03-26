@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/26 18:00:05 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/26 18:26:31 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -613,8 +613,12 @@ void	execute(t_node *node, char **env)
 			perror("open");
 			return ;
 		}
+		int fd = dup(red->fd);
 		dup2(or, red->fd);
+		close(or);
 		execute(red->node, env);
+		dup2(fd, red->fd);
+		close(fd);
 	}
 	else if (node->type == PIPE)
 	{
