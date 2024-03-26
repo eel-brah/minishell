@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/25 15:49:02 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/26 11:51:13 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,7 +251,7 @@ t_node	*create_redirection(t_node *node, char *file, int flags, int fd)
 {
 	t_redirection	*red;
 
-	if (file)
+	if (!file)
 		return (NULL);
 	red = malloc(sizeof(*red));
 	if (!red)
@@ -301,6 +301,29 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 	}
 	return (node);
 }
+t_node	*pars_and(char **pcmd);
+t_node	*parse_parenthesis(char **pcmd)
+{
+	t_node	*node;
+	t_node	*tmp;
+
+	get_token(pcmd, NULL, NULL);
+	node = pars_and(pcmd);
+	if (!node)
+		return (NULL);
+	if (token_peek(*pcmd) != CLOSE_PER)
+	{
+		free_cmdtree(node);
+		print_error("minishell", "syntax error 4");
+		return (NULL);
+	}
+	get_token(pcmd, NULL, NULL);
+	tmp = node;
+	node = parse_redirection(node, pcmd);
+	if (!node)
+		free_cmdtree(tmp);
+	return (node);
+}
 
 t_node	*parse_exec(char **pcmd)
 {
@@ -312,6 +335,8 @@ t_node	*parse_exec(char **pcmd)
 	char	r;
 	// char	*s;
 
+	if(token_peek(*pcmd) == OPEN_PER)
+		return (parse_parenthesis(pcmd));
 	cmd = create_exec();
 	if (!cmd)
 		return (NULL);
@@ -321,7 +346,7 @@ t_node	*parse_exec(char **pcmd)
 		free_cmdtree((t_node *)cmd);
 		return (NULL);
 	}
-	while (token_peek(*pcmd) != PIPELINE && token_peek(*pcmd) != OAND && token_peek(*pcmd) != OOR)
+	while (token_peek(*pcmd) != PIPELINE && token_peek(*pcmd) != OAND && token_peek(*pcmd) != OOR && token_peek(*pcmd) != CLOSE_PER)
 	{
 		r = get_token(pcmd, &st, &et);
 		if (r == 'e')
@@ -333,8 +358,8 @@ t_node	*parse_exec(char **pcmd)
 			break;
 		if (r != WORD)
 		{
-			free_cmdtree(node);
 			ft_putendl_fd("Syntax error 1", 2);
+			free_cmdtree(node);
 			return (NULL);
 		}
 		cmd->argv = ptrs_realloc(cmd->argv, strdup_v2(st, et));
@@ -462,6 +487,48 @@ t_node	*parse_cmd(char *cmd)
 	return (tree);
 }
 
+char	**ptrs_realloc2(char **tokens, char **arg, int count, int index)
+{
+	size_t	size;
+	char	**ntokens;
+
+	if (!arg)
+		return (NULL);
+	size = 0;
+	while (tokens[size])
+			size++;
+	size += count;
+	ntokens = malloc(sizeof(char *) * size);
+	if (!ntokens)
+		return (NULL);
+	// int j = 0;
+	// int i = 0;
+	// char k[] = "0123456";
+	char **p1 = arg;
+	char **p2 = tokens;
+	char **p = ntokens;
+	ft_memcpy ((char *) ntokens, (char *) tokens, index * sizeof (char *));
+	ntokens += index;
+	tokens += index;
+	free(*tokens++);
+	ft_memcpy ((char *) ntokens, (char *) arg, count * sizeof (char *));
+	ntokens += count;
+	ft_memcpy ((char *) ntokens, (char *) tokens, (size - count - index - 1) * sizeof (char *));
+	ntokens += (size - count - index - 1);
+	// while (tokens[j] && index != j)
+	// 	ntokens[i++] = tokens[j++];
+	// int k = 0;
+	// while (arg[k])
+	// 	ntokens[i++] = arg[k++];
+	// free(tokens[j++]);
+	// while (tokens[j])
+	// 	ntokens[i++] = tokens[j++];
+	*ntokens = NULL;
+	free(p1);
+	free(p2);
+	return (p);
+}
+
 // system calls returns
 void	execute(t_node *node, char **env)
 {
@@ -478,7 +545,39 @@ void	execute(t_node *node, char **env)
 		cmd = (t_exec *)node;
 		if (cmd->argv)
 		{
-			// built in exit status && built in in pipeline
+		// 	// built in exit status && built in in pipeline
+		// 	int i = 0;
+		// 	int count = 0;
+		// 	while (cmd->argv[i])
+		// 	{
+		// 		count = 0;
+		// 		char **ex = expander(cmd->argv[i], 0, 1);
+		// 		if (!ex)
+		// 		{
+		// 			i++;
+		// 			continue;
+		// 		}
+		// 		while(ex[count])
+		// 			count++;
+		// 		if (count == 1)
+		// 		{
+		// 			free(cmd->argv[i]);
+		// 			cmd->argv[i] = *ex;
+		// 			int j = 0;
+		// 			while (cmd->argv[j])
+		// 				printf("%s\n", cmd->argv[j++]);
+		// 		}
+		// 		else if (count > 1)
+		// 		{
+		// 			cmd->argv = ptrs_realloc2(cmd->argv, ex, count, i);
+		// 			int j = 0;
+		// 			while (cmd->argv[j])
+		// 				printf("%s\n", cmd->argv[j++]);
+		// 		}
+		// 		i += count;
+		// 		printf("%i\n", count);
+		// 	}
+		// 	exit(0);
 			r = built_in(cmd->argv[0], cmd->argv, env);
 			if (r != -1)
 				return ;
@@ -490,6 +589,7 @@ void	execute(t_node *node, char **env)
 	}
 	else if (node->type == RED)
 	{
+		// stdout after redirection
 		red = (t_redirection*)node;
 		or = open(red->file, red->flags, PREMISSIONS);
 		if(or < 0)
@@ -587,8 +687,6 @@ void	free_cmdtree(t_node *tree)
 	if (tree->type == EXEC)
 	{
 		cmd = (t_exec *)tree;
-		// free(cmd->argv);
-		// free(cmd->eargv);
 		double_free(cmd->argv);
 		free(cmd);
 	}
@@ -600,6 +698,20 @@ void	free_cmdtree(t_node *tree)
 		free(red);
 	}
 	else if (tree->type == PIPE)
+	{
+		pipeline = (t_div *)tree;
+		free_cmdtree((t_node *)pipeline->left);
+		free_cmdtree((t_node *)pipeline->right);
+		free(pipeline);
+	}
+	else if (tree->type == AND)
+	{
+		pipeline = (t_div *)tree;
+		free_cmdtree((t_node *)pipeline->left);
+		free_cmdtree((t_node *)pipeline->right);
+		free(pipeline);
+	}
+	else if (tree->type == OR)
 	{
 		pipeline = (t_div *)tree;
 		free_cmdtree((t_node *)pipeline->left);
@@ -636,6 +748,11 @@ char	**create_env(char **env)
 	return (ptr);
 }
 
+void fu()
+{
+	system("leaks minishell");
+}
+
 int	main(int argc, char **argv, char **env)
 {
 	char	*cmd;
@@ -649,6 +766,7 @@ int	main(int argc, char **argv, char **env)
 	_env = create_env(env);
 	if (!_env)
 		return (1);
+	// atexit(fu);
 	while (1)
 	{
 		prompt = get_prompt();
@@ -667,8 +785,9 @@ int	main(int argc, char **argv, char **env)
 		free_cmdtree(tree);
 		free(cmd);
 		free(prompt);
+		// break;
 	}
-	// double_free(_env);
+	double_free(_env);
 	// rl_clear_history();
 }
 

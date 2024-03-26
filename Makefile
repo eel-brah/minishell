@@ -11,7 +11,7 @@ INCLUDE := msh.h
 INCLUDE := $(addprefix $(INCLUDE_DIR)/,$(INCLUDE))
 
 SRC := msh.c exec.c prompt.c utils.c \
-	builtins.c
+	builtins.c expander.c
 OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
 
 LIBFT := $(LIBFTDIR)/libft.a

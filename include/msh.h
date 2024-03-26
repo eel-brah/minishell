@@ -99,4 +99,5 @@ bool	is_valid_variable_name(char *s);
 void	exec_cmd(char *prg, char **args, char **env);
 char	*get_prompt();
 
+char	**expander(char *s, int here_doc, int expand);
 #endif

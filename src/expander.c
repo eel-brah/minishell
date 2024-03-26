@@ -1,7 +1,6 @@
+#include "../include/msh.h"
 
-#include "include/msh.h"
-
-typedef struct elem
+typedef struct s_elem
 {
 	int	wild;
 	int	index;
@@ -11,9 +10,9 @@ typedef struct elem
 	int	q;
 }	t_elem;
 
-char	*match_pattern(char *pattern);
+char	**match_pattern(char *pattern);
+int		check_pattern1(char *pattern, char *name);
 char	*delete_quotes(char *s, int index);
-
 int	is_alpha_num(int c)
 {
 	if (c <= 'z' && c >= 'a')
@@ -88,7 +87,7 @@ char    **ft_realloc(char **lines, char *line)
     return (lines);
 }
 
-char    *ft_strrealloc(char *str, size_t size)
+char    *ft_strrealloc2(char *str, size_t size)
 {
     char    *new_str;
 
@@ -159,7 +158,7 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 		if (*index == capacity - 1)
 		{
 			capacity *= 2;
-			arr = ft_strrealloc(arr, capacity);
+			arr = ft_strrealloc2(arr, capacity);
 			if (!arr)
 				return (NULL);
 		}
@@ -210,30 +209,78 @@ char	*alloc_without_quotes(char *s, int len)
 	res[len] = '\0';
 	return (res);
 }
+char	**concat_two_array(char **res, char **concat)
+{
+	char	**result;
+	int		len;
+	int		i;
 
+	len = 0;
+	while (res && res[len])
+		len++;
+	i = 0;
+	while (concat && concat[i])
+		i++;
+	result = malloc(sizeof(char *) * (len + i + 1));
+	if (!result)
+		return (NULL);
+	i = 0;
+	while (res && res[i])
+	{
+		result[i] = res[i];
+		i++;
+	}
+	len = 0;
+	while (concat && concat[len])
+	{
+		result[i] = concat[len];
+		len++;
+		i++;
+	}
+	result[i] = NULL;
+	return (result);
+}
 char	*alloc_for_elem(t_elem *elem, int here_doc, char **arr, char *word, char ***res)
 {
 	char	**tmp;
+	char	**concat;
+	int 	flag;
 
+	flag = 1;
+	tmp = NULL;
+	concat = NULL;
 	if (elem->wild && here_doc == 0)
 	{
-		word = match_pattern(*arr);
-		if (word == (char *)42)
+		concat = match_pattern(*arr);
+		if (concat == (char **)42)
 			word = ft_strdup(*arr);
+		else if (concat == NULL)
+			return (perror("malloc sdf"), free(*arr), free_arr(*res), NULL);
+		else
+		{
+			tmp = concat_two_array(*res, concat);
+			if (tmp == NULL)
+				return (perror("malloc fff"), free(*arr), free_arr(*res), NULL);
+			*res = tmp;
+			flag = 0;
+		}
 		elem->wild = 0;
 	}
 	else if (here_doc == 0)
 		word = delete_quotes(*arr, elem->index);
 	else
 		word = ft_strdup(*arr);
-	if (!word)
-		return (perror("malloc"), free(*arr), free_arr(*res), NULL);
+	if (flag)
+	{
+		if (!word)
+			return (perror("malloc dsdf"), free(*arr), free_arr(*res), NULL);
+		tmp = ft_realloc(*res, word);
+		if (!tmp)
+			return (free_arr(*res) , free(word), free(*arr), perror("malloc "), NULL);
+		else
+			*res = tmp;
+	}
 	elem->index = 0;
-	tmp = ft_realloc(*res, word);
-	if (!tmp)
-		return (free_arr(*res) , free(word), free(*arr), perror("malloc "), NULL);
-	else
-		*res = tmp;
 	ft_memset(*arr, 0, elem->capacity);
 	return ((char *)42);
 }
@@ -282,7 +329,7 @@ char	*handl_other_carac(t_elem *elem, char *arr, char **res, int here_doc, int e
 	if (elem->index == elem->capacity - 1)
 	{
 		elem->capacity *= 2;
-		arrt = ft_strrealloc(arr, elem->capacity);
+		arrt = ft_strrealloc2(arr, elem->capacity);
 		if (!arrt)
 			return (free(arr), free_arr(res), perror("malloc"), NULL);
 		arr = arrt;
@@ -424,6 +471,7 @@ int	check_pattern(char *pattern, char *name)
 					quote = 0;
 					q = '\0';
 				}
+				
 				name = tmp++;
 			}
 			else
@@ -455,12 +503,14 @@ int	ft_strcmp(char *s1, char *s2)
 	}
 	return (s1[i] - s2[i]);
 }
-char	*match_pattern(char *pattern)
+char	**match_pattern(char *pattern)
 {
 	DIR				*dir;
 	struct dirent	*st;
 	int				flag;
 	char			*arr;
+	char			**res;
+	char			**rest;
 	char			*arrt;
 	int				i;
 	int				index;
@@ -468,10 +518,10 @@ char	*match_pattern(char *pattern)
 
 	flag = 1;
 	index = 0;
-	// printf("here\n");
 	capacity = 1024;
 	dir = opendir(".");
 	arr = malloc(capacity);
+	res = NULL;
 	if (!arr)
 		return (NULL);
 	ft_memset(arr, 0, capacity);
@@ -487,12 +537,13 @@ char	*match_pattern(char *pattern)
 		{
 			flag = 0;
 			i = 0;
+			index = 0;
 			while (st->d_name[i])
 			{
 				if (index == capacity - 1)
 				{
 					capacity *= 2;
-					arrt = ft_strrealloc(arr, capacity);
+					arrt = ft_strrealloc2(arr, capacity);
 					if (!arrt)
 						return (free(arr), closedir(dir), NULL);// cheack if return nULL and free old arr
 					arr = arrt;
@@ -501,56 +552,18 @@ char	*match_pattern(char *pattern)
 				index++;
 				i++;
 			}
-			arr[index++] = ' ';
+			arrt = ft_strdup(arr);
+			if (!arrt)
+				return (free(arr), NULL);
+			rest = ft_realloc(res, arrt);
+			if (!rest)
+				return (free(arr), NULL);
+			res = rest;
+			ft_memset(arr, 0, capacity);
 		}
 	}
 	closedir(dir);
-	if (!flag)
-		arr[index--] = '\0';
-	else
-		return ((char *)42);
-	return (arr);
-}
-int main()
-{
-
-	char	**res;
-	char *s;
-	int		i;
-	int		j;
-	
-	i = 0;
-	j = 0;
-	// cheak("*");
-	// match_pattern("*", "name");
- 	// s = "\'hello      world    \'    hhhh";
-	// res = handle_quotes(s);
-	// while (res[i])
-	// {
-	// 	printf("%s\n",res[i]);
-	// 	i++;
-	// }
-	// atexit(xx);
-	while (j < 15)
-	{
-		s = readline("?? : ");
-		if (s && *s)
-		{
-			add_history(s);
-			res = expander(s, 0, 1);
-			// if (!res)
-			// 	printf("nULL RE\n");
-			while (res && res[i])
-			{
-				printf("%s\n",res[i]);
-				i++;
-			}
-			i = 0;
-			free(s);
-			free_arr(res);
-		}
-		// match_pattern(s);
-		j++;
-	}
-	return 0; 
+	if (flag)
+		return (free(arr), (char **)42);
+	return (free(arr), res);
 }

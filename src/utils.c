@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/25 15:32:00 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/26 10:35:23 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void	double_free(char **ptr)
 	char	**tmp;
 
 	tmp = ptr;
-	while(*tmp)
+	while(tmp && *tmp)
 		free(*tmp++);
 	free(ptr);
 }
