@@ -151,7 +151,14 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 	env = getenv(exp);
 	free(exp);
 	if (!env)
+	{
+		if (inquote == 0)
+		{
+			arr[*index] = '\0';
+			(*index)++;
+		}
 		return (s);
+	}
 	j = 0;
 	while (env[j])
 	{
@@ -495,14 +502,43 @@ int	ft_strcmp(char *s1, char *s2)
 	int	i;
 
 	i = 0;
+	if (!s1)
+		return (-1);
+	if (!s2)
+		return (1);
 	while (s1[i] && s2[i])
 	{
 		if (s1[i] != s2[i])
-			return (-1);
+			return (s1[i] - s2[i]);
 		i++;
 	}
 	return (s1[i] - s2[i]);
 }
+
+void	sort_2d_array(char ***res)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+
+	i = 0;
+	while ((*res)[i] != NULL)
+	{
+		j = i + 1;
+		while ((*res)[j] != NULL)
+		{
+			if (ft_strcmp((*res)[i], (*res)[j]) > 0)
+			{
+				tmp = (*res)[i];
+				(*res)[i] = (*res)[j];
+				(*res)[j] = tmp;
+			}
+			j++;
+		}
+		i++;
+	}
+}
+
 char	**match_pattern(char *pattern)
 {
 	DIR				*dir;
@@ -565,5 +601,6 @@ char	**match_pattern(char *pattern)
 	closedir(dir);
 	if (flag)
 		return (free(arr), (char **)42);
+	sort_2d_array(&res);
 	return (free(arr), res);
 }
