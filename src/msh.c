@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/26 18:26:31 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:06:18 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -492,8 +492,6 @@ char	**ptrs_realloc2(char **tokens, char **arg, int count, int index)
 	size_t	size;
 	char	**ntokens;
 
-	if (!arg)
-		return (NULL);
 	size = 0;
 	while (tokens[size])
 			size++;
@@ -529,21 +527,35 @@ char	**ptrs_realloc2(char **tokens, char **arg, int count, int index)
 	return (p);
 }
 
+void	rm_ptr(char **args)
+{
+	int		j;
+	char	*ptr;
+
+	j = 0;
+	ptr = args[j];
+	while (args[j])
+	{
+		args[j] = args[j + 1];
+		j++;
+	}
+	free(ptr);
+}
+
 char	**expand_args(char **args)
 {
-	int i = 0;
-	int count = 0;
-	int j = 0;
-	char **ex = NULL;
+	unsigned int	i;
+	unsigned int	count;
+	char			**ex;
 
+	i = 0;
 	while (args[i])
 	{
 		count = 0;
 		ex = expander(args[i], 0, 1);
 		if (!ex)
 			return (NULL);
-		while(ex[count])
-			count++;
+		count = count_args(ex);
 		if (count == 1)
 		{
 			free(args[i]);
@@ -552,22 +564,38 @@ char	**expand_args(char **args)
 		else if (count > 1)
 		{
 			args = ptrs_realloc2(args, ex, count, i);
+			if (!args)
+				return (NULL);
 		}
 		else
-		{
-			j = i;
-			char *ptr = args[j];
-			while (args[j])
-			{
-				args[j] = args[j + 1];
-				j++;
-			}
-			free(ptr);
-		}
+			rm_ptr(&args[i]);
 		i += count;
 		free(ex);
 	}
 	return (args);
+}
+
+char	*expand_file(char *file)
+{
+	char **ex;
+	int	count;
+
+	count = 0;
+	ex = expander(file, 0, 1);
+	if (!ex)
+		return (NULL);
+	while(ex[count])
+		count++;
+	if (count == 1)
+	{
+		free(file);
+		file = *ex;
+		free(ex);
+		return(file);
+	}
+	print_error_2("minishell", file, "ambiguous redirect");
+	double_free(ex);
+	return (NULL);
 }
 
 // system calls returns
@@ -607,6 +635,11 @@ void	execute(t_node *node, char **env)
 	{
 		// stdout after redirection
 		red = (t_redirection*)node;
+		char *tmp2;
+		tmp2 = expand_file(red->file);
+		if (!tmp2)
+			return ;
+		red->file = tmp2;
 		or = open(red->file, red->flags, PREMISSIONS);
 		if(or < 0)
 		{
