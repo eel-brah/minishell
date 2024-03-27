@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/24 15:19:44 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/27 14:49:44 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,3 +148,67 @@ int	ft_pwd(char **args)
 // 	return (r);
 // }
 
+ssize_t	ft_atoi_v2(char *s, bool *valid)
+{
+	int		sign;
+	ssize_t	nb;
+
+	sign = 1;
+	*valid = true;
+	nb = 0;
+	while (ft_strchr(WHITESPACES, *s))
+		s++;
+	if (*s == '+' || *s == '-')
+	{
+		if (*s == '-')
+			sign = -1;
+		s++;
+	}
+	while (*s >= '0' && *s <= '9')
+	{
+		if ((sign == 1 && (LONG_MAX / 10 < nb || LONG_MAX - (*s - '0') < nb * 10))
+			|| (sign == -1 && (LONG_MIN / 10 > nb || LONG_MIN + (*s - '0') > nb * 10)))
+		{
+			*valid = false;
+			return (0);
+		}
+		nb = nb * 10 + ((*s++ - '0') * sign); 
+		if (sign == -1 && nb > 0)
+			nb *= sign;
+	}
+	if (*s)
+		*valid = false;
+	return (nb);
+}
+
+int	ft_exit(t_node *tree, char **args, char **env, int r)
+{
+	unsigned int	count;
+	bool			valid;
+	ssize_t			nb;
+
+	count = count_args(args);
+	if (count == 0)
+	{
+		free_cmdtree(tree);
+		double_free(env);
+		printf("exit\n");
+		exit(r >> 8);
+	}
+	else if (count > 1)
+	{
+		printf("exit\n");
+		print_error("exit", "too many arguments");
+		return (1);
+	}
+	nb = ft_atoi_v2(*args, &valid);
+	if (!*args || !valid)
+	{
+		print_error_2("exit", *args, "numeric argument required");
+		free_cmdtree(tree);
+		double_free(env);
+		exit(255);
+	}
+	exit(nb);
+	return (0);
+}

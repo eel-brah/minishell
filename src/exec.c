@@ -2,7 +2,7 @@
 
 extern char **environ;
 
-int	built_in(char *prg, char **args, char **env)
+int	built_in(t_node *tree, int r, char *prg, char **args, char **env)
 {
 	unsigned int size;
 
@@ -19,6 +19,9 @@ int	built_in(char *prg, char **args, char **env)
 	else if (size == ft_strlen("cd") 
 		&& !ft_strncmp(prg, "cd", size))
 		return (ft_cd(args + 1));
+	else if (size == ft_strlen("exit") 
+		&& !ft_strncmp(prg, "exit", size))
+		return (ft_exit(tree, args + 1, env, r));
 	return (-1);
 }
 
