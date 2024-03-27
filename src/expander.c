@@ -10,8 +10,16 @@ typedef struct s_elem
 	int	q;
 }	t_elem;
 
-char	**match_pattern(char *pattern);
-char	*delete_quotes(char *s, int index);
+// typedef struct res
+// {
+// 	char	*tmp;
+// }	t_res;
+
+
+char	**match_pattern(char *pattern, int handle_quote);
+char	*delete_quotes(char *s);
+char	**concat_two_array(char **res, char **concat);
+
 int	is_alpha_num(int c)
 {
 	if (c <= 'z' && c >= 'a')
@@ -154,7 +162,74 @@ void	handle_dollar_special(char *s, int *i, char *arr, int *index, int capacity)
 	(void)index;
 	(void)capacity;
 }
-char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int inquote, int here_doc)
+
+char	*handle_wild_in_dollar(char *arr,char *****res)
+{
+	char	**sp;
+	int		i;
+	char	*tmp;
+	char	**tmp1;
+	char	**exp;
+
+	i = 0;
+	sp = ft_split(arr, ' ');
+	if (!sp)
+		return (NULL);
+	while (sp[i])
+	{
+		if (ft_strchr(sp[i], '*'))
+		{
+			exp = match_pattern(sp[i], 0);
+			// int j = 0;
+			// while (exp[j])
+			// {
+			// 	printf("patt %s\n", exp[j]);
+			// 	j++;
+			// }
+			if (!exp)
+				return (free_arr(sp), perror("malloc "), NULL);
+			else if (exp == (char **)42)
+			{
+				tmp = ft_strdup(sp[i]);
+				if (!tmp)
+					return (free(sp), perror("malloc "), NULL);
+				tmp1 = ft_realloc(***res, tmp);
+				if (!tmp1)
+					return (free_arr(***res), ***res = NULL, free_arr(sp), perror("malloc "), NULL);
+				else
+					***res = tmp1;
+			}
+			else
+			{
+				// printf("here in pqtt \n");
+				tmp1 = concat_two_array(***res, exp);
+				if (tmp1 == NULL)
+					return (perror("malloc fff"), free_arr(sp), NULL);
+				***res = tmp1;
+				// int j = 0;
+				// while ((*res)[j])
+				// {
+				// 	printf("patt %s\n", (*res)[j]);
+				// 	j++;
+				// }
+			}
+		}
+		else
+		{
+			tmp = ft_strdup(sp[i]);
+			if (!tmp)
+				return (free(sp), perror("malloc "), NULL);
+			tmp1 = ft_realloc(***res, tmp);
+			if (!tmp1)
+				return (free_arr(***res), ***res = NULL, free_arr(sp), perror("malloc "), NULL);
+			else
+				***res = tmp1;
+		}
+		i++;
+	}
+	return (free_arr(sp), (char *)42);
+}
+char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int inquote, int here_doc, char ****res)
 {
 	int		j;
 	char	*exp;
@@ -217,6 +292,25 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 		arr[*index] = env[j];
 		j++;
 		(*index)++;
+	}
+	
+	if (inquote == 0 && here_doc == 0)
+	{
+		(*i)++;
+		while (s[*i] != '\0' && !is_exist(s[*i], "\t\n\v\f\r "))
+		{
+			arr[*index] = s[*i];
+			(*index)++;
+			(*i)++;
+		}
+		(*i)--;
+		exp = delete_quotes(arr);
+		if (!exp)
+			return (NULL);
+		handle_wild_in_dollar(exp, &res);
+
+		ft_memset(arr, 0, *index);
+		*index = 0;
 	}
 	return (s);
 }
@@ -300,14 +394,15 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char **arr, char *word, char **
 	char	**concat;
 	int 	flag;
 
+
 	flag = 1;
 	tmp = NULL;
 	concat = NULL;
 	if (elem->wild && here_doc == 0)
 	{
-		concat = match_pattern(*arr);
+		concat = match_pattern(*arr, 1);
 		if (concat == (char **)42)
-			word = ft_strdup(*arr);
+			word = delete_quotes(*arr);
 		else if (concat == NULL)
 			return (perror("malloc sdf"), free(*arr), free_arr(*res), NULL);
 		else
@@ -323,7 +418,7 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char **arr, char *word, char **
 	}
 	else if (here_doc == 0)
 	{
-		word = delete_quotes(*arr, elem->index);
+		word = delete_quotes(*arr);
 	}
 	else
 	{
@@ -344,7 +439,7 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char **arr, char *word, char **
 	return ((char *)42);
 }
 
-char	*delete_quotes(char *s, int index)
+char	*delete_quotes(char *s)
 {
 	int		qoute;
 	int		q;
@@ -355,7 +450,6 @@ char	*delete_quotes(char *s, int index)
 	len = 0;
 	qoute = 0;
 	q = '\0';
-	(void)index;
 	while (s && s[i])
 	{
 		if ((s[i] == '\'' || s[i] == '\"' ) && (qoute == 0 || q == s[i]))
@@ -381,17 +475,16 @@ char	*delete_quotes(char *s, int index)
 	}
 	return (alloc_without_quotes(s, len));
 }
-char	*handl_other_carac(t_elem *elem, char *arr, char **res, int here_doc, int expand, char *s, int *i)
+char	*handl_other_carac(t_elem *elem, char *arr, char ***res, int here_doc, int expand, char *s, int *i)
 {
 	char	*arrt;
 
-	// printf("dkhale hnanya\n");
 	if (elem->index == elem->capacity - 1)
 	{
 		elem->capacity *= 2;
 		arrt = ft_strrealloc2(arr, elem->capacity);
 		if (!arrt)
-			return (free(arr), free_arr(res), perror("malloc"), NULL);
+			return (free(arr), free_arr(*res), perror("malloc"), NULL);
 		arr = arrt;
 	}
 	if (s[*i] == '*' && elem->qoute == 0)
@@ -402,10 +495,8 @@ char	*handl_other_carac(t_elem *elem, char *arr, char **res, int here_doc, int e
 		handle_dollar_special(s, i, arr, &elem->index, elem->capacity);
 	else if (s[*i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && expand)
 	{
-		// printf("gerehere\n");
-		if (handle_dollar(s, i, arr, &elem->index, elem->capacity, elem->qoute, here_doc) == NULL)
-			return (free(arr), free_arr(res), perror("malloc"), NULL);
-		// printf("arr : %s",arr);
+		if (handle_dollar(s, i, arr, &elem->index, elem->capacity, elem->qoute, here_doc, &res) == NULL)
+			return (free(arr), free_arr(*res), perror("malloc no dire"), NULL);
 	}
 	else
 		arr[elem->index++] = s[*i];
@@ -414,10 +505,8 @@ char	*handl_other_carac(t_elem *elem, char *arr, char **res, int here_doc, int e
 char	**expander(char *s, int here_doc, int expand)
 {
 	char	**res;
-	// char	**tmp;
 	char	*word;
 	char	*arr;
-	// char	*arrt;
 	int		i;
 	t_elem	elem;
 	
@@ -455,17 +544,15 @@ char	**expander(char *s, int here_doc, int expand)
 		{
 			if (is_exist(s[i], "\t\n\v\f\r ") && elem.qoute == 0 && elem.index != 0)
 			{
-				// printf("adfdsfsdf\n");
+				printf("ssarr  %s and inde %d \n", arr,elem.index);
 				if (alloc_for_elem(&elem, here_doc, &arr, word, &res) == NULL)
 					return (NULL);
 			}
 			else if (!is_exist(s[i], "\t\n\v\f\r ") || elem.qoute == 1)
 			{
-				if (handl_other_carac(&elem, arr, res, here_doc, expand, s, &i) == NULL)
+				if (handl_other_carac(&elem, arr, &res, here_doc, expand, s, &i) == NULL)
 					return (NULL);
 			}
-			// else
-			// 	printf("dkhale\n");
 		}
 		i++;
 	}
@@ -483,7 +570,6 @@ char	**expander(char *s, int here_doc, int expand)
 				return (free(arr), NULL);
 			res[0] = NULL;
 		}
-		// printf("NULLNull\n");
 	}
 	if (elem.qoute == 1 && here_doc == 0)
 	{
@@ -501,7 +587,7 @@ void	xx()
 /*  *********  */
 #include <dirent.h>
 
-int	check_pattern(char *pattern, char *name)
+int	check_pattern(char *pattern, char *name, int handle_quot)
 {
 	char	*wild;
 	char	*tmp;
@@ -513,7 +599,7 @@ int	check_pattern(char *pattern, char *name)
 	wild = NULL;
 	while (*name)
 	{
-		if ((*pattern == '"' || *pattern == '\'') && (quote == 0 || q == *pattern)) {
+		if ((*pattern == '"' || *pattern == '\'') && (quote == 0 || q == *pattern) && handle_quot) {
 			if (quote == 0)
 			{
 				quote = 1;
@@ -609,7 +695,7 @@ void	sort_2d_array(char ***res)
 	}
 }
 
-char	**match_pattern(char *pattern)
+char	**match_pattern(char *pattern, int handle_quote)
 {
 	DIR				*dir;
 	struct dirent	*st;
@@ -639,7 +725,7 @@ char	**match_pattern(char *pattern)
 			continue ;
 		if (st->d_name[0] == '.' && pattern[0] != '.')
 			continue ;
-		if (check_pattern(pattern, st->d_name) == 1)
+		if (check_pattern(pattern, st->d_name, handle_quote) == 1)
 		{
 			flag = 0;
 			i = 0;

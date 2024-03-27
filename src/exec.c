@@ -8,13 +8,13 @@ int	built_in(t_node *tree, int r, char *prg, char **args, char **env)
 
 	size = ft_strlen(prg);
 	if (size == ft_strlen("echo") 
-		&& !ft_strncmp(prg, "echo", size))
+		&& (!ft_strncmp(prg, "echo", size) || !ft_strncmp(prg, "ECHO", size)))
 		return (ft_echo(args + 1));
 	else if (size == ft_strlen("pwd") 
-		&& !ft_strncmp(prg, "pwd", size))
+		&& (!ft_strncmp(prg, "pwd", size) || !ft_strncmp(prg, "PWD", size)))
 		return (ft_pwd(args + 1));
 	else if (size == ft_strlen("env") 
-		&& !ft_strncmp(prg, "env", size))
+		&& (!ft_strncmp(prg, "env", size) || !ft_strncmp(prg, "ENV", size)))
 		return (ft_env(env, args + 1));
 	else if (size == ft_strlen("cd") 
 		&& !ft_strncmp(prg, "cd", size))
