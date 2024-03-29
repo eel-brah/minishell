@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/29 18:36:19 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:17:28 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -832,20 +832,13 @@ int	main(int argc, char **argv, char **env)
 	{
 		prompt = get_prompt();
 		cmd = get_cmd(prompt);
-		if (!cmd)
-		{
-			free(prompt);
-			continue;
-		}
-		tree = parse_cmd(cmd);
-		if (!tree)
-		{
-			free(cmd);
-			free(prompt);
-			continue;
-		}
-		free(cmd);
 		free(prompt);
+		if (!cmd)
+			continue;
+		tree = parse_cmd(cmd);
+		free(cmd);
+		if (!tree)
+			continue;
 		execute(tree, _env);
 		// pre_trv(tree);
 		free_cmdtree(tree);
