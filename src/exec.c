@@ -79,7 +79,7 @@ void	exec_cmd(char *prg, char **args, char **env)
 	else
 	{
 		path = getenv("PATH");
-		if (path)
+		if (path && *prg)
 		{
 			paths = ft_split(path, ':');
 			if (!paths)

@@ -64,12 +64,13 @@ typedef struct s_redirection
 #define PIPELINE 'p'
 #define OAND 'a'
 #define OOR 'o'
-#define OUTPUT_REDIRECTION 'r'
-#define INPUT_REDIRECTION 'R'
-#define APPEND_REDIRECTION 'd'
+#define OUT_RED 'r'
+#define IN_RED 'R'
+#define APP_RED 'd'
 #define HEREDOC 'h'
 #define OPEN_PER 't'
 #define CLOSE_PER 'T'
+#define ERROR 'e'
 
 #define PREMISSIONS 0644
 

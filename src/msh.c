@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/27 14:56:19 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/29 18:28:11 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ bool	get_token_cmp2(char *p, char *r)
 	else if (!ft_strncmp(p, "<<", 2))
 		*r = HEREDOC;
 	else if (!ft_strncmp(p, ">>", 2))
-		*r = APPEND_REDIRECTION;
+		*r = APP_RED;
 	else
 		return (false);
 	return (true);
@@ -32,9 +32,9 @@ bool	get_token_cmp1(char *p, char *r)
 	if (*p == '|')
 		*r = PIPELINE;
 	else if (*p == '>')
-		*r = OUTPUT_REDIRECTION;
+		*r = OUT_RED;
 	else if (*p == '<')
-		*r = INPUT_REDIRECTION;
+		*r = IN_RED;
 	else if (*p == '(')
 		*r = OPEN_PER;
 	else if (*p == ')')
@@ -44,15 +44,41 @@ bool	get_token_cmp1(char *p, char *r)
 	return (true);
 }
 
+void	get_token_word(char **dp, char *r, bool print)
+{
+	char	*p;
+	bool	Q;
+	char	q;
+
+	Q = false;
+	p = *dp;
+	while (*p && ((!ft_strchr(WHITESPACES, *p) && (!ft_strchr(SYMBOL, *p)
+		|| (*p == '&' && *(p + 1) != '&'))) || Q))
+	{
+		if ((*p == '\"' || *p == '\'') && (!Q || (Q && *p == q)))
+		{
+			q = *p;
+			Q = !Q;
+		}
+		p++;
+	}
+	if (Q)
+	{
+		if (print)
+			print_error("minishell", "syntax error");
+		*r = ERROR;
+	}
+	else
+		*r = WORD;
+	*dp = p;
+}
+
 char	get_token(char **s, char **st, char **et)
 {
 	char	*p;
 	char	r;
-	bool	Q;
-	char	q;
 
 	p = *s;
-	Q = false;
 	while (*p && ft_strchr(WHITESPACES, *p))
 		p++;
 	if (st)
@@ -64,37 +90,18 @@ char	get_token(char **s, char **st, char **et)
 	else if (get_token_cmp1(p, &r))
 		p += 1;
 	else
-	{
-		while (*p && ((!ft_strchr(WHITESPACES, *p) && (!ft_strchr(SYMBOL, *p)
-			|| (*p == '&' && *(p + 1) != '&'))) || Q))
-		{
-			if ((*p == '\"' || *p == '\'') && (!Q || (Q && *p == q)))
-			{
-				q = *p;
-				Q = !Q;
-			}
-			p++;
-		}
-		if (Q)
-		{
-			ft_putendl_fd("Synax errur 4", 2);
-			return ('e');
-		}
-		r = WORD;
-	}
+		get_token_word(&p, &r, true);
 	if (et)
 		*et = p;
 	*s = p;
 	return (r);
 }
 
+
 char	token_peek(char *p)
 {
 	char	r;
-	bool	Q;
-	char	q;
 
-	Q = false;
 	while (*p && ft_strchr(WHITESPACES, *p))
 		p++;
 	if (!*p)
@@ -104,24 +111,7 @@ char	token_peek(char *p)
 	else if (get_token_cmp1(p, &r))
 		p += 1;
 	else
-	{
-		while (*p && ((!ft_strchr(WHITESPACES, *p) && (!ft_strchr(SYMBOL, *p)
-			|| (*p == '&' && *(p + 1) != '&'))) || Q))
-		{
-			if ((*p == '\"' || *p == '\'') && (!Q || (Q && *p == q)))
-			{
-				q = *p;
-				Q = !Q;
-			}
-			p++;
-		}
-		if (Q)
-		{
-			ft_putendl_fd("Synax errur 4", 2);
-			return ('e');
-		}
-		r = WORD;
-	}
+		get_token_word(&p, &r, false);
 	return (r);
 }
 
@@ -179,12 +169,7 @@ char	*get_cmd(char *prompt)
 	cmd = readline(prompt);
 	if (cmd && *cmd)
 	{
-		add_history(cmd); // return on error
-		// // char *ptr = cmd;
-		// cmd = ft_strtrim(cmd, WHITESPACES);
-		// // free(ptr);
-		// if (!cmd)
-		// 	perror("malloc");
+		add_history(cmd);
 		return (cmd);
 	}
 	free (cmd);
@@ -276,31 +261,54 @@ bool	peek(char **pcmd, char *set)
 	return (*ptr && ft_strchr(set, *ptr));
 }
 
+t_node	*parse_redirection_create(char *st, char *et, t_node *node, char red)
+{
+	char	*file;
+	t_node	*tmp_node;
+
+	file = strdup_v2(st, et);
+	tmp_node = node;
+	if (red == IN_RED)
+		node = create_redirection(node, file, O_RDONLY, 0);
+	else if (red == OUT_RED)
+		node = create_redirection(node, file, O_WRONLY|O_CREAT|O_TRUNC, 1);
+	else if (red == APP_RED)
+		node = create_redirection(node, file, O_WRONLY|O_CREAT|O_APPEND, 1);
+	if (!node)
+	{
+		free(file);
+		free_cmdtree(tmp_node);
+		return (NULL);
+	}
+	return (node);
+}
+
 t_node	*parse_redirection(t_node *node, char **pcmd)
 {
 	char	red;
 	char	*st;
 	char	*et;
-	char	*file;
+	char	token;
 
-	while (peek(pcmd, "<>"))
+	token = token_peek(*pcmd);
+	while (token == OUT_RED || token == IN_RED || token == APP_RED || token == HEREDOC)
 	{
 		red = get_token(pcmd, 0, 0);
-		if (red == HEREDOC || get_token(pcmd, &st, &et) != WORD)
+		token = get_token(pcmd, &st, &et);
+		if (red == HEREDOC ||  token != WORD)
 		{
-			ft_putendl_fd("Syntax error 3", 2);
+			if (token != ERROR)
+				print_error("minishell", "syntax error");
 			return (NULL);
 		}
-		file = strdup_v2(st, et);
-		if (red == INPUT_REDIRECTION)
-			node = create_redirection(node, file, O_RDONLY, 0);
-		else if (red == OUTPUT_REDIRECTION)
-			node = create_redirection(node, file, O_WRONLY|O_CREAT|O_TRUNC, 1);
-		else if (red == APPEND_REDIRECTION)
-			node = create_redirection(node, file, O_WRONLY|O_CREAT|O_APPEND, 1);
+		node = parse_redirection_create(st, et, node, red);
+		if (!node)
+			return (NULL);
+		token = token_peek(*pcmd);
 	}
 	return (node);
 }
+
 t_node	*pars_and(char **pcmd);
 t_node	*parse_parenthesis(char **pcmd)
 {
@@ -320,8 +328,6 @@ t_node	*parse_parenthesis(char **pcmd)
 	get_token(pcmd, NULL, NULL);
 	tmp = node;
 	node = parse_redirection(node, pcmd);
-	if (!node)
-		free_cmdtree(tmp);
 	return (node);
 }
 
@@ -329,11 +335,10 @@ t_node	*parse_exec(char **pcmd)
 {
 	t_exec	*cmd;
 	t_node	*node;
-	t_node	*tmp;
 	char	*st;
 	char	*et;
-	char	r;
-	// char	*s;
+	char	token;
+	char	**tmp;
 
 	if(token_peek(*pcmd) == OPEN_PER)
 		return (parse_parenthesis(pcmd));
@@ -342,44 +347,34 @@ t_node	*parse_exec(char **pcmd)
 		return (NULL);
 	node = parse_redirection((t_node *)cmd, pcmd);
 	if (!node)
-	{
-		free_cmdtree((t_node *)cmd);
 		return (NULL);
-	}
-	while (token_peek(*pcmd) != PIPELINE && token_peek(*pcmd) != OAND && token_peek(*pcmd) != OOR && token_peek(*pcmd) != CLOSE_PER)
+	token = token_peek(*pcmd);
+	while (token && token != PIPELINE && token != OAND && token != OOR && token != CLOSE_PER)
 	{
-		r = get_token(pcmd, &st, &et);
-		if (r == 'e')
+		if (token != WORD)
+		{
+			if (token != ERROR)
+				print_error("minishell", "syntax error");
+			free_cmdtree(node);
+			return (NULL);
+		}
+		get_token(pcmd, &st, &et);
+		tmp = ptrs_realloc(cmd->argv, strdup_v2(st, et));
+		if (!tmp)
 		{
 			free_cmdtree(node);
 			return (NULL);
 		}
-		if (r == 0)
-			break;
-		if (r != WORD)
-		{
-			ft_putendl_fd("Syntax error 1", 2);
-			free_cmdtree(node);
-			return (NULL);
-		}
-		cmd->argv = ptrs_realloc(cmd->argv, strdup_v2(st, et));
-		if (!cmd->argv)
-		{
-			free_cmdtree(node);
-			return (NULL);
-		}
-		tmp = node;
+		cmd->argv = tmp;
 		node = parse_redirection(node, pcmd);
 		if (!node)
-		{
-			free_cmdtree(tmp);
 			return (NULL);
-		}
+		token = token_peek(*pcmd);
 	}
 	if (!cmd->argv && node == (t_node *)cmd)
 	{
 		free_cmdtree(node);
-		ft_putendl_fd("Syntax error 2", 2);
+		print_error("minishell", "syntax error");
 		return (NULL);
 	}
 	return (node);
@@ -483,7 +478,14 @@ t_node	*parse_cmd(char *cmd)
 	tree = pars_and(&cmd);
 	if (!tree)
 		return (NULL);
-	// parse_cmd_term(tree);
+	while (*cmd && ft_strchr(WHITESPACES, *cmd))
+		cmd++;
+	if (*cmd)
+	{
+		print_error("minishell", "syntax error");
+		free_cmdtree(tree);
+		return (NULL);
+	}
 	return (tree);
 }
 
@@ -831,7 +833,10 @@ int	main(int argc, char **argv, char **env)
 		prompt = get_prompt();
 		cmd = get_cmd(prompt);
 		if (!cmd)
+		{
+			free(prompt);
 			continue;
+		}
 		tree = parse_cmd(cmd);
 		if (!tree)
 		{
@@ -844,7 +849,6 @@ int	main(int argc, char **argv, char **env)
 		execute(tree, _env);
 		// pre_trv(tree);
 		free_cmdtree(tree);
-		// break;
 	}
 	double_free(_env);
 	// rl_clear_history();

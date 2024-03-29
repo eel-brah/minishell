@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/27 14:49:44 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/29 18:27:20 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ ssize_t	ft_atoi_v2(char *s, bool *valid)
 	sign = 1;
 	*valid = true;
 	nb = 0;
-	while (ft_strchr(WHITESPACES, *s))
+	while (*s && ft_strchr(WHITESPACES, *s))
 		s++;
 	if (*s == '+' || *s == '-')
 	{
