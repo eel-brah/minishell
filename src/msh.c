@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/29 20:17:28 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/29 22:28:12 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ char	get_token(char **s, char **st, char **et)
 	else if (get_token_cmp1(p, &r))
 		p += 1;
 	else
-		get_token_word(&p, &r, true);
+		get_token_word(&p, &r, 0);
 	if (et)
 		*et = p;
 	*s = p;
@@ -353,8 +353,7 @@ t_node	*parse_exec(char **pcmd)
 	{
 		if (token != WORD)
 		{
-			if (token != ERROR)
-				print_error("minishell", "syntax error");
+			print_error("minishell", "syntax error");
 			free_cmdtree(node);
 			return (NULL);
 		}
@@ -648,6 +647,7 @@ void	execute(t_node *node, char **env)
 		if (!tmp2)
 			return ;
 		red->file = tmp2;
+		// S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); /* rw-rw-rw- 
 		or = open(red->file, red->flags, PREMISSIONS);
 		if(or < 0)
 		{
