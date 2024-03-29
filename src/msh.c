@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/29 18:28:11 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/29 18:36:19 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -741,7 +741,7 @@ void	free_cmdtree(t_node *tree)
 {
 	t_exec			*cmd;
 	t_redirection	*red;
-	t_div			*pipeline;
+	t_div			*div;
 
 	if (!tree)
 		return ;
@@ -760,24 +760,24 @@ void	free_cmdtree(t_node *tree)
 	}
 	else if (tree->type == PIPE)
 	{
-		pipeline = (t_div *)tree;
-		free_cmdtree((t_node *)pipeline->left);
-		free_cmdtree((t_node *)pipeline->right);
-		free(pipeline);
+		div = (t_div *)tree;
+		free_cmdtree((t_node *)div->left);
+		free_cmdtree((t_node *)div->right);
+		free(div);
 	}
 	else if (tree->type == AND)
 	{
-		pipeline = (t_div *)tree;
-		free_cmdtree((t_node *)pipeline->left);
-		free_cmdtree((t_node *)pipeline->right);
-		free(pipeline);
+		div = (t_div *)tree;
+		free_cmdtree((t_node *)div->left);
+		free_cmdtree((t_node *)div->right);
+		free(div);
 	}
 	else if (tree->type == OR)
 	{
-		pipeline = (t_div *)tree;
-		free_cmdtree((t_node *)pipeline->left);
-		free_cmdtree((t_node *)pipeline->right);
-		free(pipeline);
+		div = (t_div *)tree;
+		free_cmdtree((t_node *)div->left);
+		free_cmdtree((t_node *)div->right);
+		free(div);
 	}
 }
 
