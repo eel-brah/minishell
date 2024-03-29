@@ -272,11 +272,14 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 	free(exp);
 	if (!env)
 	{
+		if (!is_alpha_num(s[*i + 1]) && s[*i + 1] != '\0' && s[*i] == '$' && s[*i + 1] != '\'' && s[*i + 1] != '"')
+			arr[(*index)++] = s[*i];
 		// if (inquote == 0)
 		// {
 		// 	arr[*index] = '\0';
 		// 	(*index)++;
 		// }
+			// printf("herererer %c \n", s[*i]);
 		return (s);
 	}
 	j = 0;
@@ -296,6 +299,8 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 	
 	if (inquote == 0 && here_doc == 0)
 	{
+		// if (start == 0)
+			// printf("herererer %c \n", s[*i]);
 		(*i)++;
 		while (s[*i] != '\0' && !is_exist(s[*i], "\t\n\v\f\r "))
 		{
@@ -304,7 +309,7 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 			(*i)++;
 		}
 		(*i)--;
-		exp = delete_quotes(arr);
+		exp = ft_strdup(arr);
 		if (!exp)
 			return (NULL);
 		handle_wild_in_dollar(exp, &res);
