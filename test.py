@@ -33,6 +33,14 @@ simple_tests = {
         "wildcard 13": 'echo $sdfsdf=*$dl=',
         "wildcard 13": 'echo hello >> $sdfdsf',
         "wildcard 13": 'echo hello >> =$sdfdsf*',
+        "wildcard 13": 'echo $USER\'\'l\'\'',
+        # echo $USER''$l'$'$
+        # echo "$USER======"
+        # echo "$======"
+        # echo "$USER''$l"
+        # echo "$====="
+        #  $USER''$l
+        # echo $USER''$USER
 }
 
 sofisticated_tests = {

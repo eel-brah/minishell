@@ -2,12 +2,14 @@
 
 typedef struct s_elem
 {
-	int	wild;
-	int	index;
-	int	here_doc;
-	int	capacity;
-	int	qoute;
-	int	q;
+	int		wild;
+	int		index;
+	int		here_doc;
+	int		capacity;
+	int		qoute;
+	int		q;
+	int		i;
+	char	*arr;
 }	t_elem;
 
 // typedef struct res
@@ -18,7 +20,27 @@ typedef struct s_elem
 
 char	**match_pattern(char *pattern, int handle_quote);
 char	*delete_quotes(char *s);
+char	*alloc_for_expand_without_q(char *s, t_elem ***elem);
 char	**concat_two_array(char **res, char **concat);
+char    *ft_strrealloc2(char *str, size_t size);
+
+char	*set_caractere(t_elem *elem, int c)
+{
+	char	*tmp;
+	if (elem->index == elem->capacity - 1)
+	{
+		printf("elem capacity %d\n", elem->capacity);
+		elem->capacity *= 2;
+		tmp = ft_strrealloc2(elem->arr, elem->capacity);
+		if (!tmp)
+			return (NULL);
+		elem->arr = tmp;
+	}
+	elem->arr[elem->index] = c;
+	elem->index++;
+	// elem->i++;
+	return ((char *)42);
+}
 
 int	is_alpha_num(int c)
 {
@@ -229,7 +251,7 @@ char	*handle_wild_in_dollar(char *arr,char *****res)
 	}
 	return (free_arr(sp), (char *)42);
 }
-char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int inquote, int here_doc, char ****res)
+char	*handle_dollar(char *s, char ****res, t_elem **elem)
 {
 	int		j;
 	char	*exp;
@@ -237,24 +259,24 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 	int		start;
 	// int		d;
 
-	(*i)++;
-	if (s[*i] >= '0' && s[*i] <= '9')
+	(*elem)->i++;
+	if (s[(*elem)->i] >= '0' && s[(*elem)->i] <= '9')
 		return (s);
 	start = 0;
-	if (s[*i] == '\0')
+	if (s[(*elem)->i] == '\0')
 	{
-		(*i)--;
-		arr[*index] = s[*i];
-		(*index)++;
+		(*elem)->i--;
+		(*elem)->arr[(*elem)->index] = s[(*elem)->i];
+		(*elem)->index++;
 		return (s);
 	}
-	while (s[*i + start] && is_alpha_num(s[*i + start]))
+	while (s[(*elem)->i + start] && is_alpha_num(s[(*elem)->i + start]))
 		start++;
-	if (start == 0 && (inquote == 1 || here_doc))
+	if (start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc))
 	{
-		(*i)--;
-		arr[*index] = s[*i];
-		(*index)++;
+		(*elem)->i--;
+		(*elem)->arr[(*elem)->index] = s[(*elem)->i];
+		((*elem)->index)++;
 		return (s);
 	}
 	exp = malloc(start + 1);
@@ -263,17 +285,17 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 	j = 0;
 	while (j < start)
 	{
-		exp[j] = s[*i + j];
+		exp[j] = s[(*elem)->i + j];
 		j++;
 	}
 	exp[j] = '\0';
-	(*i) = (*i) + start - 1;
+	((*elem)->i) = ((*elem)->i) + start - 1;
 	env = getenv(exp);
 	free(exp);
 	if (!env)
 	{
-		if (!is_alpha_num(s[*i + 1]) && s[*i + 1] != '\0' && s[*i] == '$' && s[*i + 1] != '\'' && s[*i + 1] != '"')
-			arr[(*index)++] = s[*i];
+		if (!is_alpha_num(s[(*elem)->i + 1]) && s[(*elem)->i + 1] != '\0' && s[(*elem)->i] == '$' && s[(*elem)->i + 1] != '\'' && s[(*elem)->i + 1] != '"')
+			(*elem)->arr[((*elem)->index)++] = s[(*elem)->i];
 		// if (inquote == 0)
 		// {
 		// 	arr[*index] = '\0';
@@ -285,41 +307,98 @@ char	*handle_dollar(char *s, int *i, char *arr, int *index, int capacity, int in
 	j = 0;
 	while (env[j])
 	{
-		if (*index == capacity - 1)
-		{
-			capacity *= 2;
-			arr = ft_strrealloc2(arr, capacity);
-			if (!arr)
-				return (NULL);
-		}
-		arr[*index] = env[j];
+		// if ((*elem)->index == ((*elem)->capacity) - 1)
+		// {
+		// 	(*elem)->capacity *= 2;
+		// 	printf("elem capacity %d \n",(*elem)->capacity);
+		// 	(*elem)->arr = ft_strrealloc2((*elem)->arr, (*elem)->capacity);
+		// 	if (!(*elem)->arr)
+		// 		return (NULL);
+		// }
+		if (set_caractere(*elem, env[j]) == NULL)
+			return (NULL);
+		// (*elem)->arr[(*elem)->index] = env[j];
 		j++;
-		(*index)++;
+		// ((*elem)->index)++;
 	}
-	
-	if (inquote == 0 && here_doc == 0)
+	// fprintf(stderr, "hereerrsdfsdfsd %d %d\n", (*elem)->here_doc, (*elem)->qoute);
+	if ((*elem)->qoute == 0 && (*elem)->here_doc == 0)
 	{
 		// if (start == 0)
 			// printf("herererer %c \n", s[*i]);
-		(*i)++;
-		while (s[*i] != '\0' && !is_exist(s[*i], "\t\n\v\f\r "))
-		{
-			arr[*index] = s[*i];
-			(*index)++;
-			(*i)++;
-		}
-		(*i)--;
-		exp = ft_strdup(arr);
+		// cheack for capacity 
+		// (*i)++;
+		// while (s[*i] != '\0' && !is_exist(s[*i], "\t\n\v\f\r "))
+		// {
+		// 	arr[*index] = s[*i];
+		// 	(*index)++;
+		// 	(*i)++;
+		// }
+		// (*i)--;
+		// fprintf(stderr, "hereerr\n");
+		// printf("here\n");
+		if (alloc_for_expand_without_q(s, &elem) == (char *)16)
+			return (s);
+		// export a="*c '**'"
+		exp = ft_strdup((*elem)->arr);
 		if (!exp)
 			return (NULL);
 		handle_wild_in_dollar(exp, &res);
 
-		ft_memset(arr, 0, *index);
-		*index = 0;
+		ft_memset((*elem)->arr, 0, (*elem)->index);
+		(*elem)->index = 0;
 	}
 	return (s);
 }
 
+
+char	*alloc_for_expand_without_q(char *s, t_elem ***elem)
+{
+	int		qoute;
+	int		q;
+
+	qoute = 0;
+	q = '\0';
+	((**elem)->i)++;
+	while (s[((**elem)->i)] != '\0' && !is_exist(s[((**elem)->i)], "\t\n\v\f\r  "))
+	{
+		if (s[((**elem)->i)] == '$')
+			return (((**elem)->i)--, (char *)16);	
+		if ((s[((**elem)->i)] == '\'' || s[((**elem)->i)] == '\"' ) && (qoute == 0 || q == s[((**elem)->i)]))
+		{
+			if (qoute == 0)
+			{
+				q = s[((**elem)->i)];
+				qoute = 1;
+			}
+			else
+			{
+				qoute = 0;
+				q = '\0';
+			}
+			((**elem)->i)++;
+			continue ;
+		}
+		else
+		{
+			if (set_caractere(**elem, s[((**elem)->i)]) == NULL)
+				return (NULL);
+			(((**elem)->i))++;
+		}
+		// printf("here %c \n",s[((**elem)->i)]);
+		// if ((**elem)->index == ((**elem)->capacity) - 1)
+		// {
+		// 	(**elem)->capacity *= 2;
+		// 	(**elem)->arr = ft_strrealloc2((**elem)->arr, (**elem)->capacity);
+		// 	if (!(**elem)->arr)
+		// 		return (NULL);
+		// }
+		// (**elem)->arr[(**elem)->index] = s[((**elem)->i)];
+		// ((**elem)->index)++;
+	}
+	((**elem)->i)--;
+	return ((char *)42);
+}
 char	*alloc_without_quotes(char *s, int len)
 {
 	int		qoute;
@@ -393,7 +472,7 @@ char	**concat_two_array(char **res, char **concat)
 	result[i] = NULL;
 	return (result);
 }
-char	*alloc_for_elem(t_elem *elem, int here_doc, char **arr, char *word, char ***res)
+char	*alloc_for_elem(t_elem *elem, int here_doc, char *word, char ***res)
 {
 	char	**tmp;
 	char	**concat;
@@ -405,16 +484,16 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char **arr, char *word, char **
 	concat = NULL;
 	if (elem->wild && here_doc == 0)
 	{
-		concat = match_pattern(*arr, 1);
+		concat = match_pattern(elem->arr, 1);
 		if (concat == (char **)42)
-			word = delete_quotes(*arr);
+			word = delete_quotes(elem->arr);
 		else if (concat == NULL)
-			return (perror("malloc sdf"), free(*arr), free_arr(*res), NULL);
+			return (perror("malloc sdf"), free(elem->arr), free_arr(*res), NULL);
 		else
 		{
 			tmp = concat_two_array(*res, concat);
 			if (tmp == NULL)
-				return (perror("malloc fff"), free(*arr), free_arr(*res), NULL);
+				return (perror("malloc fff"), free(elem->arr), free_arr(*res), NULL);
 			*res = tmp;
 			flag = 0;
 		}
@@ -423,24 +502,24 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char **arr, char *word, char **
 	}
 	else if (here_doc == 0)
 	{
-		word = delete_quotes(*arr);
+		word = delete_quotes(elem->arr);
 	}
 	else
 	{
-		word = ft_strdup(*arr);
+		word = ft_strdup(elem->arr);
 	}
 	if (flag)
 	{
 		if (!word)
-			return (perror("malloc dsdf"), free(*arr), free_arr(*res), NULL);
+			return (perror("malloc dsdf"), free(elem->arr), free_arr(*res), NULL);
 		tmp = ft_realloc(*res, word);
 		if (!tmp)
-			return (free_arr(*res) , free(word), free(*arr), perror("malloc "), NULL);
+			return (free_arr(*res) , free(word), free(elem->arr), perror("malloc "), NULL);
 		else
 			*res = tmp;
 	}
 	elem->index = 0;
-	ft_memset(*arr, 0, elem->capacity);
+	ft_memset(elem->arr, 0, elem->capacity);
 	return ((char *)42);
 }
 
@@ -480,60 +559,65 @@ char	*delete_quotes(char *s)
 	}
 	return (alloc_without_quotes(s, len));
 }
-char	*handl_other_carac(t_elem *elem, char *arr, char ***res, int here_doc, int expand, char *s, int *i)
+char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, char *s)
 {
-	char	*arrt;
+	// char	*arrt;
 
-	if (elem->index == elem->capacity - 1)
-	{
-		elem->capacity *= 2;
-		arrt = ft_strrealloc2(arr, elem->capacity);
-		if (!arrt)
-			return (free(arr), free_arr(*res), perror("malloc"), NULL);
-		arr = arrt;
-	}
-	if (s[*i] == '*' && elem->qoute == 0)
+	// if (elem->index == elem->capacity - 1)
+	// {
+	// 	elem->capacity *= 2;
+	// 	arrt = ft_strrealloc2(elem->arr, elem->capacity);
+	// 	if (!arrt)
+	// 		return (free(elem->arr), free_arr(*res), perror("malloc"), NULL);
+	// 	elem->arr = arrt;
+	// }
+	if (s[elem->i] == '*' && elem->qoute == 0)
 	{
 		elem->wild = 1;
 	}
-	if (s[*i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && is_exist(s[*i + 1], "*@#?	$-!0") && expand)
-		handle_dollar_special(s, i, arr, &elem->index, elem->capacity);
-	else if (s[*i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && expand)
+	if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && is_exist(s[elem->i + 1], "*@#?	$-!0") && expand)
+		handle_dollar_special(s, &elem->i, elem->arr, &elem->index, elem->capacity);
+	else if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && expand)
 	{
-		if (handle_dollar(s, i, arr, &elem->index, elem->capacity, elem->qoute, here_doc, &res) == NULL)
-			return (free(arr), free_arr(*res), perror("malloc no dire"), NULL);
+		if (handle_dollar(s, &res, &elem) == NULL)
+			return (free(elem->arr), free_arr(*res), *res = NULL, perror("malloc no dire"), NULL);
 	}
 	else
-		arr[elem->index++] = s[*i];
+	{
+		if (set_caractere(elem, s[elem->i]) == NULL)
+			return (NULL);
+		// elem->arr[elem->index++] = s[elem->i];
+
+	}
 	return ((char *)42);
 }
 char	**expander(char *s, int here_doc, int expand)
 {
 	char	**res;
 	char	*word;
-	char	*arr;
-	int		i;
+	// char	*arr;
 	t_elem	elem;
 	
 	elem.q = '\0';
+	elem.here_doc = here_doc;
 	elem.qoute = 0;
-	i = 0;
 	word = NULL;
 	res = NULL;
 	elem.index = 0;
+	elem.i = 0;
 	elem.wild = 0;
 	elem.capacity = 1024;
-	arr = malloc(elem.capacity);
-	if (!arr)
+	elem.arr = malloc(elem.capacity);
+	if (!elem.arr)
 		return (perror("malloc"), NULL);
-	ft_memset(arr, 0, elem.capacity);
-	while (s && s[i])
+	ft_memset(elem.arr, 0, elem.capacity);
+	while (s && s[elem.i])
 	{
-		if ((s[i] == '\'' || s[i] == '\"' ) && (elem.qoute == 0 || elem.q == s[i]))
+		if ((s[elem.i] == '\'' || s[elem.i] == '\"' ) && (elem.qoute == 0 || elem.q == s[elem.i]))
 		{
 			if (elem.qoute == 0)
 			{
-				elem.q = s[i];
+				elem.q = s[elem.i];
 				elem.qoute = 1;
 			}
 			else
@@ -541,29 +625,32 @@ char	**expander(char *s, int here_doc, int expand)
 				elem.qoute = 0;
 				elem.q = '\0';
 			}
-			arr[elem.index++] = s[i];
-			i++;
+			// elem.arr[elem.index++] = s[elem.i];
+			if (set_caractere(&elem, s[elem.i]) == NULL)
+				return (NULL);
+			elem.i++;
 			continue ;
 		}
 		else
 		{
-			if (is_exist(s[i], "\t\n\v\f\r ") && elem.qoute == 0 && elem.index != 0)
+			if (is_exist(s[elem.i], "\t\n\v\f\r ") && elem.qoute == 0 && elem.index != 0)
 			{
-				printf("ssarr  %s and inde %d \n", arr,elem.index);
-				if (alloc_for_elem(&elem, here_doc, &arr, word, &res) == NULL)
+				// printf("ssarr  %s and inde %d \n", arr,elem.index);
+				if (alloc_for_elem(&elem, here_doc, word, &res) == NULL)
 					return (NULL);
 			}
-			else if (!is_exist(s[i], "\t\n\v\f\r ") || elem.qoute == 1)
+			else if (!is_exist(s[elem.i], "\t\n\v\f\r ") || elem.qoute == 1)
 			{
-				if (handl_other_carac(&elem, arr, &res, here_doc, expand, s, &i) == NULL)
+				if (handl_other_carac(&elem, &res, here_doc, expand, s) == NULL)
 					return (NULL);
 			}
 		}
-		i++;
+		elem.i++;
 	}
+	// printf("elem quote , %d\n", elem.qoute);
 	if (elem.index > 0)
 	{
-		if (alloc_for_elem(&elem, here_doc, &arr, word, &res) == NULL)
+		if (alloc_for_elem(&elem, here_doc, word, &res) == NULL)
 			return (NULL);
 	}
 	else
@@ -572,16 +659,16 @@ char	**expander(char *s, int here_doc, int expand)
 		{
 			res = malloc(sizeof(char *) * 1);
 			if (!res)
-				return (free(arr), NULL);
+				return (free(elem.arr), NULL);
 			res[0] = NULL;
 		}
 	}
-	if (elem.qoute == 1 && here_doc == 0)
-	{
-		printf("syntax error\n");
-		return (free_arr(res), free(arr), NULL);
-	}
-	return (free(arr), res);
+	// if (elem.qoute == 1 && here_doc == 0)
+	// {
+	// 	fprintf(stderr, "syntax error\n");
+	// 	return (free_arr(res), free(arr), NULL);
+	// }
+	return (free(elem.arr), res);
 }
 
 void	xx()
