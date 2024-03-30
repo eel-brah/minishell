@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   msh.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/29 22:28:12 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/03/30 22:16:48 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -781,6 +781,14 @@ void	free_cmdtree(t_node *tree)
 	}
 }
 
+char	**create_new_env()
+{
+	char	**env;
+
+	env = NULL;
+	return (env);
+}
+
 char	**create_env(char **env)
 {
 	size_t	size;
@@ -788,6 +796,8 @@ char	**create_env(char **env)
 	size_t	i;
 
 	size = count_args(env);
+	if (size == 0)
+		return (create_new_env());
 	ptr = malloc((size + 1) * sizeof(env));
 	if (!ptr)
 	{
