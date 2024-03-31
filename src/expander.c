@@ -30,7 +30,7 @@ char	*set_caractere(t_elem *elem, int c)
 	char	*tmp;
 	if (elem->index == elem->capacity - 1)
 	{
-		printf("elem capacity %d\n", elem->capacity);
+		// printf("elem capacity %d\n", elem->capacity);
 		elem->capacity *= 2;
 		tmp = ft_strrealloc2(elem->arr, elem->capacity);
 		if (!tmp)
@@ -302,34 +302,35 @@ char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 	}
 	return (NULL);
 }
+char	*split_expand(t_elem **elem, char *s, char ****res)
+{
+	char	*exp;
+
+	if ((*elem)->qoute == 0 && (*elem)->here_doc == 0)
+	{
+		(*elem)->tmp = alloc_for_expand_without_q(s, &elem);
+		if ((*elem)->tmp == (char *)16)
+			return (s);
+		else if ((*elem)->tmp == NULL)
+			return (NULL);
+		exp = ft_strdup((*elem)->arr);
+		if (!exp)
+			return (NULL);
+		(*elem)->tmp = handle_wild_in_dollar(exp, &res);
+		if ((*elem)->tmp == NULL)
+			return (NULL);
+		ft_memset((*elem)->arr, 0, (*elem)->index);
+		(*elem)->index = 0;
+	}
+	return (s);
+}
 char	*handle_dollar(char *s, char ****res, t_elem **elem)
 {
 	int		j;
 	char	*exp;
 	char	*env;
 	int		start;
-	// int		d;
 
-	// (*elem)->i++;
-	// if (s[(*elem)->i] >= '0' && s[(*elem)->i] <= '9')
-	// 	return (s);
-	// start = 0;
-	// if (s[(*elem)->i] == '\0')
-	// {
-	// 	(*elem)->i--;
-	// 	(*elem)->arr[(*elem)->index] = s[(*elem)->i];
-	// 	(*elem)->index++;
-	// 	return (s);
-	// }
-	// while (s[(*elem)->i + start] && is_alpha_num(s[(*elem)->i + start]))
-	// 	start++;
-	// if (start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc))
-	// {
-	// 	(*elem)->i--;
-	// 	(*elem)->arr[(*elem)->index] = s[(*elem)->i];
-	// 	((*elem)->index)++;
-	// 	return (s);
-	// }
 	if (handle_first_in_expand(elem, s, &start) != NULL)
 		return (s);
 	exp = malloc(start + 1);
@@ -347,22 +348,8 @@ char	*handle_dollar(char *s, char ****res, t_elem **elem)
 	free(exp);
 	if (handle_env_in_expand(env, elem, s) != NULL)
 		return (s);
-	if ((*elem)->qoute == 0 && (*elem)->here_doc == 0)
-	{
-		(*elem)->tmp = alloc_for_expand_without_q(s, &elem);
-		if ((*elem)->tmp == (char *)16)
-			return (s);
-		else if ((*elem)->tmp == NULL)
-			return (NULL);
-		exp = ft_strdup((*elem)->arr);
-		if (!exp)
-			return (NULL);
-		(*elem)->tmp = handle_wild_in_dollar(exp, &res);
-		if ((*elem)->tmp == NULL)
-			return (NULL);
-		ft_memset((*elem)->arr, 0, (*elem)->index);
-		(*elem)->index = 0;
-	}
+	if (split_expand(elem, s, res) == NULL)
+		return (NULL);
 	return (s);
 }
 
@@ -506,13 +493,9 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char *word, char ***res)
 
 	}
 	else if (here_doc == 0)
-	{
 		word = delete_quotes(elem->arr);
-	}
 	else
-	{
 		word = ft_strdup(elem->arr);
-	}
 	if (flag)
 	{
 		if (!word)
@@ -650,6 +633,20 @@ char	*handle_last(t_elem *elem, char ***res, char *word)
 	}
 	return ((char *)42);
 }
+char	*handle_other_carac_space(t_elem *elem, char *s, char *word, int expand, char ***res)
+{
+	if (is_exist(s[elem->i], "\t\n\v\f\r ") && elem->qoute == 0 && elem->index != 0)
+	{
+		if (alloc_for_elem(elem, elem->here_doc, word, res) == NULL)
+			return (NULL);
+	}
+	else if (!is_exist(s[elem->i], "\t\n\v\f\r ") || elem->qoute == 1)
+	{
+		if (handl_other_carac(elem, res, elem->here_doc, expand, s) == NULL)
+			return (NULL);
+	}
+	return (s);
+}
 char	**expander(char *s, int here_doc, int expand)
 {
 	char	**res;
@@ -667,16 +664,18 @@ char	**expander(char *s, int here_doc, int expand)
 		}
 		else
 		{
-			if (is_exist(s[elem.i], "\t\n\v\f\r ") && elem.qoute == 0 && elem.index != 0)
-			{
-				if (alloc_for_elem(&elem, here_doc, word, &res) == NULL)
-					return (NULL);
-			}
-			else if (!is_exist(s[elem.i], "\t\n\v\f\r ") || elem.qoute == 1)
-			{
-				if (handl_other_carac(&elem, &res, here_doc, expand, s) == NULL)
-					return (NULL);
-			}
+			// if (is_exist(s[elem.i], "\t\n\v\f\r ") && elem.qoute == 0 && elem.index != 0)
+			// {
+			// 	if (alloc_for_elem(&elem, here_doc, word, &res) == NULL)
+			// 		return (NULL);
+			// }
+			// else if (!is_exist(s[elem.i], "\t\n\v\f\r ") || elem.qoute == 1)
+			// {
+			// 	if (handl_other_carac(&elem, &res, here_doc, expand, s) == NULL)
+			// 		return (NULL);
+			// }
+			if (handle_other_carac_space(&elem, s, word, expand, &res) == NULL)
+				return (NULL);
 		}
 		elem.i++;
 	}
