@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   msh.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/31 04:01:30 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/03/31 22:28:21 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,12 +168,8 @@ char	*get_cmd(char *prompt)
 		prompt = "$";
 	cmd = readline(prompt);
 	if (cmd && *cmd)
-	{
 		add_history(cmd);
-		return (cmd);
-	}
-	free (cmd);
-	return (NULL);
+	return (cmd);
 }
 
 t_exec	*create_exec()
@@ -474,6 +470,10 @@ t_node	*parse_cmd(char *cmd)
 {
 	t_node	*tree;
 
+	while (*cmd && ft_strchr(WHITESPACES, *cmd))
+		cmd++;
+	if (!*cmd)
+		return (NULL);
 	tree = pars_and(&cmd);
 	if (!tree)
 		return (NULL);
@@ -600,14 +600,13 @@ char	*expand_file(char *file)
 }
 
 // system calls returns
-void	execute(t_node *node, char **env)
+void	execute(t_node *node, char **env, int *r)
 {
 	t_exec			*cmd;
 	t_redirection	*red;
 	t_div			*div;
 	pid_t			pid[3];
 	int				p[2];
-	static int		r;
 	int				t;
 	int				or;
 	char **tmp;
@@ -626,16 +625,20 @@ void	execute(t_node *node, char **env)
 			// return ;
 			if (!cmd->argv[0])
 				return ;
-			t = built_in(node, r, cmd->argv[0], cmd->argv, env);
+			t = built_in(node, *r, cmd->argv[0], cmd->argv, env);
 			if (t != -1)
 			{
-				r = t << 8;
+				*r = t << 8;
 				return ;
 			}
+			// remove this fork
 			pid[2] = fork();
 			if (pid[2] == 0)
+			{
 				exec_cmd(cmd->argv[0], cmd->argv, env);
-			waitpid(pid[2], &r, 0);
+				return ;
+			}
+			waitpid(pid[2], r, 0);
 		}
 	}
 	else if (node->type == RED)
@@ -657,7 +660,7 @@ void	execute(t_node *node, char **env)
 		int fd = dup(red->fd);
 		dup2(or, red->fd);
 		close(or);
-		execute(red->node, env);
+		execute(red->node, env, r);
 		dup2(fd, red->fd);
 		close(fd);
 	}
@@ -680,8 +683,8 @@ void	execute(t_node *node, char **env)
 			dup2(p[1], 1);
 			close(p[1]);
 			close(p[0]);
-			execute(div->left, env);
-			exit(r >> 8);
+			execute(div->left, env, r);
+			exit(*r >> 8);
 		}
 		pid[1] = fork();
 		if (pid[1] < 0)
@@ -694,27 +697,27 @@ void	execute(t_node *node, char **env)
 			dup2(p[0], 0);
 			close(p[1]);
 			close(p[0]);
-			execute(div->right, env);
-			exit(r >> 8);
+			execute(div->right, env, r);
+			exit(*r >> 8);
 		}
 		close(p[0]);
 		close(p[1]);
-		waitpid(pid[0], &r, 0);
-		waitpid(pid[1], &r, 0);
+		waitpid(pid[0], r, 0);
+		waitpid(pid[1], r, 0);
 	}
 	else if (node->type == AND)
 	{
 		div = (t_div*)node;
-		execute(div->left, env);
-		if (!r)
-			execute(div->right, env);
+		execute(div->left, env, r);
+		if (!*r)
+			execute(div->right, env, r);
 	}
 	else if (node->type == OR)
 	{
 		div = (t_div*)node;
-		execute(div->left, env);
-		if (r)
-			execute(div->right, env);
+		execute(div->left, env, r);
+		if (*r)
+			execute(div->right, env, r);
 	}
 }
 
@@ -799,13 +802,13 @@ char	**create_new_env()
 	if (!tmp || !tmp1)
 		return (perror("malloc"), NULL);
 	env[1]= tmp;
-	tmp = ft_strdup("_=/usr/bin/env");
+	tmp = ft_strdup("_=/usr/bin/env"); // handle it
 	if (!tmp)
 		return (perror("malloc"), NULL);
 	env[2]= tmp;
 	tmp = ft_strdup("PATH=/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.");
 	if (!tmp)
-		return (perror("malloc"), NULL);
+		return (perror("malloc"), NULL); // free the previous ones
 	env[3]= tmp;
 	return (env[4]= NULL, env);
 }
@@ -842,12 +845,16 @@ void fu()
 	system("leaks minishell");
 }
 
+extern int rl_catch_signals;
+extern char **environ;
+
 int	main(int argc, char **argv, char **env)
 {
 	char	*cmd;
 	t_node	*tree;
 	char	*prompt;
 	char	**_env;
+	static int r;
 
 	(void) argv;
 	if (argc > 1)
@@ -855,27 +862,25 @@ int	main(int argc, char **argv, char **env)
 	_env = create_env(env);
 	if (!_env)
 		return (1);
+	rl_catch_signals = 0;
 	environ = _env;
-	// atexit(fu);
-	// int i = 0;
-	// while (environ[i])
-	// {
-	// 	printf("%s\n", environ[i]);
-	// 	i++;
-	// }
 	while (1)
 	{
 		prompt = get_prompt();
 		cmd = get_cmd(prompt);
 		free(prompt);
 		if (!cmd)
+			ft_exit(NULL, NULL, _env, r);
+		else if (!*cmd)
+		{
+			free(cmd);
 			continue;
+		}
 		tree = parse_cmd(cmd);
 		free(cmd);
 		if (!tree)
 			continue;
-		execute(tree, _env);
-		// pre_trv(tree);
+		execute(tree, _env, &r);
 		free_cmdtree(tree);
 	}
 	double_free(_env);
