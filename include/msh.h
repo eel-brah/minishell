@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-// extern char **environ;
+extern char **environ;
 
 typedef struct s_node 
 {

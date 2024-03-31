@@ -186,13 +186,58 @@ void	handle_dollar_special(char *s, int *i, char *arr, int *index, int capacity)
 	(void)capacity;
 }
 
+char	*handle_wild_inside_expand(char *****res, char **sp, int i)
+{
+	char	*tmp;
+	char	**tmp1;
+	char	**exp;
+
+	exp = match_pattern(sp[i], 0);
+	if (!exp)
+		return (free_arr(sp), perror("malloc "), NULL);
+	else if (exp == (char **)42)
+	{
+		tmp = ft_strdup(sp[i]);
+		if (!tmp)
+			return (free(sp), perror("malloc "), NULL);
+		tmp1 = ft_realloc(***res, tmp);
+		if (!tmp1)
+			return (free_arr(***res), ***res = NULL, free_arr(sp), perror("malloc "), NULL);
+		else
+			***res = tmp1;
+	}
+	else
+	{
+		tmp1 = concat_two_array(***res, exp);
+		if (tmp1 == NULL)
+			return (perror("malloc "), free_arr(sp), NULL);
+		***res = tmp1;
+	}
+	return ((char *)42);
+}
+
+char	*handle_expand_without_wild(char **sp, char *****res, int i)
+{
+	char	*tmp;
+	char	**tmp1;
+
+	tmp = ft_strdup(sp[i]);
+	if (!tmp)
+		return (free(sp), perror("malloc "), NULL);
+	tmp1 = ft_realloc(***res, tmp);
+	if (!tmp1)
+		return (free_arr(***res), ***res = NULL, free_arr(sp), perror("malloc "), NULL);
+	else
+		***res = tmp1;
+	return ((char *)42);
+}
 char	*handle_wild_in_dollar(char *arr,char *****res)
 {
 	char	**sp;
 	int		i;
-	char	*tmp;
-	char	**tmp1;
-	char	**exp;
+	// char	*tmp;
+	// char	**tmp1;
+	// char	**exp;
 
 	i = 0;
 	sp = ft_split(arr, ' ');
@@ -202,55 +247,24 @@ char	*handle_wild_in_dollar(char *arr,char *****res)
 	{
 		if (ft_strchr(sp[i], '*'))
 		{
-			exp = match_pattern(sp[i], 0);
-			if (!exp)
-				return (free_arr(sp), perror("malloc "), NULL);
-			else if (exp == (char **)42)
-			{
-				tmp = ft_strdup(sp[i]);
-				if (!tmp)
-					return (free(sp), perror("malloc "), NULL);
-				tmp1 = ft_realloc(***res, tmp);
-				if (!tmp1)
-					return (free_arr(***res), ***res = NULL, free_arr(sp), perror("malloc "), NULL);
-				else
-					***res = tmp1;
-			}
-			else
-			{
-				tmp1 = concat_two_array(***res, exp);
-				if (tmp1 == NULL)
-					return (perror("malloc "), free_arr(sp), NULL);
-				***res = tmp1;
-			}
+			if (handle_wild_inside_expand(res, sp, i) == NULL)
+				return (NULL);
 		}
 		else
 		{
-			tmp = ft_strdup(sp[i]);
-			if (!tmp)
-				return (free(sp), perror("malloc "), NULL);
-			tmp1 = ft_realloc(***res, tmp);
-			if (!tmp1)
-				return (free_arr(***res), ***res = NULL, free_arr(sp), perror("malloc "), NULL);
-			else
-				***res = tmp1;
+			if (handle_expand_without_wild(sp, res, i) == NULL)
+				return (NULL);
 		}
 		i++;
 	}
 	return (free_arr(sp), (char *)42);
 }
-char	*handle_dollar(char *s, char ****res, t_elem **elem)
+char	*handle_first_in_expand(t_elem **elem, char *s, int *start)
 {
-	int		j;
-	char	*exp;
-	char	*env;
-	int		start;
-	// int		d;
-
 	(*elem)->i++;
 	if (s[(*elem)->i] >= '0' && s[(*elem)->i] <= '9')
 		return (s);
-	start = 0;
+	*start = 0;
 	if (s[(*elem)->i] == '\0')
 	{
 		(*elem)->i--;
@@ -258,28 +272,21 @@ char	*handle_dollar(char *s, char ****res, t_elem **elem)
 		(*elem)->index++;
 		return (s);
 	}
-	while (s[(*elem)->i + start] && is_alpha_num(s[(*elem)->i + start]))
-		start++;
-	if (start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc))
+	while (s[(*elem)->i + *start] && is_alpha_num(s[(*elem)->i + *start]))
+		(*start)++;
+	if (*start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc))
 	{
 		(*elem)->i--;
 		(*elem)->arr[(*elem)->index] = s[(*elem)->i];
 		((*elem)->index)++;
 		return (s);
 	}
-	exp = malloc(start + 1);
-	if (!exp)
-		return (NULL);
-	j = 0;
-	while (j < start)
-	{
-		exp[j] = s[(*elem)->i + j];
-		j++;
-	}
-	exp[j] = '\0';
-	((*elem)->i) = ((*elem)->i) + start - 1;
-	env = getenv(exp);
-	free(exp);
+	return (NULL);
+}
+
+char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
+{
+	int	j;
 	if (!env)
 	{
 		if (!is_alpha_num(s[(*elem)->i + 1]) && s[(*elem)->i + 1] != '\0' && s[(*elem)->i] == '$' && s[(*elem)->i + 1] != '\'' && s[(*elem)->i + 1] != '"')
@@ -293,6 +300,53 @@ char	*handle_dollar(char *s, char ****res, t_elem **elem)
 			return (NULL);
 		j++;
 	}
+	return (NULL);
+}
+char	*handle_dollar(char *s, char ****res, t_elem **elem)
+{
+	int		j;
+	char	*exp;
+	char	*env;
+	int		start;
+	// int		d;
+
+	// (*elem)->i++;
+	// if (s[(*elem)->i] >= '0' && s[(*elem)->i] <= '9')
+	// 	return (s);
+	// start = 0;
+	// if (s[(*elem)->i] == '\0')
+	// {
+	// 	(*elem)->i--;
+	// 	(*elem)->arr[(*elem)->index] = s[(*elem)->i];
+	// 	(*elem)->index++;
+	// 	return (s);
+	// }
+	// while (s[(*elem)->i + start] && is_alpha_num(s[(*elem)->i + start]))
+	// 	start++;
+	// if (start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc))
+	// {
+	// 	(*elem)->i--;
+	// 	(*elem)->arr[(*elem)->index] = s[(*elem)->i];
+	// 	((*elem)->index)++;
+	// 	return (s);
+	// }
+	if (handle_first_in_expand(elem, s, &start) != NULL)
+		return (s);
+	exp = malloc(start + 1);
+	if (!exp)
+		return (NULL);
+	j = 0;
+	while (j < start)
+	{
+		exp[j] = s[(*elem)->i + j];
+		j++;
+	}
+	exp[j] = '\0';
+	((*elem)->i) = ((*elem)->i) + start - 1;
+	env = getenv(exp);
+	free(exp);
+	if (handle_env_in_expand(env, elem, s) != NULL)
+		return (s);
 	if ((*elem)->qoute == 0 && (*elem)->here_doc == 0)
 	{
 		(*elem)->tmp = alloc_for_expand_without_q(s, &elem);

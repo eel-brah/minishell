@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/31 03:07:15 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/03/31 04:01:30 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -855,6 +855,7 @@ int	main(int argc, char **argv, char **env)
 	_env = create_env(env);
 	if (!_env)
 		return (1);
+	environ = _env;
 	// atexit(fu);
 	// int i = 0;
 	// while (environ[i])
