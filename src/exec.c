@@ -25,6 +25,21 @@ int	built_in(t_node *tree, int r, char *prg, char **args, char **env)
 	return (-1);
 }
 
+char	*ft_getenv(char **env, char *s)
+{
+	int		i;
+	int		len;
+
+	i = 0;
+	len = ft_strlen(s);
+	while (env && env[i])
+	{
+		if (ft_strncmp(env[i], s, len) == 0 && env[i][len] == '=')
+			return ((char *)(&env[i][len + 1]));
+		i++;
+	}
+	return (NULL);
+}
 void	exec_cmd(char *prg, char **args, char **env)
 {
 	char	*path;
@@ -78,7 +93,7 @@ void	exec_cmd(char *prg, char **args, char **env)
 	}
 	else
 	{
-		path = getenv("PATH");
+		path = ft_getenv(env, "PATH");
 		if (path && *prg)
 		{
 			paths = ft_split(path, ':');

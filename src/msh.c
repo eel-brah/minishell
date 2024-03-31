@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/30 22:16:48 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/03/31 03:07:15 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -784,9 +784,30 @@ void	free_cmdtree(t_node *tree)
 char	**create_new_env()
 {
 	char	**env;
+	char	*tmp;
+	char	*tmp1;
 
-	env = NULL;
-	return (env);
+	env = malloc(sizeof(char *) * 5);
+	if (!env)
+		return (perror("malloc"), NULL);
+	tmp = getcwd(NULL, 0);
+	if (!tmp)
+		return (perror("getcwd"), NULL);
+	tmp1 = ft_strdup(tmp);
+	env[0] = tmp1;
+	tmp = ft_strdup("SHLVL=1");
+	if (!tmp || !tmp1)
+		return (perror("malloc"), NULL);
+	env[1]= tmp;
+	tmp = ft_strdup("_=/usr/bin/env");
+	if (!tmp)
+		return (perror("malloc"), NULL);
+	env[2]= tmp;
+	tmp = ft_strdup("PATH=/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.");
+	if (!tmp)
+		return (perror("malloc"), NULL);
+	env[3]= tmp;
+	return (env[4]= NULL, env);
 }
 
 char	**create_env(char **env)
@@ -800,10 +821,7 @@ char	**create_env(char **env)
 		return (create_new_env());
 	ptr = malloc((size + 1) * sizeof(env));
 	if (!ptr)
-	{
-		perror("malloc");
-		return (NULL);
-	}
+		return (perror("malloc"), NULL);
 	i = 0;
 	while (*env)
 	{
@@ -838,6 +856,12 @@ int	main(int argc, char **argv, char **env)
 	if (!_env)
 		return (1);
 	// atexit(fu);
+	// int i = 0;
+	// while (environ[i])
+	// {
+	// 	printf("%s\n", environ[i]);
+	// 	i++;
+	// }
 	while (1)
 	{
 		prompt = get_prompt();
