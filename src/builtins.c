@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/29 18:27:20 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/01 22:49:37 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,43 +110,43 @@ int	ft_pwd(char **args)
 	return (0);
 }
 
-// int	ft_unset(char **env, char **args)
-// {
-// 	unsigned int	i;
-// 	unsigned int	j;
-// 	unsigned int	r;
+int	ft_unset(char **env, char **args)
+{
+	unsigned int	i;
+	unsigned int	j;
+	unsigned int	r;
 
-// 	r = 0;
-// 	while (*args)
-// 	{
-// 		if (is_valid_variable_name(*args))
-// 		{
-// 			i = 0;
-// 			while (env[i])
-// 			{
-// 				if (!ft_strncmp(env[i], *args, ft_strlen(*args)) 
-// 					&& env[i][ft_strlen(*args)] == '=')
-// 				{
-// 					free(env[i]);
-// 					j = i;
-// 					while (env[j])
-// 					{
-// 						env[j] = env[j + 1];
-// 						j++;
-// 					}
-// 				}
-// 				i++;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			print_error_2("unset", *args ,"not a valid identifier");
-// 			r = 1;
-// 		}
-// 		args++;
-// 	}
-// 	return (r);
-// }
+	r = 0;
+	while (*args)
+	{
+		if (is_valid_variable_name(*args))
+		{
+			i = 0;
+			while (env[i])
+			{
+				if (!ft_strncmp(env[i], *args, ft_strlen(*args)) 
+					&& env[i][ft_strlen(*args)] == '=')
+				{
+					free(env[i]);
+					j = i;
+					while (env[j])
+					{
+						env[j] = env[j + 1];
+						j++;
+					}
+				}
+				i++;
+			}
+		}
+		else
+		{
+			print_error_2("unset", *args ,"not a valid identifier");
+			r = 1;
+		}
+		args++;
+	}
+	return (r);
+}
 
 ssize_t	ft_atoi_v2(char *s, bool *valid)
 {

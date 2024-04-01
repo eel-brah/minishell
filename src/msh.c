@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/01 02:49:36 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/01 22:49:02 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -610,7 +610,7 @@ char	*expand_file(char *file, int *r)
 }
 
 // system calls returns
-void	execute(t_node *node, char **env, int *r)
+void	execute(t_node *node, char ***env, int *r)
 {
 	t_exec			*cmd;
 	t_redirection	*red;
@@ -641,7 +641,14 @@ void	execute(t_node *node, char **env, int *r)
 				*r = t << 8;
 				return ;
 			}
-			*r = exec_cmd(cmd->argv[0], cmd->argv, env) << 8;
+			*r = exec_cmd(cmd->argv[0], cmd->argv, *env);
+			// if (WIFSIGNALED(*r))
+			// || WTERMSIG(*r) == SIGQUIT
+			if (WTERMSIG(*r) == SIGINT)
+			{
+				*r = 130 << 8;
+				ft_putchar_fd('\n', 1);
+			}
 		}
 	}
 	else if (node->type == RED)
@@ -689,7 +696,7 @@ void	execute(t_node *node, char **env, int *r)
 			close(p[1]);
 			close(p[0]);
 			execute(div->left, env, r);
-			exit(*r >> 8);
+			exit(WEXITSTATUS(*r));
 		}
 		pid[1] = fork();
 		if (pid[1] < 0)
@@ -704,7 +711,7 @@ void	execute(t_node *node, char **env, int *r)
 			close(p[1]);
 			close(p[0]);
 			execute(div->right, env, r);
-			exit(*r >> 8);
+			exit(WEXITSTATUS(*r));
 		}
 		close(p[0]);
 		close(p[1]);
@@ -899,7 +906,7 @@ int	main(int argc, char **argv, char **env)
 		free(cmd);
 		if (!tree)
 			continue;
-		execute(tree, _env, &r);
+		execute(tree, &_env, &r);
 		free_cmdtree(tree);
 	}
 	double_free(_env);

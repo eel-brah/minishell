@@ -2,7 +2,7 @@
 
 extern char **environ;
 
-int	built_in(t_node *tree, int r, char *prg, char **args, char **env)
+int	built_in(t_node *tree, int r, char *prg, char **args, char ***env)
 {
 	unsigned int size;
 
@@ -15,16 +15,19 @@ int	built_in(t_node *tree, int r, char *prg, char **args, char **env)
 		return (ft_pwd(args + 1));
 	else if (size == ft_strlen("env") 
 		&& (!ft_strncmp(prg, "env", size) || !ft_strncmp(prg, "ENV", size)))
-		return (ft_env(env, args + 1));
+		return (ft_env(*env, args + 1));
 	else if (size == ft_strlen("cd") 
 		&& !ft_strncmp(prg, "cd", size))
 		return (ft_cd(args + 1));
 	else if (size == ft_strlen("exit") 
 		&& !ft_strncmp(prg, "exit", size))
-		return (ft_exit(tree, args + 1, env, r));
+		return (ft_exit(tree, args + 1, *env, r));
 	else if (size == ft_strlen("export") 
 		&& !ft_strncmp(prg, "export", size))
-		return (ft_export(&env, args + 1));
+		return (ft_export(env, args + 1));
+	else if (size == ft_strlen("unset") 
+		&& !ft_strncmp(prg, "unset", size))
+		return (ft_unset(*env, args + 1));
 	return (-1);
 }
 
@@ -69,24 +72,24 @@ int	exec_cmd(char *prg, char **args, char **env)
 	if (is_path && acc)
 	{
 		perror(prg);
-		return(127);
+		return(127 << 8);
 	}
 	else if (is_path && !acc)
 	{
 		if (access(prg, X_OK))
 		{
 			perror(prg);
-			return(126);
+			return(126 << 8);
 		}
 		if (stat(prg, &statbuf))
 		{
 			perror("stat");
-			return(1);
+			return(1 << 8);
 		}
 		if (S_ISDIR(statbuf.st_mode))
 		{
 			print_error(prg, "Is a directory");
-			return(126);
+			return(126 << 8);
 		}
 		// pid = fork();
 		// if (pid == -1)
@@ -111,12 +114,12 @@ int	exec_cmd(char *prg, char **args, char **env)
 			execve(prg, args, env);
 			// handle signals if faild
 			perror("execve");
-			return(1);
+			return(1 << 8);
 		}
 		while (waitpid(pid, &r, 0) == -1)
 		{
 			if (errno != EINTR) 
-				return (1);
+				return (1 << 8);
 		}
 		signal(SIGQUIT, SIG_IGN);
 		signal(SIGINT, sigint_handler);
@@ -130,14 +133,14 @@ int	exec_cmd(char *prg, char **args, char **env)
 			if (!paths)
 			{
 				perror("malloc");
-				return(1);
+				return(1 << 8);
 			}
 			slashed = ft_strjoin("/", prg);
 			if (!slashed)
 			{
 				perror("malloc");
 				double_free(paths);
-				return(1);
+				return(1 << 8);
 			}
 			i = 0;
 			pr_denied = NULL;
@@ -161,12 +164,12 @@ int	exec_cmd(char *prg, char **args, char **env)
 			if (!paths[i] && pr_denied)
 			{
 				print_error(pr_denied, "Permission denied");
-				return(126);
+				return(126 << 8);
 			}
 			else if (!paths[i])
 			{
 				print_error(prg, "command not found");
-				return(127);
+				return(127 << 8);
 			}
 			else
 			{
@@ -178,12 +181,12 @@ int	exec_cmd(char *prg, char **args, char **env)
 					signal(SIGQUIT, SIG_DFL);
 					execve(full_path, args, env);
 					perror("execve");
-					return(1);
+					return(1 << 8);
 				}
 				while (waitpid(pid, &r, 0) == -1)
 				{
 					if (errno != EINTR) 
-						return (1);
+						return (1 << 8);
 				}
 				signal(SIGQUIT, SIG_IGN);
 				signal(SIGINT, sigint_handler);
@@ -196,10 +199,10 @@ int	exec_cmd(char *prg, char **args, char **env)
 		else
 		{
 			print_error(prg, "command not found");
-			return(127);
+			return(127 << 8);
 		}
 	}
-	return(r >> 8);
+	return(r);
 }
 
 // int main()
