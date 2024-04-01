@@ -94,6 +94,7 @@ int		ft_cd(char **args);
 int		built_in(t_node *tree, int r, char *prg, char **args, char **env);
 char	*strdup_v2(char *start, char *end);
 ssize_t	ft_atoi_v2(char *s, bool *valid);
+bool	ft_export(char ***env, char **args);
 
 void	ft_printenv(char **env);
 char	**ptrs_realloc(char **tokens, char *arg);

@@ -22,6 +22,9 @@ int	built_in(t_node *tree, int r, char *prg, char **args, char **env)
 	else if (size == ft_strlen("exit") 
 		&& !ft_strncmp(prg, "exit", size))
 		return (ft_exit(tree, args + 1, env, r));
+	else if (size == ft_strlen("export") 
+		&& !ft_strncmp(prg, "export", size))
+		return (ft_export(&env, args + 1));
 	return (-1);
 }
 

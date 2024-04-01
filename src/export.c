@@ -3,21 +3,21 @@
 // Variable names must start with a letter or underscore.
 // Subsequent characters can be letters, digits, or underscores.
 
-size_t	count_args(char **ptrs)
-{
-	char	**ptr;
+// size_t	count_args(char **ptrs)
+// {
+// 	char	**ptr;
 
-	ptr = ptrs;
-	while (ptr && *ptr)
-		ptr++;
-	return (ptr - ptrs);
-}
+// 	ptr = ptrs;
+// 	while (ptr && *ptr)
+// 		ptr++;
+// 	return (ptr - ptrs);
+// }
 
-void	ft_printenv(char **env)
-{
-	while (env && *env)
-		printf("%s\n", *env++);
-}
+// void	ft_printenv(char **env)
+// {
+// 	while (env && *env)
+// 		printf("%s\n", *env++);
+// }
 
 void	free_env(char **env)
 {
@@ -151,7 +151,7 @@ char	*edit_env(char ***env, char *vrbl)
 	char	**env_ptr;
 	char	*ptr;
 	int		v;
-	size_t	len;
+	// size_t	len;
 
 	env_ptr = *env;
 	if (is_valid_variable(vrbl, &v))
@@ -228,51 +228,51 @@ bool	ft_export(char ***env, char **args)
 	return (true);
 }
 
-char	**create_env(char **env)
-{
-	size_t	size;
-	char	**ptr;
-	size_t	i;
+// char	**create_env(char **env)
+// {
+// 	size_t	size;
+// 	char	**ptr;
+// 	size_t	i;
 
-	size = count_args(env);
-	ptr = malloc((size + 1) * sizeof(env));
-	if (!ptr)
-	{
-		perror("malloc");
-		return (NULL);
-	}
-	i = 0;
-	while (*env)
-	{
-		ptr[i++] = ft_strdup(*env++);
-		if (!ptr[i - 1])
-		{
-			perror("malloc");
-			free_env(ptr);
-			return (NULL);
-		}
-	}
-	ptr[i] = NULL;
-	return (ptr);
-}
+// 	size = count_args(env);
+// 	ptr = malloc((size + 1) * sizeof(env));
+// 	if (!ptr)
+// 	{
+// 		perror("malloc");
+// 		return (NULL);
+// 	}
+// 	i = 0;
+// 	while (*env)
+// 	{
+// 		ptr[i++] = ft_strdup(*env++);
+// 		if (!ptr[i - 1])
+// 		{
+// 			perror("malloc");
+// 			free_env(ptr);
+// 			return (NULL);
+// 		}
+// 	}
+// 	ptr[i] = NULL;
+// 	return (ptr);
+// }
 
-void fu()
-{
-	system("leaks a.out");
-}
+// void fu()
+// {
+// 	system("leaks a.out");
+// }
 
-int	main(int argc, char **argv, char **env)
-{
-	atexit(fu);
-	char	**tmp;
+// int	main(int argc, char **argv, char **env)
+// {
+// 	atexit(fu);
+// 	char	**tmp;
 
-	env = create_env(env);
-	if (!env)
-		return (1);
-	ft_export(&env, argv+1);
-	// env = tmp;
-	ft_printenv(env);
-	free_env(env);
-	// printf("eenv %s, \n",getenv(argv[1]));
-	// printf("eenv %s, \n",getenv(argv[2]));
-}
+// 	env = create_env(env);
+// 	if (!env)
+// 		return (1);
+// 	ft_export(&env, argv+1);
+// 	// env = tmp;
+// 	ft_printenv(env);
+// 	free_env(env);
+// 	// printf("eenv %s, \n",getenv(argv[1]));
+// 	// printf("eenv %s, \n",getenv(argv[2]));
+// }
