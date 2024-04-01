@@ -101,7 +101,7 @@ void	print_error(char *source, char *error);
 void	print_error_2(char *source, char *arg,char *error);
 bool	is_valid_variable_name(char *s);
 
-void	exec_cmd(char *prg, char **args, char **env);
+int		exec_cmd(char *prg, char **args, char **env);
 char	*get_prompt();
 
 char	**expander(char *s, int here_doc, int expand);

@@ -40,7 +40,7 @@ char	*ft_getenv(char **env, char *s)
 	}
 	return (NULL);
 }
-void	exec_cmd(char *prg, char **args, char **env)
+int	exec_cmd(char *prg, char **args, char **env)
 {
 	char	*path;
 	char	**paths;
@@ -52,44 +52,45 @@ void	exec_cmd(char *prg, char **args, char **env)
 	bool	is_path;
 	char	*pr_denied;
 	bool	acc;
+	int		r = 0;
 	
 	is_path = !!ft_strchr(prg, '/');
 	acc = access(prg, F_OK);
 	if (is_path && acc)
 	{
 		perror(prg);
-		exit(127);
+		return(127);
 	}
 	else if (is_path && !acc)
 	{
 		if (access(prg, X_OK))
 		{
 			perror(prg);
-			exit(126);
+			return(126);
 		}
 		if (stat(prg, &statbuf))
 		{
 			perror("stat");
-			exit(1);
+			return(1);
 		}
 		if (S_ISDIR(statbuf.st_mode))
 		{
 			print_error(prg, "Is a directory");
-			exit(126);
+			return(126);
 		}
 		pid = fork();
 		if (pid == -1)
 		{
 			perror("fork");
-			exit(1);
+			return(1);
 		}
 		if (pid == 0)
 		{
 			execve(prg, args, env);
 			perror("execve");
-			exit(1);
+			return(1);
 		}
-		waitpid(pid, NULL, 0);
+		waitpid(pid, &r, 0);
 	}
 	else
 	{
@@ -100,14 +101,14 @@ void	exec_cmd(char *prg, char **args, char **env)
 			if (!paths)
 			{
 				perror("malloc");
-				exit(1);
+				return(1);
 			}
 			slashed = ft_strjoin("/", prg);
 			if (!slashed)
 			{
 				perror("malloc");
 				double_free(paths);
-				exit(1);
+				return(1);
 			}
 			i = 0;
 			pr_denied = NULL;
@@ -131,12 +132,12 @@ void	exec_cmd(char *prg, char **args, char **env)
 			if (!paths[i] && pr_denied)
 			{
 				print_error(pr_denied, "Permission denied");
-				exit(126);
+				return(126);
 			}
 			else if (!paths[i])
 			{
 				print_error(prg, "command not found");
-				exit(127);
+				return(127);
 			}
 			else
 			{
@@ -145,10 +146,9 @@ void	exec_cmd(char *prg, char **args, char **env)
 				{
 					execve(full_path, args, env);
 					perror("execve");
-					exit(1);
+					return(1);
 				}
-				else
-					waitpid(pid, NULL, 0);
+				waitpid(pid, &r, 0);
 				free(full_path);
 			}
 			free(pr_denied);
@@ -158,10 +158,10 @@ void	exec_cmd(char *prg, char **args, char **env)
 		else
 		{
 			print_error(prg, "command not found");
-			exit(127);
+			return(127);
 		}
 	}
-	exit(0);
+	return(r >> 8);
 }
 
 // int main()

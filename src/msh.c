@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/31 22:28:21 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/01 00:14:53 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -576,7 +576,7 @@ char	**expand_args(char **args)
 	return (args);
 }
 
-char	*expand_file(char *file)
+char	*expand_file(char *file, int *r)
 {
 	char **ex;
 	int	count;
@@ -595,6 +595,7 @@ char	*expand_file(char *file)
 		return(file);
 	}
 	print_error_2("minishell", file, "ambiguous redirect");
+	*r = 1 << 8;
 	double_free(ex);
 	return (NULL);
 }
@@ -631,14 +632,7 @@ void	execute(t_node *node, char **env, int *r)
 				*r = t << 8;
 				return ;
 			}
-			// remove this fork
-			pid[2] = fork();
-			if (pid[2] == 0)
-			{
-				exec_cmd(cmd->argv[0], cmd->argv, env);
-				return ;
-			}
-			waitpid(pid[2], r, 0);
+			*r = exec_cmd(cmd->argv[0], cmd->argv, env) << 8;
 		}
 	}
 	else if (node->type == RED)
@@ -646,7 +640,7 @@ void	execute(t_node *node, char **env, int *r)
 		// stdout after redirection
 		red = (t_redirection*)node;
 		char *tmp2;
-		tmp2 = expand_file(red->file);
+		tmp2 = expand_file(red->file, r);
 		if (!tmp2)
 			return ;
 		red->file = tmp2;

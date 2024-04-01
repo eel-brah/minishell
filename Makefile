@@ -21,11 +21,11 @@ NAME := minishell
 all: lib $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT) $(INCLUDE)
-	@$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME) -lreadline
+	@$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME) -lreadline -L /Users/eel-brah/.brew/opt/readline/lib
 	@echo "\033[1;34m$(NAME) \033[0;34mhas been compiled"
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDE)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@ -I /Users/eel-brah/.brew/opt/readline/include
 
 lib:
 	@[ -d "$(BUILD_DIR)" ] || mkdir "$(BUILD_DIR)"

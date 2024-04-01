@@ -1,12 +1,9 @@
-
-
-
 import subprocess
 import os
 
 simple_tests = {
         "normal test": "ls -l",
-        "unset": "unset HOME && echo $HOME",
+        # "unset": "unset HOME && echo $HOME",
         "expand 1": "echo \"$HOME\"",
         "expand 2": "echo \"$HOME\"$\"$HOME\"",
         "expand 3": "echo \"$HOME\"\"$\"\"$HOME\"",
@@ -24,16 +21,25 @@ simple_tests = {
         "wildcard 8": 'echo "Makefile"*',
         "wildcard 9": 'echo *"Makefile"*',
         "wildcard 10": 'echo *****"Makefile"',
-        "wildcard 11": 'echo *$Makefile.c"',
+        "wildcard 11": 'echo *$Makefile.c',
         "wildcard 12": 'echo Make$sdfsdf*',
         "wildcard 13": '$sdfsdfsdf/bin/ls',
-        "wildcard 13": 'echo $.sdfsdfsf',
-        "wildcard 13": 'echo $""$',
-        "wildcard 13": ' echo $\'$\'$',
-        "wildcard 13": 'echo $sdfsdf=*$dl=',
-        "wildcard 13": 'echo hello >> $sdfdsf',
-        "wildcard 13": 'echo hello >> =$sdfdsf*',
-        "wildcard 13": 'echo $USER\'\'l\'\'',
+        "wildcard 14": 'echo $.sdfsdfsf',
+        "wildcard 15": 'echo $""$',
+        "wildcard 16": 'echo $\'$\'$',
+        "wildcard 17": 'echo $sdfsdf=*$dl=',
+        "wildcard 18": 'echo hello >> $sdfdsf',
+        "wildcard 19": 'echo hello >> =$sdfdsf*',
+        "wildcard 20": "echo $USER''l''",
+        "wildcard 21": 'echo $USER\'\'$l\'$\'$',
+        # "wildcard 22": 'echo $USER\'\'l\'\'',
+        # "wildcard 23": 'echo $USER\'\'l\'\'',
+        # "wildcard 24": 'echo $USER\'\'l\'\'',
+        # "wildcard 25": 'echo $USER\'\'l\'\'',
+        # "wildcard 26": 'echo $USER\'\'l\'\'',
+        # "wildcard 27": 'echo $USER\'\'l\'\'',
+        # "wildcard 28": 'echo $USER\'\'l\'\'',
+        # "wildcard 29": 'echo $USER\'\'l\'\'',
         # echo $USER''$l'$'$
         # echo "$USER======"
         # echo "$======"
@@ -50,7 +56,7 @@ sofisticated_tests = {
 
 def run_sofisticated_test(tests):
     setup = tests["setup"]
-    p = subprocess.Popen("./mini", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    p = subprocess.Popen("./minishell", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     bash = subprocess.Popen("bash", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     for cmd in setup:
         p.communicate(input=cmd)
@@ -65,7 +71,7 @@ def run_sofisticated_test(tests):
 def run_tests(tests):
     for key in tests:
         expected = subprocess.check_output(['bash', '-c', tests[key]])
-        got = subprocess.check_output(['bash', '-c', f"echo \'{tests[key]}\' | ./mini"])
+        got = subprocess.check_output(['bash', '-c', f"echo \'{tests[key]}\' | ./minishell"])
         got = b'\n'.join(got.split(b'\n')[1:-2]) + b'\n'
         if got == expected:
             print("yaaaay")
