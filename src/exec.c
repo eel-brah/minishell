@@ -40,6 +40,13 @@ char	*ft_getenv(char **env, char *s)
 	}
 	return (NULL);
 }
+
+void	sig_hand1(int sig)
+{
+	(void) sig;
+	write(1, "\n", 1);
+}
+
 int	exec_cmd(char *prg, char **args, char **env)
 {
 	char	*path;
@@ -78,19 +85,38 @@ int	exec_cmd(char *prg, char **args, char **env)
 			print_error(prg, "Is a directory");
 			return(126);
 		}
+		// pid = fork();
+		// if (pid == -1)
+		// {
+		// 	perror("fork");
+		// 	return(1);
+		// }
+		// if (pid == 0)
+		// {
+		// 	execve(prg, args, env);
+		// 	perror("execve");
+		// 	return(1);
+		// }
+		// waitpid(pid, &r, 0);
+
+		signal(SIGINT, SIG_IGN);
 		pid = fork();
-		if (pid == -1)
-		{
-			perror("fork");
-			return(1);
-		}
 		if (pid == 0)
 		{
+			signal(SIGQUIT, SIG_DFL);
+			signal(SIGINT, SIG_DFL);
 			execve(prg, args, env);
+			// handle signals if faild
 			perror("execve");
 			return(1);
 		}
-		waitpid(pid, &r, 0);
+		while (waitpid(pid, &r, 0) == -1)
+		{
+			if (errno != EINTR) 
+				return (1);
+		}
+		signal(SIGQUIT, SIG_IGN);
+		signal(SIGINT, sigint_handler);
 	}
 	else
 	{
@@ -141,14 +167,23 @@ int	exec_cmd(char *prg, char **args, char **env)
 			}
 			else
 			{
+				signal(SIGINT, SIG_IGN);
 				pid = fork();
 				if (pid == 0)
 				{
+					signal(SIGINT, SIG_DFL);
+					signal(SIGQUIT, SIG_DFL);
 					execve(full_path, args, env);
 					perror("execve");
 					return(1);
 				}
-				waitpid(pid, &r, 0);
+				while (waitpid(pid, &r, 0) == -1)
+				{
+					if (errno != EINTR) 
+						return (1);
+				}
+				signal(SIGQUIT, SIG_IGN);
+				signal(SIGINT, sigint_handler);
 				free(full_path);
 			}
 			free(pr_denied);

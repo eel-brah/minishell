@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/01 00:36:57 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/01 02:49:36 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,6 +325,15 @@ t_node	*parse_parenthesis(char **pcmd)
 	tmp = node;
 	node = parse_redirection(node, pcmd);
 	return (node);
+}
+
+void sigint_handler(int sig)
+{
+	(void)sig;
+	write(1, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
 }
 
 t_node	*parse_exec(char **pcmd)
@@ -651,6 +660,7 @@ void	execute(t_node *node, char **env, int *r)
 			perror("open");
 			return ;
 		}
+		// if signal arrive while this happning
 		int fd = dup(red->fd);
 		dup2(or, red->fd);
 		close(or);
@@ -666,6 +676,7 @@ void	execute(t_node *node, char **env, int *r)
 			perror("pipe");
 			return ;
 		}
+		signal(SIGINT, SIG_IGN);
 		pid[0] = fork();
 		if (pid[0] < 0)
 		{
@@ -683,6 +694,7 @@ void	execute(t_node *node, char **env, int *r)
 		pid[1] = fork();
 		if (pid[1] < 0)
 		{
+			// r
 			perror("fork");
 			return ;
 		}
@@ -696,8 +708,18 @@ void	execute(t_node *node, char **env, int *r)
 		}
 		close(p[0]);
 		close(p[1]);
-		waitpid(pid[0], r, 0);
-		waitpid(pid[1], r, 0);
+		while (waitpid(pid[0], r, 0) == -1)
+		{
+			// r
+			if (errno != EINTR) 
+				return ;
+		}
+		while (waitpid(pid[1], r, 0) == -1)
+		{
+			if (errno != EINTR) 
+				return ;
+		}
+		signal(SIGINT, sigint_handler);
 	}
 	else if (node->type == AND)
 	{
@@ -849,6 +871,9 @@ int	main(int argc, char **argv, char **env)
 	char	*prompt;
 	char	**_env;
 	static int r;
+
+	signal(SIGINT, sigint_handler);
+	signal(SIGQUIT, SIG_IGN);
 
 	(void) argv;
 	if (argc > 1)
