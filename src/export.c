@@ -171,8 +171,8 @@ char	*edit_env(char ***env, char *vrbl)
 		{
 			if (ptr)
 			{
-				// printf("cc %c\n", vrbl[ptr - vrbl]);
-				if (!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl + 1))
+				// printf("cc %c\n", vrbl[ptr - vrbl - 1]);
+				if (!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl + 1) || (!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl) && env_ptr[i][ptr - vrbl] == '\0'))
 				{
 					free (env_ptr[i]);
 					env_ptr[i] = vrbl;
@@ -189,7 +189,10 @@ char	*edit_env(char ***env, char *vrbl)
 				}
 			}
 			else if (!ft_strncmp(env_ptr[i], vrbl, ft_strlen(vrbl)) && env_ptr[i][ft_strlen(vrbl)] == '=')
+			{
+				printf("here dfg\n");
 				return ((char *)1337);
+			}
 			i++;
 		}
 		if (v == 1 && !add_to_env(env, vrbl))

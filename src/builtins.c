@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/01 22:49:37 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/02 16:05:29 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,8 +124,9 @@ int	ft_unset(char **env, char **args)
 			i = 0;
 			while (env[i])
 			{
-				if (!ft_strncmp(env[i], *args, ft_strlen(*args)) 
-					&& env[i][ft_strlen(*args)] == '=')
+				// add condition if there is just the name without equale like just a check if end with null caracter
+				if ((!ft_strncmp(env[i], *args, ft_strlen(*args)) && env[i][ft_strlen(*args)] == '=') || (!ft_strncmp(env[i], *args, ft_strlen(*args)) 
+					&& env[i][ft_strlen(*args)] == '\0'))
 				{
 					free(env[i]);
 					j = i;
