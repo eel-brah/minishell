@@ -4,6 +4,9 @@ import os
 simple_tests = {
         "normal test": "ls -l",
         # "unset": "unset HOME && echo $HOME",
+        # echo hi | > file4 grep h > file2
+        # echo hi | > file3 grep h
+        # echo hi | > file grep h > file
         "expand 1": "echo \"$HOME\"",
         "expand 2": "echo \"$HOME\"$\"$HOME\"",
         "expand 3": "echo \"$HOME\"\"$\"\"$HOME\"",
@@ -242,3 +245,13 @@ if __name__ == '__main__':
 # echo -nn -nn -nnnnnn sf
 
 # Echo “**”*
+
+# bash-3.2$ lskfjalskf
+# bash: lskfjalskf: command not found
+# bash-3.2$ > file
+# bash-3.2$ echo $?
+
+# bash-3.2$ lzjcxklz
+# bash: lzjcxklz: command not found
+# bash-3.2$ $kljfklvj
+# bash-3.2$ echo $?

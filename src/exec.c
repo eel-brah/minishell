@@ -2,7 +2,7 @@
 
 extern char **environ;
 
-int	built_in(t_node *tree, int r, char *prg, char **args, char ***env)
+int	built_in(t_node *tree, int status, char *prg, char **args, char ***env)
 {
 	unsigned int size;
 
@@ -21,7 +21,7 @@ int	built_in(t_node *tree, int r, char *prg, char **args, char ***env)
 		return (ft_cd(args + 1));
 	else if (size == ft_strlen("exit") 
 		&& !ft_strncmp(prg, "exit", size))
-		return (ft_exit(tree, args + 1, *env, r));
+		return (ft_exit(tree, args + 1, *env, status));
 	else if (size == ft_strlen("export") 
 		&& !ft_strncmp(prg, "export", size))
 		{
@@ -57,7 +57,7 @@ void	sig_hand1(int sig)
 	write(1, "\n", 1);
 }
 
-int	exec_cmd(char *prg, char **args, char **env)
+int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 {
 	char	*path;
 	char	**paths;
@@ -69,8 +69,13 @@ int	exec_cmd(char *prg, char **args, char **env)
 	bool	is_path;
 	char	*pr_denied;
 	bool	acc;
-	int		r = 0;
-	
+	int t;
+
+	if (!prg)
+		return (0);
+	t = built_in(tree, status, prg, args, env);
+	if (t != -1)
+		return (t << 8);
 	is_path = !!ft_strchr(prg, '/');
 	acc = access(prg, F_OK);
 	if (is_path && acc)
@@ -107,7 +112,7 @@ int	exec_cmd(char *prg, char **args, char **env)
 		// 	perror("execve");
 		// 	return(1);
 		// }
-		// waitpid(pid, &r, 0);
+		// waitpid(pid, &status, 0);
 
 		signal(SIGINT, SIG_IGN);
 		pid = fork();
@@ -115,12 +120,12 @@ int	exec_cmd(char *prg, char **args, char **env)
 		{
 			signal(SIGQUIT, SIG_DFL);
 			signal(SIGINT, SIG_DFL);
-			execve(prg, args, env);
+			execve(prg, args, *env);
 			// handle signals if faild
 			perror("execve");
 			return(1 << 8);
 		}
-		while (waitpid(pid, &r, 0) == -1)
+		while (waitpid(pid, &status, 0) == -1)
 		{
 			if (errno != EINTR) 
 				return (1 << 8);
@@ -130,7 +135,7 @@ int	exec_cmd(char *prg, char **args, char **env)
 	}
 	else
 	{
-		path = ft_getenv(env, "PATH");
+		path = ft_getenv(*env, "PATH");
 		if (path && *prg)
 		{
 			paths = ft_split(path, ':');
@@ -183,11 +188,11 @@ int	exec_cmd(char *prg, char **args, char **env)
 				{
 					signal(SIGINT, SIG_DFL);
 					signal(SIGQUIT, SIG_DFL);
-					execve(full_path, args, env);
+					execve(full_path, args, *env);
 					perror("execve");
 					return(1 << 8);
 				}
-				while (waitpid(pid, &r, 0) == -1)
+				while (waitpid(pid, &status, 0) == -1)
 				{
 					if (errno != EINTR) 
 						return (1 << 8);
@@ -206,7 +211,7 @@ int	exec_cmd(char *prg, char **args, char **env)
 			return(127 << 8);
 		}
 	}
-	return(r);
+	return(status);
 }
 
 // int main()

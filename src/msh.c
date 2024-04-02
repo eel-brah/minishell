@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/01 22:49:02 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/02 05:49:39 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -585,7 +585,7 @@ char	**expand_args(char **args)
 	return (args);
 }
 
-char	*expand_file(char *file, int *r)
+char	*expand_file(char *file)
 {
 	char **ex;
 	int	count;
@@ -604,20 +604,18 @@ char	*expand_file(char *file, int *r)
 		return(file);
 	}
 	print_error_2("minishell", file, "ambiguous redirect");
-	*r = 1 << 8;
 	double_free(ex);
 	return (NULL);
 }
 
 // system calls returns
-void	execute(t_node *node, char ***env, int *r)
+void	execute(t_node *node, char ***env, int *status)
 {
 	t_exec			*cmd;
 	t_redirection	*red;
 	t_div			*div;
 	pid_t			pid[3];
 	int				p[2];
-	int				t;
 	int				or;
 	char **tmp;
 	
@@ -626,44 +624,41 @@ void	execute(t_node *node, char ***env, int *r)
 		cmd = (t_exec *)node;
 		if (cmd->argv)
 		{
-			// built in exit status && built in in pipeline
 			tmp = expand_args(cmd->argv);
 			if (!tmp)
-				return ;
-			cmd->argv = tmp;
-			// exit(0);
-			// return ;
-			if (!cmd->argv[0])
-				return ;
-			t = built_in(node, *r, cmd->argv[0], cmd->argv, env);
-			if (t != -1)
 			{
-				*r = t << 8;
+				*status = 1 << 8;
 				return ;
 			}
-			*r = exec_cmd(cmd->argv[0], cmd->argv, *env);
-			// if (WIFSIGNALED(*r))
-			// || WTERMSIG(*r) == SIGQUIT
-			if (WTERMSIG(*r) == SIGINT)
+			cmd->argv = tmp;
+			*status = exec_cmd(node, *status, cmd->argv[0], cmd->argv, env);
+			// if (WIFSIGNALED(*status))
+			// || WTERMSIG(*status) == SIGQUIT
+			if (WTERMSIG(*status) == SIGINT)
 			{
-				*r = 130 << 8;
+				*status = 130 << 8;
 				ft_putchar_fd('\n', 1);
 			}
 		}
+		else
+			*status = 0;
 	}
 	else if (node->type == RED)
 	{
-		// stdout after redirection
 		red = (t_redirection*)node;
 		char *tmp2;
-		tmp2 = expand_file(red->file, r);
+		tmp2 = expand_file(red->file);
 		if (!tmp2)
+		{
+			*status = 1 << 8;
 			return ;
+		}
 		red->file = tmp2;
 		// S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); /* rw-rw-rw- 
 		or = open(red->file, red->flags, PREMISSIONS);
 		if(or < 0)
 		{
+			*status = 1 << 8;
 			perror("open");
 			return ;
 		}
@@ -671,7 +666,7 @@ void	execute(t_node *node, char ***env, int *r)
 		int fd = dup(red->fd);
 		dup2(or, red->fd);
 		close(or);
-		execute(red->node, env, r);
+		execute(red->node, env, status);
 		dup2(fd, red->fd);
 		close(fd);
 	}
@@ -695,13 +690,13 @@ void	execute(t_node *node, char ***env, int *r)
 			dup2(p[1], 1);
 			close(p[1]);
 			close(p[0]);
-			execute(div->left, env, r);
-			exit(WEXITSTATUS(*r));
+			execute(div->left, env, status);
+			exit(WEXITSTATUS(*status));
 		}
 		pid[1] = fork();
 		if (pid[1] < 0)
 		{
-			// r
+			// status
 			perror("fork");
 			return ;
 		}
@@ -710,18 +705,18 @@ void	execute(t_node *node, char ***env, int *r)
 			dup2(p[0], 0);
 			close(p[1]);
 			close(p[0]);
-			execute(div->right, env, r);
-			exit(WEXITSTATUS(*r));
+			execute(div->right, env, status);
+			exit(WEXITSTATUS(*status));
 		}
 		close(p[0]);
 		close(p[1]);
-		while (waitpid(pid[0], r, 0) == -1)
+		while (waitpid(pid[0], status, 0) == -1)
 		{
-			// r
+			// status
 			if (errno != EINTR) 
 				return ;
 		}
-		while (waitpid(pid[1], r, 0) == -1)
+		while (waitpid(pid[1], status, 0) == -1)
 		{
 			if (errno != EINTR) 
 				return ;
@@ -731,16 +726,16 @@ void	execute(t_node *node, char ***env, int *r)
 	else if (node->type == AND)
 	{
 		div = (t_div*)node;
-		execute(div->left, env, r);
-		if (!*r)
-			execute(div->right, env, r);
+		execute(div->left, env, status);
+		if (!*status)
+			execute(div->right, env, status);
 	}
 	else if (node->type == OR)
 	{
 		div = (t_div*)node;
-		execute(div->left, env, r);
-		if (*r)
-			execute(div->right, env, r);
+		execute(div->left, env, status);
+		if (*status)
+			execute(div->right, env, status);
 	}
 }
 
@@ -877,7 +872,7 @@ int	main(int argc, char **argv, char **env)
 	t_node	*tree;
 	char	*prompt;
 	char	**_env;
-	static int r;
+	static int status;
 
 	signal(SIGINT, sigint_handler);
 	signal(SIGQUIT, SIG_IGN);
@@ -896,7 +891,7 @@ int	main(int argc, char **argv, char **env)
 		cmd = get_cmd(prompt);
 		free(prompt);
 		if (!cmd)
-			ft_exit(NULL, NULL, _env, r);
+			ft_exit(NULL, NULL, _env, status);
 		else if (!*cmd)
 		{
 			free(cmd);
@@ -906,7 +901,7 @@ int	main(int argc, char **argv, char **env)
 		free(cmd);
 		if (!tree)
 			continue;
-		execute(tree, &_env, &r);
+		execute(tree, &_env, &status);
 		free_cmdtree(tree);
 	}
 	double_free(_env);

@@ -69,7 +69,6 @@ bool	add_to_env(char ***env, char *vrbl)
 		i++;
 	}
 	new_env[i] = vrbl;
-	printf("new %s i %zu\n", new_env[i], i );
 	new_env[i + 1] = NULL;
 	free(env_ptr);
 	*env = new_env;
