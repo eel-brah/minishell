@@ -108,5 +108,5 @@ char	*get_prompt();
 
 void	sigint_handler(int sig);
 
-char	**expander(char *s, int here_doc, int expand);
+char	**expander(char *s, int here_doc, int expand, int status);
 #endif

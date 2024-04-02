@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/02 05:49:39 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/02 18:38:31 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -552,7 +552,7 @@ void	rm_ptr(char **args)
 	free(ptr);
 }
 
-char	**expand_args(char **args)
+char	**expand_args(char **args, int status)
 {
 	unsigned int	i;
 	unsigned int	count;
@@ -562,7 +562,7 @@ char	**expand_args(char **args)
 	while (args[i])
 	{
 		count = 0;
-		ex = expander(args[i], 0, 1);
+		ex = expander(args[i], 0, 1, status);
 		if (!ex)
 			return (NULL);
 		count = count_args(ex);
@@ -585,13 +585,13 @@ char	**expand_args(char **args)
 	return (args);
 }
 
-char	*expand_file(char *file)
+char	*expand_file(char *file, int status)
 {
 	char **ex;
 	int	count;
 
 	count = 0;
-	ex = expander(file, 0, 1);
+	ex = expander(file, 0, 1, status);
 	if (!ex)
 		return (NULL);
 	while(ex[count])
@@ -624,7 +624,7 @@ void	execute(t_node *node, char ***env, int *status)
 		cmd = (t_exec *)node;
 		if (cmd->argv)
 		{
-			tmp = expand_args(cmd->argv);
+			tmp = expand_args(cmd->argv, *status);
 			if (!tmp)
 			{
 				*status = 1 << 8;
@@ -647,7 +647,7 @@ void	execute(t_node *node, char ***env, int *status)
 	{
 		red = (t_redirection*)node;
 		char *tmp2;
-		tmp2 = expand_file(red->file);
+		tmp2 = expand_file(red->file, *status);
 		if (!tmp2)
 		{
 			*status = 1 << 8;

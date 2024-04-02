@@ -174,11 +174,15 @@ char    *ft_strrealloc2(char *str, size_t size)
     free(str);
     return (new_str);
 }
-void	handle_dollar_special(char *s, int *i, char *arr, int *index, int capacity)
+void	handle_dollar_special(char *s, int *i, char *arr, int *index, int capacity, int status)
 {
 	// if (s[*i] == '\'')
 	// 	(*i)++;
 	//printf("Special caractere \n");
+	// char	*s;
+
+	// s = ft_itoa()
+	(void)status;
 	(void)s;
 	(void)i;
 	(void)arr;
@@ -547,7 +551,7 @@ char	*delete_quotes(char *s)
 	}
 	return (alloc_without_quotes(s, len));
 }
-char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, char *s)
+char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, char *s, int status)
 {
 	// char	*arrt;
 
@@ -564,7 +568,7 @@ char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, cha
 		elem->wild = 1;
 	}
 	if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && is_exist(s[elem->i + 1], "*@#?	$-!0") && expand)
-		handle_dollar_special(s, &elem->i, elem->arr, &elem->index, elem->capacity);
+		handle_dollar_special(s, &elem->i, elem->arr, &elem->index, elem->capacity, status);
 	else if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && expand)
 	{
 		if (handle_dollar(s, &res, &elem) == NULL)
@@ -633,7 +637,7 @@ char	*handle_last(t_elem *elem, char ***res, char *word)
 	}
 	return ((char *)42);
 }
-char	*handle_other_carac_space(t_elem *elem, char *s, char *word, int expand, char ***res)
+char	*handle_other_carac_space(t_elem *elem, char *s, char *word, int expand, char ***res, int status)
 {
 	if (is_exist(s[elem->i], "\t\n\v\f\r ") && elem->qoute == 0 && elem->index != 0)
 	{
@@ -642,12 +646,12 @@ char	*handle_other_carac_space(t_elem *elem, char *s, char *word, int expand, ch
 	}
 	else if (!is_exist(s[elem->i], "\t\n\v\f\r ") || elem->qoute == 1)
 	{
-		if (handl_other_carac(elem, res, elem->here_doc, expand, s) == NULL)
+		if (handl_other_carac(elem, res, elem->here_doc, expand, s, status) == NULL)
 			return (NULL);
 	}
 	return (s);
 }
-char	**expander(char *s, int here_doc, int expand)
+char	**expander(char *s, int here_doc, int expand, int status)
 {
 	char	**res;
 	char	*word;
@@ -674,7 +678,7 @@ char	**expander(char *s, int here_doc, int expand)
 			// 	if (handl_other_carac(&elem, &res, here_doc, expand, s) == NULL)
 			// 		return (NULL);
 			// }
-			if (handle_other_carac_space(&elem, s, word, expand, &res) == NULL)
+			if (handle_other_carac_space(&elem, s, word, expand, &res, status) == NULL)
 				return (NULL);
 		}
 		elem.i++;
