@@ -69,6 +69,7 @@ bool	add_to_env(char ***env, char *vrbl)
 		i++;
 	}
 	new_env[i] = vrbl;
+	printf("new %s i %zu\n", new_env[i], i );
 	new_env[i + 1] = NULL;
 	free(env_ptr);
 	*env = new_env;
@@ -87,6 +88,8 @@ char	*alloc_without_plus(char *vrbl)
 	index = 0;
 	len = ft_strlen(vrbl);
 	res = malloc(sizeof(char) *len);
+	if (!res)
+		return (perror("malloc"), NULL);
 	while (vrbl[i])
 	{
 		if (vrbl[i] == '+' && flag)
@@ -96,6 +99,7 @@ char	*alloc_without_plus(char *vrbl)
 		}
 		res[index++] = vrbl[i++];
 	}
+	res[index] = '\0';
 	return (res);
 }
 bool	add_to_env_plus(char ***env, char *vrbl)
@@ -117,6 +121,7 @@ bool	add_to_env_plus(char ***env, char *vrbl)
 		i++;
 	}
 	new_env[i] = alloc_without_plus(vrbl);
+	printf("new %s i %zu\n", new_env[i], i );
 	if (new_env[i] == NULL)
 		return (perror("malloc"), false);
 	new_env[i + 1] = NULL;
@@ -147,6 +152,10 @@ char	*join_variabl(char *old, char *new, char *ptr)
 
 char	*edit_env(char ***env, char *vrbl)
 {
+	// export V / export V+= / export V=
+	// V
+	// B=
+	// V=
 	size_t	i;
 	char	**env_ptr;
 	char	*ptr;
@@ -166,16 +175,12 @@ char	*edit_env(char ***env, char *vrbl)
 				// printf("cc %c\n", vrbl[ptr - vrbl]);
 				if (!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl + 1))
 				{
-					// printf("prt %s\n",ptr);
-					// if (vrbl[ptr - vrbl - 1] != '+')
-					// {
-						free (env_ptr[i]);
-						env_ptr[i] = vrbl;
-						return ((char *)1337);
-					// }
-					// return ((char *)1337);
+					free (env_ptr[i]);
+					env_ptr[i] = vrbl;
+					return ((char *)1337);
+					
 				}
-				else if(!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl - 1) && vrbl[ptr - vrbl - 1] == '+' && vrbl[ptr - vrbl] == '=')
+				else if(!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl - 1) && vrbl[ptr - vrbl - 1] == '+')
 				{
 					// free (env_ptr[i]);
 					env_ptr[i] = join_variabl(env_ptr[i], vrbl, ptr + 1);

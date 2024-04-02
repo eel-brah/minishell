@@ -24,7 +24,11 @@ int	built_in(t_node *tree, int r, char *prg, char **args, char ***env)
 		return (ft_exit(tree, args + 1, *env, r));
 	else if (size == ft_strlen("export") 
 		&& !ft_strncmp(prg, "export", size))
-		return (ft_export(env, args + 1));
+		{
+			bool a = ft_export(env, args + 1);
+			environ = *env;
+			return (a);
+		}
 	else if (size == ft_strlen("unset") 
 		&& !ft_strncmp(prg, "unset", size))
 		return (ft_unset(*env, args + 1));
