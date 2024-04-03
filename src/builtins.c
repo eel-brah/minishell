@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/02 18:23:47 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/03 01:09:10 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ int	ft_env(char **env, char **args)
 		print_error("env", "Invalid number of arguments");
 		return (127);
 	}
-	ft_printenv(env);
+	ft_printenv_no_empty(env);
 	return (0);
 }
 
@@ -207,7 +207,7 @@ int	ft_exit(t_node *tree, char **args, char **env, int r)
 		print_error_2("exit", *args, "numeric argument required");
 		free_cmdtree(tree);
 		double_free(env);
-		exit(255);
+		exit(255);	
 	}
 	exit(nb);
 	return (0);

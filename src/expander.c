@@ -34,7 +34,7 @@ char	*set_caractere(t_elem *elem, int c)
 		elem->capacity *= 2;
 		tmp = ft_strrealloc2(elem->arr, elem->capacity);
 		if (!tmp)
-			return (NULL);
+			return (perror("malloc"), NULL);
 		elem->arr = tmp;
 	}
 	elem->arr[elem->index] = c;
@@ -174,20 +174,31 @@ char    *ft_strrealloc2(char *str, size_t size)
     free(str);
     return (new_str);
 }
-void	handle_dollar_special(char *s, int *i, char *arr, int *index, int capacity, int status)
+char	*handle_dollar_special(char *s, t_elem **elem, int status)
 {
-	// if (s[*i] == '\'')
-	// 	(*i)++;
-	//printf("Special caractere \n");
-	// char	*s;
-
-	// s = ft_itoa()
-	(void)status;
-	(void)s;
-	(void)i;
-	(void)arr;
-	(void)index;
-	(void)capacity;
+	char	*num;
+	int		j;
+	j = 0;
+	
+	//WEXITSTATUS  (((*(int *)&(status)) >> 8) & 0x000000ff)
+	((*elem)->i)++;
+	if (s[(*elem)->i] != '?')
+	{
+		if (set_caractere(*elem, s[(*elem)->i]) == NULL)
+			return (NULL);
+		return (s);
+	}
+	num = ft_itoa(WEXITSTATUS(status));
+	if (!num)
+		return (NULL);
+	while(num[j])
+	{
+		if (set_caractere(*elem, num[j]) == NULL)
+			return (NULL);
+		j++;
+	}
+	free(num);
+	return (s);
 }
 
 char	*handle_wild_inside_expand(char *****res, char **sp, int i)
@@ -568,7 +579,10 @@ char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, cha
 		elem->wild = 1;
 	}
 	if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && is_exist(s[elem->i + 1], "*@#?	$-!0") && expand)
-		handle_dollar_special(s, &elem->i, elem->arr, &elem->index, elem->capacity, status);
+	{
+		if (handle_dollar_special(s, &elem, status) == NULL)
+			return (free(elem->arr), free_arr(*res), *res = NULL, perror("malloc "), NULL);
+	}
 	else if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && expand)
 	{
 		if (handle_dollar(s, &res, &elem) == NULL)
@@ -577,9 +591,8 @@ char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, cha
 	else
 	{
 		if (set_caractere(elem, s[elem->i]) == NULL)
-			return (NULL);
+			return (free(elem->arr), free_arr(*res), *res = NULL, perror("malloc "), NULL);
 		// elem->arr[elem->index++] = s[elem->i];
-
 	}
 	return ((char *)42);
 }

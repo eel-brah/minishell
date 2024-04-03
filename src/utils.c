@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/03/26 10:35:23 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/03 01:10:23 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,16 @@ void	ft_printenv(char **env)
 {
 	while (env && *env)
 		printf("%s\n", *env++);
+}
+
+void	ft_printenv_no_empty(char **env)
+{
+	while (env && *env)
+	{
+		if (ft_strchr(*env, '=') != NULL)
+			printf("%s\n", *env);
+		env++;
+	}
 }
 
 char	*strdup_v2(char *start, char *end)

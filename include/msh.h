@@ -37,6 +37,12 @@ typedef struct s_node
 	int	type;
 }	t_node;
 
+typedef struct s_fullenv
+{
+	char **env;
+	char **extra_env;
+}	t_fullenv;
+
 typedef struct s_exec
 {
 	int		type;
@@ -94,7 +100,11 @@ int		ft_cd(char **args);
 int		built_in(t_node *tree, int r, char *prg, char **args, char ***env);
 char	*strdup_v2(char *start, char *end);
 ssize_t	ft_atoi_v2(char *s, bool *valid);
-bool	ft_export(char ***env, char **args);
+int		ft_export(char ***env, char **args);
+
+
+void	sort_2d_array(char ***res);
+void	ft_printenv_no_empty(char **env);
 
 void	ft_printenv(char **env);
 char	**ptrs_realloc(char **tokens, char *arg);

@@ -189,10 +189,9 @@ char	*edit_env(char ***env, char *vrbl)
 				}
 			}
 			else if (!ft_strncmp(env_ptr[i], vrbl, ft_strlen(vrbl)) && env_ptr[i][ft_strlen(vrbl)] == '=')
-			{
-				printf("here dfg\n");
 				return ((char *)1337);
-			}
+			else if (!ft_strncmp(env_ptr[i], vrbl, ft_strlen(vrbl)) && env_ptr[i][ft_strlen(vrbl)] == '\0')
+				return ((char *)1337);
 			i++;
 		}
 		if (v == 1 && !add_to_env(env, vrbl))
@@ -208,31 +207,131 @@ char	*edit_env(char ***env, char *vrbl)
 	return ((char *)1337);
 }
 
-bool	ft_export(char ***env, char **args)
+void	print_to(char *s, char *e)
+{
+	if (!s || !e || s > e)
+		return ;
+	while (s != e)
+		ft_putchar_fd(*s++, 1);
+}
+void	print_sored_env(char **res)
+{
+	int		i;
+	char	*eq;
+
+	i = 0;
+	while (res[i])
+	{
+		ft_putstr_fd("declare -x ", 1);
+		eq = ft_strchr(res[i], '=');
+		if (eq == NULL)
+		{
+			ft_putendl_fd(res[i++], 1);
+			continue;
+		}
+		print_to(res[i], eq + 1);
+		if (!eq[1])
+			ft_putstr_fd("\"\"", 1);
+		else
+		{
+			ft_putchar_fd('"', 1);
+			print_to(eq + 1, &eq[ft_strlen(eq)]);
+			ft_putchar_fd('"', 1);
+		}
+		ft_putchar_fd('\n', 1);
+		i++;
+	}
+}
+
+// void	print_sored_env(char **res)
+// {
+// 	int	i;
+// 	int	j;
+// 	int	flag;
+
+
+// 	i = 0;
+// 	while (res[i])
+// 	{
+// 		printf("declare -x ");
+// 		j = 0;
+// 		flag = 1;
+// 		if (ft_strchr(res[i], '=') == NULL)
+// 		{
+// 			printf("%s\n", res[i]);
+// 			i++;
+// 			continue;
+// 		}
+// 		while (res[i][j])
+// 		{
+// 			if (res[i][j] == '=' && flag)
+// 			{
+// 				flag = 0;
+// 				if (!res[i][j+1])
+// 					printf("%c\"\"",res[i][j]);
+// 				else
+// 					printf("%c\"",res[i][j]);
+// 				j++;
+// 				continue;
+// 			}
+// 			if(res[i][j + 1] == '\0')
+// 				printf("%c\"",res[i][j]);
+// 			else
+// 				printf("%c",res[i][j]);
+// 			j++;
+// 		}
+// 		printf("\n");
+// 		i++;
+// 	}
+// }
+
+int	ft_printexport(char **env)
+{
+	int		size;
+	char	**res;
+	int		i;
+
+	size = count_args(env);
+	res = malloc(sizeof(char *) * (size + 1));
+	if (!res)
+		return (perror("malloc"), 1);
+	i = 0;
+	while (i < size)
+	{
+		res[i] = env[i];
+		i++;
+	}
+	res[i] = NULL;
+	sort_2d_array(&res);
+	print_sored_env(res);
+	free(res);
+	return (0);
+}
+int	ft_export(char ***env, char **args)
 {
 	char	*ptr;
+	char	*tmp;
+	int		r;
 
 	if (!count_args(args))
-		ft_printenv(*env);
+		return (ft_printexport(*env));
 	else
 	{
+		r = 0;
 		while (*args)
 		{
 			ptr = ft_strdup(*args);
 			if (!ptr)
-			{
-				perror("malloc");
-				return (false);
-			}
-			if (edit_env(env, ptr) == NULL)
-			{
-				free(ptr);
-				return (false);
-			}
+				return (perror("malloc"), 1);
+			tmp = edit_env(env, ptr);
+			if (tmp == NULL)
+				return (free(ptr), 1);
+			else if (tmp == (char *)42)
+				r = 1;
 			args++;
 		}
 	}
-	return (true);
+	return (r);
 }
 
 // char	**create_env(char **env)
