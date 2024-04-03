@@ -4,3 +4,6 @@ echo $? /
 heredoc
 . ..
 cntr-c status
+
+
+handle `%s'  in export error to std error

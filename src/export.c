@@ -120,7 +120,6 @@ bool	add_to_env_plus(char ***env, char *vrbl)
 		i++;
 	}
 	new_env[i] = alloc_without_plus(vrbl);
-	printf("new %s i %zu\n", new_env[i], i );
 	if (new_env[i] == NULL)
 		return (perror("malloc"), false);
 	new_env[i + 1] = NULL;
@@ -201,7 +200,7 @@ char	*edit_env(char ***env, char *vrbl)
 	}
 	else
 	{
-		printf("export: `%s': not a valid identifier\n", vrbl);
+		print_error_2("export", vrbl, "not a valid identifier");
 		return ((char *)42);
 	}
 	return ((char *)1337);
