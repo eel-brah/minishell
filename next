@@ -1,7 +1,5 @@
 cd / pwd + oldpwd + read man + remove the parrent dir
-echo $? /
 heredoc
-cntr-c status
-error messages 
 
+error messages 
 handle `%s'  in export error to std error

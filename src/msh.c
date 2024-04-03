@@ -6,11 +6,13 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/02 18:38:31 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/03 02:46:27 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
+
+volatile sig_atomic_t got_sigint = 0;
 
 bool	get_token_cmp2(char *p, char *r)
 {
@@ -329,6 +331,7 @@ t_node	*parse_parenthesis(char **pcmd)
 
 void sigint_handler(int sig)
 {
+	got_sigint = 1;
 	(void)sig;
 	write(1, "\n", 1);
 	rl_on_new_line();
@@ -901,6 +904,11 @@ int	main(int argc, char **argv, char **env)
 		free(cmd);
 		if (!tree)
 			continue;
+		if (got_sigint)
+		{
+			status = 1 << 8;
+			got_sigint = 0;
+		}
 		execute(tree, &_env, &status);
 		free_cmdtree(tree);
 	}
