@@ -149,6 +149,8 @@ simple_tests = {
         "syntax error 2": ' << ()',
         "syntax error 3": 'echo hello >      ',
         "empty command": '           ',
+        "just .": '.',
+        "just ..": '..',
         "permisions": 'cd /tmp && touch hello && chmod 000 hello && echo hello > hello || rm -fr hello',
         "permisions 2": 'cd /tmp && touch hello && chmod 000 hello && ls hello >> hello || rm -fr hello',
         "files with spaces": 'cd /tmp && ls -al >     "hello    world"   && ls -al && cat "hello    world" && rm -fr "hello    world"',
@@ -254,3 +256,6 @@ if __name__ == '__main__':
 # bash: lzjcxklz: command not found
 # bash-3.2$ $kljfklvj
 # bash-3.2$ echo $?
+    
+# bash-3.2$ .
+# bash-3.2$ ..

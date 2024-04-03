@@ -841,10 +841,6 @@ char	**match_pattern(char *pattern, int handle_quote)
 	ft_memset(arr, 0, capacity);
 	while ((st = readdir(dir)) != NULL)
 	{
-		if (ft_strcmp(st->d_name, ".") == 0)
-			continue ;
-		if (ft_strcmp(st->d_name, "..") == 0)
-			continue ;
 		if (st->d_name[0] == '.' && pattern[0] != '.')
 			continue ;
 		if (check_pattern(pattern, st->d_name, handle_quote) == 1)
