@@ -102,7 +102,7 @@ char	*strdup_v2(char *start, char *end);
 ssize_t	ft_atoi_v2(char *s, bool *valid);
 int		ft_export(char ***env, char **args);
 
-
+char	**env_without_empty(char **env);
 void	sort_2d_array(char ***res);
 void	ft_printenv_no_empty(char **env);
 

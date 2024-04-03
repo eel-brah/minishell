@@ -120,12 +120,14 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 		// waitpid(pid, &status, 0);
 
 		signal(SIGINT, SIG_IGN);
+		char **eenv = env_without_empty(*env);
+		// if NULL
 		pid = fork();
 		if (pid == 0)
 		{
 			signal(SIGQUIT, SIG_DFL);
 			signal(SIGINT, SIG_DFL);
-			execve(prg, args, *env);
+			execve(prg, args, eenv);
 			// handle signals if faild
 			perror("execve");
 			return(1 << 8);
@@ -135,6 +137,7 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 			if (errno != EINTR) 
 				return (1 << 8);
 		}
+		free(eenv);
 		signal(SIGQUIT, SIG_IGN);
 		signal(SIGINT, sigint_handler);
 	}
@@ -188,12 +191,13 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 			else
 			{
 				signal(SIGINT, SIG_IGN);
+				char **eenv = env_without_empty(*env);
 				pid = fork();
 				if (pid == 0)
 				{
 					signal(SIGINT, SIG_DFL);
 					signal(SIGQUIT, SIG_DFL);
-					execve(full_path, args, *env);
+					execve(full_path, args, eenv);
 					perror("execve");
 					return(1 << 8);
 				}
@@ -202,6 +206,7 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 					if (errno != EINTR) 
 						return (1 << 8);
 				}
+				free(eenv);
 				signal(SIGQUIT, SIG_IGN);
 				signal(SIGINT, sigint_handler);
 				free(full_path);

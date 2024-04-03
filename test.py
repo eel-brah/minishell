@@ -259,3 +259,5 @@ if __name__ == '__main__':
     
 # bash-3.2$ .
 # bash-3.2$ ..
+    
+# empty variables are not inherted by subshell

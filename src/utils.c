@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/03 01:10:23 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/03 02:35:52 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,43 @@ char	*ft_strrealloc(char *str, size_t size)
 	return (new_str);
 }
 
+int	nb_without_empty(char **env)
+{
+	int	res;
+	int	i;
+
+	i = 0;
+	res = 0;
+	while (env[i])
+	{
+		if (ft_strchr(env[i], '=') != NULL)
+			res++;
+		i++;
+	}
+	return (res);
+}
+char	**env_without_empty(char **env)
+{
+	int		i;
+	int		size;
+	int		index;
+	char	**res;
+
+	size = nb_without_empty(env);
+	res = malloc(sizeof(char *) * (size + 1));
+	if (!res)
+		return (perror("malloc"), NULL);
+	i = 0;
+	index = 0;
+	while (env[i])
+	{
+		if (ft_strchr(env[i], '=') != NULL)
+			res[index++] = env[i];
+		i++;
+	}
+	res[index] = NULL;
+	return (res); 
+}
 void	ft_printenv(char **env)
 {
 	while (env && *env)
