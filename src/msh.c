@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/03 02:46:27 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/04 02:45:47 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ bool	get_token_cmp2(char *p, char *r)
 	else if (!ft_strncmp(p, "||", 2))
 		*r = OOR;
 	else if (!ft_strncmp(p, "<<", 2))
-		*r = HEREDOC;
+		*r = HERE_DOC;
 	else if (!ft_strncmp(p, ">>", 2))
 		*r = APP_RED;
 	else
@@ -215,10 +215,10 @@ t_node	*add_redirection(t_redirection *red, t_node *node)
 	t_redirection	*prev;
 
 	red->node = node;
-	if (node->type == RED && ((t_redirection *)node)->fd == red->fd)
+	if ((node->type == RED || node->type == HEREDOC) && ((t_redirection *)node)->fd == red->fd)
 	{
 		ptr = (t_redirection *)node;
-		while (ptr->type == RED && ptr->fd == red->fd)
+		while ((ptr->type == RED || ptr->type == HEREDOC) && ptr->fd == red->fd)
 		{
 			prev = ptr;
 			ptr = (t_redirection *)ptr->node;
@@ -259,6 +259,78 @@ bool	peek(char **pcmd, char *set)
 	return (*ptr && ft_strchr(set, *ptr));
 }
 
+bool	fill_file_heredoc(t_redirection *node, char *delem, int fd)
+{
+	char	*s;
+	char	**res;
+	int		len;
+	int		len_s;
+
+	if (!delem)
+		return (false);
+	if (ft_strchr(delem, '\'') || ft_strchr(delem, '"'))
+		node->expand = false;
+	res = expander(delem, 0, 0, 0);
+	free(delem);
+	if (!res)
+		return (false);
+	delem = res[0];
+	len = ft_strlen(delem);
+	// fd = dup(node->here_fd); // check fail of dup
+	while (1)
+	{
+		s = readline("> ");
+		len_s = ft_strlen(s);
+		if (!s || (len == len_s && !ft_strncmp(s, delem, len)))
+			break ;
+		write(fd, s, len_s);
+		write(fd, "\n", 1);
+		free(s);
+	}
+	double_free(res);
+	free(s);
+	close(fd);
+	// char buffer[1024];
+	// int redd = read(node->here_fd, buffer, 1024);
+	// printf("reddd %d\n", redd);
+	// write(2, buffer, redd);
+	return (!!1337);
+}
+
+t_node	*parse_heredoc(t_node *node, char *start, char *end)
+{
+	t_redirection	*red;
+	char	*file = "smo_0098731277";
+	int		fd;
+	red = malloc(sizeof(*red));
+	if (!red)
+		return (NULL);
+	red->fd = 0;
+	red->type = HEREDOC;
+	red->file = file;
+	red->flags = O_RDWR|O_CREAT|O_TRUNC;
+	red->here_fd = open(file, red->flags, PREMISSIONS);
+	fd = open(file, red->flags, PREMISSIONS);
+	if (red->here_fd == -1 || fd == -1)
+	{
+		// close 
+		red->node = node;
+		free_cmdtree((t_node *)red);
+		perror("open");
+		return (NULL);
+	}
+	unlink(file);
+	red->expand = true;
+	if (!fill_file_heredoc(red, strdup_v2(start, end), fd))
+	{
+		red->node = node;
+		free_cmdtree((t_node *)red);
+		perror("malloc");
+		return (NULL);
+	}
+	return (add_redirection(red, node));
+}
+
 t_node	*parse_redirection_create(char *st, char *et, t_node *node, char red)
 {
 	char	*file;
@@ -289,17 +361,20 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 	char	token;
 
 	token = token_peek(*pcmd);
-	while (token == OUT_RED || token == IN_RED || token == APP_RED || token == HEREDOC)
+	while (token == OUT_RED || token == IN_RED || token == APP_RED || token == HERE_DOC)
 	{
 		red = get_token(pcmd, 0, 0);
 		token = get_token(pcmd, &st, &et);
-		if (red == HEREDOC ||  token != WORD)
+		if (token != WORD)
 		{
 			if (token != ERROR)
 				print_error("minishell", "syntax error");
 			return (NULL);
 		}
-		node = parse_redirection_create(st, et, node, red);
+		if (red != HERE_DOC)
+			node = parse_redirection_create(st, et, node, red);
+		else
+			node = parse_heredoc(node, st, et);
 		if (!node)
 			return (NULL);
 		token = token_peek(*pcmd);
@@ -645,6 +720,22 @@ void	execute(t_node *node, char ***env, int *status)
 		}
 		else
 			*status = 0;
+	}
+	else if (node->type == HEREDOC)
+	{
+		red = (t_redirection*)node;
+		int fd = dup(red->fd);
+		int fd_read = expand_here_doc(red->here_fd, *status, red->expand);
+		close(red->here_fd);
+		// check error and free
+		if (fd_read == -1)
+			return ;
+		red->here_fd = fd_read;
+		dup2(red->here_fd, red->fd);
+		close(red->here_fd);
+		execute(red->node, env, status);
+		dup2(fd, red->fd);
+		close(fd);
 	}
 	else if (node->type == RED)
 	{

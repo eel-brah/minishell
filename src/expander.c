@@ -652,9 +652,14 @@ char	*handle_last(t_elem *elem, char ***res, char *word)
 }
 char	*handle_other_carac_space(t_elem *elem, char *s, char *word, int expand, char ***res, int status)
 {
-	if (is_exist(s[elem->i], "\t\n\v\f\r ") && elem->qoute == 0 && elem->index != 0)
+	if (is_exist(s[elem->i], "\t\n\v\f\r ") && elem->qoute == 0 && elem->index != 0 && !elem->here_doc)
 	{
 		if (alloc_for_elem(elem, elem->here_doc, word, res) == NULL)
+			return (NULL);
+	}
+	else if(is_exist(s[elem->i], "\t\n\v\f\r ") && elem->here_doc == 1)
+	{
+		if (set_caractere(elem, s[elem->i]) == NULL)
 			return (NULL);
 	}
 	else if (!is_exist(s[elem->i], "\t\n\v\f\r ") || elem->qoute == 1)
@@ -877,4 +882,33 @@ char	**match_pattern(char *pattern, int handle_quote)
 		return (free(arr), (char **)42);
 	sort_2d_array(&res);
 	return (free(arr), res);
+}
+
+int	expand_here_doc(int fd, int status, int expand)
+{
+	char	*s;
+	char	**res;
+	int		fd_res;
+	int		fd_ret;
+
+	fd_res = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
+	fd_ret = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
+	if (fd_res == -1 || fd_ret == -1)
+		return (perror("open"), -1); // close 
+	unlink("fd_res");
+	while (1)
+	{
+		// check if get_next fails
+		s = get_next_line(fd);
+		if (!s)
+			break ;
+		res = expander(s, 1, expand, status);
+		if (!res)
+			return (close(fd_res), free(s), -2);
+		write(fd_res, *res, ft_strlen(*res));
+		double_free(res);
+		free(s);
+	}
+	close(fd_res);
+	return (fd_ret);
 }

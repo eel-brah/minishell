@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
+#include "get_next_line.h"
 
 #include <string.h>
 #include "../libft/include/libft.h"
@@ -63,6 +64,8 @@ typedef struct s_redirection
 	int		fd;
 	char	*file;
 	int		flags;
+	int		here_fd;
+	bool	expand;
 }	t_redirection;
 
 #define WHITESPACES "\t\n\v\f\r "
@@ -75,18 +78,19 @@ typedef struct s_redirection
 #define OUT_RED 'r'
 #define IN_RED 'R'
 #define APP_RED 'd'
-#define HEREDOC 'h'
+#define HERE_DOC 'h'
 #define OPEN_PER 't'
 #define CLOSE_PER 'T'
 #define ERROR 'e'
 
 #define PREMISSIONS 0644
 
-#define EXEC 1
-#define PIPE 2
-#define RED  3
-#define AND  4
-#define OR   5
+#define EXEC	1
+#define PIPE	2
+#define RED		3
+#define AND		4
+#define OR		5
+#define HEREDOC 6
 
 
 size_t	count_args(char **ptrs);
@@ -112,7 +116,7 @@ void	double_free(char **ptrs);
 void	print_error(char *source, char *error);
 void	print_error_2(char *source, char *arg,char *error);
 bool	is_valid_variable_name(char *s);
-
+int		expand_here_doc(int fd, int status, int expand);
 int		exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env);
 char	*get_prompt();
 
