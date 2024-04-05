@@ -301,7 +301,9 @@ char	*handle_first_in_expand(t_elem **elem, char *s, int *start)
 
 char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 {
-	int	j;
+	int		j;
+	char	a;
+
 	if (!env)
 	{
 		if (!is_alpha_num(s[(*elem)->i + 1]) && s[(*elem)->i + 1] != '\0' && s[(*elem)->i] == '$' && s[(*elem)->i + 1] != '\'' && s[(*elem)->i + 1] != '"')
@@ -309,12 +311,21 @@ char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 		return (s);
 	}
 	j = 0;
+	a = '\0';
+	// if (ft_strchr(env, '\'') == NULL)
+	// 	a = '\'';
+	// else if(ft_strchr(env, '"') == NULL)
+	// 	a = '"';
+	// if (set_caractere(*elem, a) == NULL)
+	// 		return (NULL);
 	while (env[j])
 	{
 		if (set_caractere(*elem, env[j]) == NULL)
 			return (NULL);
 		j++;
 	}
+	// if (set_caractere(*elem, a) == NULL)
+	// 		return (NULL);
 	return (NULL);
 }
 char	*split_expand(t_elem **elem, char *s, char ****res)
@@ -328,7 +339,7 @@ char	*split_expand(t_elem **elem, char *s, char ****res)
 			return (s);
 		else if ((*elem)->tmp == NULL)
 			return (NULL);
-		exp = ft_strdup((*elem)->arr);
+		exp = delete_quotes((*elem)->arr);
 		if (!exp)
 			return (NULL);
 		(*elem)->tmp = handle_wild_in_dollar(exp, &res);
@@ -373,25 +384,45 @@ char	*alloc_for_expand_without_q(char *s, t_elem ***elem)
 {
 	int		qoute;
 	int		q;
+	int		tmp;
+	int		tmp1;
+	int		tmp2;
 
-	qoute = 0;
-	q = '\0';
+
+
+	qoute = (**elem)->qoute;
+	q = (**elem)->q;
+	tmp = (**elem)->i;
+	tmp1 = (**elem)->index;
+	tmp2 = tmp1;
 	((**elem)->i)++;
 	while (s[((**elem)->i)] != '\0' && !is_exist(s[((**elem)->i)], "\t\n\v\f\r  "))
 	{
 		if (s[((**elem)->i)] == '$')
-			return (((**elem)->i)--, (char *)16);	
-		if ((s[((**elem)->i)] == '\'' || s[((**elem)->i)] == '\"' ) && (qoute == 0 || q == s[((**elem)->i)]))
 		{
-			if (qoute == 0)
+			(**elem)->qoute = qoute ;
+			(**elem)->q = q;
+			(**elem)->index = tmp1;
+			while (tmp1 < tmp2)
+				(**elem)->arr[tmp1++] = 0;
+			(**elem)->i = tmp;
+			// ((**elem)->i)--;
+			return ((char *)16);
+		}
+		if ((s[((**elem)->i)] == '\'' || s[((**elem)->i)] == '\"' ) && ((**elem)->qoute == 0 || (**elem)->q == s[((**elem)->i)]))
+		{
+			if ((**elem)->qoute == 0)
 			{
-				q = s[((**elem)->i)];
-				qoute = 1;
+				// tmp = (**elem)->i;
+				// tmp1 = (**elem)->index;
+				// tmp2 = tmp1;
+				(**elem)->q = s[((**elem)->i)];
+				(**elem)->qoute = 1;
 			}
 			else
 			{
-				qoute = 0;
-				q = '\0';
+				(**elem)->qoute = 0;
+				(**elem)->q = '\0';
 			}
 			((**elem)->i)++;
 			continue ;
@@ -911,4 +942,33 @@ int	expand_here_doc(int fd, int status, int expand)
 	}
 	close(fd_res);
 	return (fd_ret);
+}
+
+bool	ft_change_last_pro(char ****eenv, char **args)
+{
+	int		len;
+	char	*s;
+	char	**res;
+	bool	ret;
+
+
+	// printf("hereheresdfdsf\n");
+	(void)eenv;
+	len = 0;
+	while (args && args[len])
+		len++;
+	if (len > 0)
+		len--;
+	s = ft_strjoin("_=", args[len]);
+	res = malloc(sizeof(char *) * 2);
+	if (!res)
+		return (free(s), false);
+	// printf("export %s\n",s);
+	res[0] = s;
+	res[1] = NULL;
+	if (!s)
+		return (false);
+	ret = ft_export(&environ, res);
+	free(s);
+	return (ret);
 }

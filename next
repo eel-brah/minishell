@@ -1,8 +1,8 @@
-cd / pwd + oldpwd + read man + remove the parrent dir
 heredoc / signals
-
 error messages 
 handle `%s'  in export error to std error
 
+Terminal reset
+cd / pwd + oldpwd + read man + remove the parrent dir
 handle _ , shell level
 default envarment varaibles should be added if there are not there

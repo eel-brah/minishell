@@ -127,6 +127,7 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 		{
 			signal(SIGQUIT, SIG_DFL);
 			signal(SIGINT, SIG_DFL);
+			// ft_change_last_pro(&env, args);
 			execve(prg, args, eenv);
 			// handle signals if faild
 			perror("execve");
@@ -197,6 +198,7 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 				{
 					signal(SIGINT, SIG_DFL);
 					signal(SIGQUIT, SIG_DFL);
+					// ft_change_last_pro(&env, args);
 					execve(full_path, args, eenv);
 					perror("execve");
 					return(1 << 8);

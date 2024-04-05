@@ -312,6 +312,7 @@ int	ft_export(char ***env, char **args)
 	char	*tmp;
 	int		r;
 
+	// printf("args[0] %s\n", args[0]);
 	if (!count_args(args))
 		return (ft_printexport(*env));
 	else
