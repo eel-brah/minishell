@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/05 06:52:20 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/05 23:07:03 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,54 +259,55 @@ bool	peek(char **pcmd, char *set)
 	return (*ptr && ft_strchr(set, *ptr));
 }
 
-bool	fill_file_heredoc(t_redirection *node, char *delem, int fd)
+bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 {
 	char	*s;
 	char	**res;
 	int		len;
 	int		len_s;
 
-	if (!delem)
+	if (!delim)
 		return (false);
-	if (ft_strchr(delem, '\'') || ft_strchr(delem, '"'))
+	if (ft_strchr(delim, '\'') || ft_strchr(delim, '"'))
 		node->expand = false;
-	res = expander(delem, 0, 0, 0);
-	free(delem);
+	res = expander(delim, 0, 0, 0);
+	free(delim);
 	if (!res)
 	{
 		perror("malloc");
 		return (false);
 	}
-	delem = res[0];
-	len = ft_strlen(delem);
+	delim = res[0];
+	len = ft_strlen(delim);
 	// fd = dup(node->here_fd); // check fail of dup
 	signal(SIGINT, sigint_handler2);
+	int fd2 = dup(0);
 	while (1)
 	{
 		s = readline("> ");
-		len_s = ft_strlen(s);
-		if (!s || (len == len_s && !ft_strncmp(s, delem, len)))
-			break ;
-		write(fd, s, len_s);
-		write(fd, "\n", 1);
-		free(s);
 		if (got_sigint)
 		{
+			dup2(fd2, 0);
+			close(fd2);
 			double_free(res);
+			free(s);
 			close(fd);
 			got_sigint = 0;
 			signal(SIGINT, sigint_handler);
 			return (false);
 		}
+		len_s = ft_strlen(s);
+		if (!s || (len == len_s && !ft_strncmp(s, delim, len)))
+			break ;
+		write(fd, s, len_s);
+		write(fd, "\n", 1);
+		free(s);
 	}
 	signal(SIGINT, sigint_handler);
 	double_free(res);
 	free(s);
 	close(fd);
-	// char buffer[1024];
-	// int redd = read(node->here_fd, buffer, 1024);
-	// printf("reddd %d\n", redd);
-	// write(2, buffer, redd);
+	close(fd2);
 	return (!!1337);
 }
 
@@ -419,7 +420,7 @@ t_node	*parse_parenthesis(char **pcmd)
 
 void sigint_handler(int sig)
 {
-	got_sigint = 1;
+	exit_status(1, true, true);
 	(void)sig;
 	write(1, "\n", 1);
 	rl_on_new_line();
@@ -429,7 +430,9 @@ void sigint_handler(int sig)
 
 void sigint_handler2(int sig)
 {
+	exit_status(1, true, true);
 	got_sigint = 1;
+	close(0);
 	(void)sig;
 }
 
@@ -649,7 +652,7 @@ void	rm_ptr(char **args)
 	free(ptr);
 }
 
-char	**expand_args(char **args, int status)
+char	**expand_args(char **args)
 {
 	unsigned int	i;
 	unsigned int	count;
@@ -659,7 +662,7 @@ char	**expand_args(char **args, int status)
 	while (args[i])
 	{
 		count = 0;
-		ex = expander(args[i], 0, 1, status);
+		ex = expander(args[i], 0, 1, exit_status(0, false, false));
 		if (!ex)
 			return (NULL);
 		count = count_args(ex);
@@ -682,13 +685,13 @@ char	**expand_args(char **args, int status)
 	return (args);
 }
 
-char	*expand_file(char *file, int status)
+char	*expand_file(char *file)
 {
 	char **ex;
 	int	count;
 
 	count = 0;
-	ex = expander(file, 0, 1, status);
+	ex = expander(file, 0, 1, exit_status(0, false, false));
 	if (!ex)
 		return (NULL);
 	while(ex[count])
@@ -706,7 +709,7 @@ char	*expand_file(char *file, int status)
 }
 
 // system calls returns
-void	execute(t_node *node, char ***env, int *status)
+void	execute(t_node *node, char ***env)
 {
 	t_exec			*cmd;
 	t_redirection	*red;
@@ -721,30 +724,31 @@ void	execute(t_node *node, char ***env, int *status)
 		cmd = (t_exec *)node;
 		if (cmd->argv)
 		{
-			tmp = expand_args(cmd->argv, *status);
+			tmp = expand_args(cmd->argv);
 			if (!tmp)
 			{
-				*status = 1 << 8;
+				exit_status(1, true, true);
 				return ;
 			}
 			cmd->argv = tmp;
-			*status = exec_cmd(node, *status, cmd->argv[0], cmd->argv, env);
+			exec_cmd(node, cmd->argv[0], cmd->argv, env);
 			// if (WIFSIGNALED(*status))
 			// || WTERMSIG(*status) == SIGQUIT
-			if (WTERMSIG(*status) == SIGINT)
+			int s = exit_status(0, false, false);
+			if (WTERMSIG(s) == SIGINT)
 			{
-				*status = 130 << 8;
+				exit_status(130, true, true);
 				ft_putchar_fd('\n', 1);
 			}
 		}
 		else
-			*status = 0;
+			exit_status(0, true, true);
 	}
 	else if (node->type == HEREDOC)
 	{
 		red = (t_redirection*)node;
 		int fd = dup(red->fd);
-		int fd_read = expand_here_doc(red->here_fd, *status, red->expand);
+		int fd_read = expand_here_doc(red->here_fd, exit_status(0, false, false), red->expand);
 		close(red->here_fd);
 		// check error and free
 		if (fd_read == -1)
@@ -752,7 +756,7 @@ void	execute(t_node *node, char ***env, int *status)
 		red->here_fd = fd_read;
 		dup2(red->here_fd, red->fd);
 		close(red->here_fd);
-		execute(red->node, env, status);
+		execute(red->node, env);
 		dup2(fd, red->fd);
 		close(fd);
 	}
@@ -760,10 +764,10 @@ void	execute(t_node *node, char ***env, int *status)
 	{
 		red = (t_redirection*)node;
 		char *tmp2;
-		tmp2 = expand_file(red->file, *status);
+		tmp2 = expand_file(red->file);
 		if (!tmp2)
 		{
-			*status = 1 << 8;
+			exit_status(1, true, true);
 			return ;
 		}
 		red->file = tmp2;
@@ -771,7 +775,7 @@ void	execute(t_node *node, char ***env, int *status)
 		or = open(red->file, red->flags, PREMISSIONS);
 		if(or < 0)
 		{
-			*status = 1 << 8;
+			exit_status(1, true, true);
 			perror("open");
 			return ;
 		}
@@ -779,7 +783,7 @@ void	execute(t_node *node, char ***env, int *status)
 		int fd = dup(red->fd);
 		dup2(or, red->fd);
 		close(or);
-		execute(red->node, env, status);
+		execute(red->node, env);
 		dup2(fd, red->fd);
 		close(fd);
 	}
@@ -803,8 +807,9 @@ void	execute(t_node *node, char ***env, int *status)
 			dup2(p[1], 1);
 			close(p[1]);
 			close(p[0]);
-			execute(div->left, env, status);
-			exit(WEXITSTATUS(*status));
+			execute(div->left, env);
+			int s = exit_status(0, false, false);
+			exit(WEXITSTATUS(s));
 		}
 		pid[1] = fork();
 		if (pid[1] < 0)
@@ -818,37 +823,40 @@ void	execute(t_node *node, char ***env, int *status)
 			dup2(p[0], 0);
 			close(p[1]);
 			close(p[0]);
-			execute(div->right, env, status);
-			exit(WEXITSTATUS(*status));
+			execute(div->right, env);
+			int s = exit_status(0, false, false);
+			exit(WEXITSTATUS(s));
 		}
 		close(p[0]);
 		close(p[1]);
-		while (waitpid(pid[0], status, 0) == -1)
+		int s;
+		while (waitpid(pid[0], &s, 0) == -1)
 		{
 			// status
 			if (errno != EINTR) 
 				return ;
 		}
-		while (waitpid(pid[1], status, 0) == -1)
+		while (waitpid(pid[1], &s, 0) == -1)
 		{
 			if (errno != EINTR) 
 				return ;
 		}
+		exit_status(s, true, false);
 		signal(SIGINT, sigint_handler);
 	}
 	else if (node->type == AND)
 	{
 		div = (t_div*)node;
-		execute(div->left, env, status);
-		if (!*status)
-			execute(div->right, env, status);
+		execute(div->left, env);
+		if (!exit_status(0, false, false))
+			execute(div->right, env);
 	}
 	else if (node->type == OR)
 	{
 		div = (t_div*)node;
-		execute(div->left, env, status);
-		if (*status)
-			execute(div->right, env, status);
+		execute(div->left, env);
+		if (exit_status(0, false, false))
+			execute(div->right, env);
 	}
 }
 
@@ -987,13 +995,23 @@ void fu()
 extern int rl_catch_signals;
 extern char **environ;
 
+int	exit_status(int	status, bool update, bool shift)
+{
+	static int s;
+
+	if (update && shift)
+		s = status << 8;
+	else if (update)
+		s = status;
+	return (s);
+}
+
 int	main(int argc, char **argv, char **env)
 {
 	char	*cmd;
 	t_node	*tree;
 	char	*prompt;
 	char	**_env;
-	static int status;
 
 	signal(SIGINT, sigint_handler);
 	signal(SIGQUIT, SIG_IGN);
@@ -1012,7 +1030,7 @@ int	main(int argc, char **argv, char **env)
 		cmd = get_cmd(prompt);
 		free(prompt);
 		if (!cmd)
-			ft_exit(NULL, NULL, _env, status);
+			ft_exit(NULL, NULL, _env);
 		else if (!*cmd)
 		{
 			free(cmd);
@@ -1022,12 +1040,7 @@ int	main(int argc, char **argv, char **env)
 		free(cmd);
 		if (!tree)
 			continue;
-		if (got_sigint)
-		{
-			status = 1 << 8;
-			got_sigint = 0;
-		}
-		execute(tree, &_env, &status);
+		execute(tree, &_env);
 		free_cmdtree(tree);
 	}
 	double_free(_env);

@@ -92,6 +92,7 @@ typedef struct s_redirection
 #define OR		5
 #define HEREDOC 6
 
+#define GET_STAUS exit_status(0, false)
 
 size_t	count_args(char **ptrs);
 void	free_cmdtree(t_node *tree);
@@ -99,9 +100,9 @@ int		ft_echo(char **args);
 int		ft_env(char **env, char **args);
 int		ft_pwd(char **args);
 int		ft_unset(char **env, char **args);
-int		ft_exit(t_node *tree, char **args, char **env, int r);
+int		ft_exit(t_node *tree, char **args, char **env);
 int		ft_cd(char **args);
-int		built_in(t_node *tree, int r, char *prg, char **args, char ***env);
+int		built_in(t_node *tree, char *prg, char **args, char ***env);
 char	*strdup_v2(char *start, char *end);
 ssize_t	ft_atoi_v2(char *s, bool *valid);
 int		ft_export(char ***env, char **args);
@@ -117,8 +118,9 @@ void	print_error(char *source, char *error);
 void	print_error_2(char *source, char *arg,char *error);
 bool	is_valid_variable_name(char *s);
 int		expand_here_doc(int fd, int status, int expand);
-int		exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env);
+void	exec_cmd(t_node *tree, char *prg, char **args, char ***env);
 char	*get_prompt();
+int		exit_status(int	status, bool update, bool shift);
 
 void	sigint_handler(int sig);
 void sigint_handler2(int sig);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/03 01:09:10 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/05 23:08:09 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ ssize_t	ft_atoi_v2(char *s, bool *valid)
 	return (nb);
 }
 
-int	ft_exit(t_node *tree, char **args, char **env, int r)
+int	ft_exit(t_node *tree, char **args, char **env)
 {
 	unsigned int	count;
 	bool			valid;
@@ -193,7 +193,7 @@ int	ft_exit(t_node *tree, char **args, char **env, int r)
 		free_cmdtree(tree);
 		double_free(env);
 		printf("exit\n");
-		exit(r >> 8);
+		exit(exit_status(0, false, false) >> 8);
 	}
 	else if (count > 1)
 	{

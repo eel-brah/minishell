@@ -2,7 +2,7 @@
 
 extern char **environ;
 
-int	built_in(t_node *tree, int status, char *prg, char **args, char ***env)
+int	built_in(t_node *tree, char *prg, char **args, char ***env)
 {
 	unsigned int size;
 
@@ -21,7 +21,7 @@ int	built_in(t_node *tree, int status, char *prg, char **args, char ***env)
 		return (ft_cd(args + 1));
 	else if (size == ft_strlen("exit") 
 		&& !ft_strncmp(prg, "exit", size))
-		return (ft_exit(tree, args + 1, *env, status));
+		return (ft_exit(tree, args + 1, *env));
 	else if (size == ft_strlen("export") 
 		&& !ft_strncmp(prg, "export", size))
 		{
@@ -51,13 +51,7 @@ char	*ft_getenv(char **env, char *s)
 	return (NULL);
 }
 
-void	sig_hand1(int sig)
-{
-	(void) sig;
-	write(1, "\n", 1);
-}
-
-int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
+void	exec_cmd(t_node *tree, char *prg, char **args, char ***env)
 {
 	char	*path;
 	char	**paths;
@@ -70,54 +64,54 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 	char	*pr_denied;
 	bool	acc;
 	int t;
+		int s;
+
 
 	if (!prg)
-		return (0);
-	t = built_in(tree, status, prg, args, env);
+	{
+		exit_status(0, true, true);
+		return ;
+	}
+	t = built_in(tree, prg, args, env);
 	if (t != -1)
-		return (t << 8);
+	{
+		exit_status(t, true, true);
+		return ;
+	}
 	if (!ft_strncmp(prg, ".", 2) || !ft_strncmp(prg, "..", 3))
 	{
 		print_error(prg, "command not found");
-		return(127 << 8);
+		exit_status(127, true, true);
+		return ;
 	}
 	is_path = !!ft_strchr(prg, '/');
 	acc = access(prg, F_OK);
 	if (is_path && acc)
 	{
 		perror(prg);
-		return(127 << 8);
+		exit_status(127, true, true);
+		return ;
 	}
 	else if (is_path && !acc)
 	{
 		if (access(prg, X_OK))
 		{
 			perror(prg);
-			return(126 << 8);
+			exit_status(126, true, true);
+			return ;
 		}
 		if (stat(prg, &statbuf))
 		{
 			perror("stat");
-			return(1 << 8);
+			exit_status(1, true, true);
+			return ;
 		}
 		if (S_ISDIR(statbuf.st_mode))
 		{
 			print_error(prg, "Is a directory");
-			return(126 << 8);
+			exit_status(126, true, true);
+			return ;
 		}
-		// pid = fork();
-		// if (pid == -1)
-		// {
-		// 	perror("fork");
-		// 	return(1);
-		// }
-		// if (pid == 0)
-		// {
-		// 	execve(prg, args, env);
-		// 	perror("execve");
-		// 	return(1);
-		// }
-		// waitpid(pid, &status, 0);
 
 		signal(SIGINT, SIG_IGN);
 		char **eenv = env_without_empty(*env);
@@ -131,12 +125,16 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 			execve(prg, args, eenv);
 			// handle signals if faild
 			perror("execve");
-			return(1 << 8);
+			exit_status(1, true, true);
+			return ;
 		}
-		while (waitpid(pid, &status, 0) == -1)
+		while (waitpid(pid, &s, 0) == -1)
 		{
-			if (errno != EINTR) 
-				return (1 << 8);
+			if (errno != EINTR)
+			{
+				exit_status(1, true, true);
+				return ;
+			}
 		}
 		free(eenv);
 		signal(SIGQUIT, SIG_IGN);
@@ -151,14 +149,16 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 			if (!paths)
 			{
 				perror("malloc");
-				return(1 << 8);
+				exit_status(1, true, true);
+				return ;
 			}
 			slashed = ft_strjoin("/", prg);
 			if (!slashed)
 			{
 				perror("malloc");
 				double_free(paths);
-				return(1 << 8);
+				exit_status(1, true, true);
+				return ;
 			}
 			i = 0;
 			pr_denied = NULL;
@@ -182,12 +182,14 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 			if (!paths[i] && pr_denied)
 			{
 				print_error(pr_denied, "Permission denied");
-				return(126 << 8);
+				exit_status(126, true, true);
+				return ;
 			}
 			else if (!paths[i])
 			{
 				print_error(prg, "command not found");
-				return(127 << 8);
+				exit_status(127, true, true);
+				return ;
 			}
 			else
 			{
@@ -201,12 +203,16 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 					// ft_change_last_pro(&env, args);
 					execve(full_path, args, eenv);
 					perror("execve");
-					return(1 << 8);
+					exit_status(1, true, true);
+					return ;
 				}
-				while (waitpid(pid, &status, 0) == -1)
+				while (waitpid(pid, &s, 0) == -1)
 				{
 					if (errno != EINTR) 
-						return (1 << 8);
+					{
+						exit_status(1, true, true);
+						return ;
+					}
 				}
 				free(eenv);
 				signal(SIGQUIT, SIG_IGN);
@@ -220,10 +226,12 @@ int	exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env)
 		else
 		{
 			print_error(prg, "command not found");
-			return(127 << 8);
+			exit_status(127, true, true);
+			return ;
 		}
 	}
-	return(status);
+	exit_status(s, true, false);
+	return ;
 }
 
 // int main()
