@@ -2,7 +2,10 @@ heredoc / signals
 error messages 
 handle `%s'  in export error to std error
 
+random file in heredoc
 Terminal reset
 cd / pwd + oldpwd + read man + remove the parrent dir
 handle _ , shell level
 default envarment varaibles should be added if there are not there
+
+symbolik links lstat

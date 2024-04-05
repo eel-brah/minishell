@@ -1,34 +1,5 @@
 #include "../include/msh.h"
 
-// Variable names must start with a letter or underscore.
-// Subsequent characters can be letters, digits, or underscores.
-
-// size_t	count_args(char **ptrs)
-// {
-// 	char	**ptr;
-
-// 	ptr = ptrs;
-// 	while (ptr && *ptr)
-// 		ptr++;
-// 	return (ptr - ptrs);
-// }
-
-// void	ft_printenv(char **env)
-// {
-// 	while (env && *env)
-// 		printf("%s\n", *env++);
-// }
-
-void	free_env(char **env)
-{
-	char	**ptr;
-
-	ptr = env;
-	while (ptr && *ptr)
-		free(*ptr++);
-	free(env);
-}
-
 int	is_valid_variable(char *s, int *plus)
 {
 	*plus = 0;
@@ -47,6 +18,7 @@ int	is_valid_variable(char *s, int *plus)
 	}
 	return (*plus=1, 1);
 }
+
 bool	add_to_env(char ***env, char *vrbl)
 {
 	char	**new_env;
@@ -74,6 +46,7 @@ bool	add_to_env(char ***env, char *vrbl)
 	*env = new_env;
 	return (true);
 }
+
 char	*alloc_without_plus(char *vrbl)
 {
 	char	*res;
@@ -101,6 +74,7 @@ char	*alloc_without_plus(char *vrbl)
 	res[index] = '\0';
 	return (res);
 }
+
 bool	add_to_env_plus(char ***env, char *vrbl)
 {
 	char	**new_env;
@@ -128,14 +102,12 @@ bool	add_to_env_plus(char ***env, char *vrbl)
 	*env = new_env;
 	return (true);
 }
+
 char	*join_variabl(char *old, char *new, char *ptr)
 {
 	char	*tmp;
 	char	*res;
 
-	// sp = ft_split(new, '=');
-	// if (!sp)
-		// return (perror("malloc"), NULL);
 	tmp = ft_strdup(ptr);
 	if (!tmp)
 		return (perror("malloc"), NULL);
@@ -150,27 +122,20 @@ char	*join_variabl(char *old, char *new, char *ptr)
 
 char	*edit_env(char ***env, char *vrbl)
 {
-	// export V / export V+= / export V=
-	// V
-	// B=
-	// V=
 	size_t	i;
 	char	**env_ptr;
 	char	*ptr;
 	int		v;
-	// size_t	len;
 
 	env_ptr = *env;
 	if (is_valid_variable(vrbl, &v))
 	{
 		i = 0;
 		ptr = ft_strchr(vrbl, '=');
-		// printf("prt %s\n",ptr);
 		while (env_ptr[i])
 		{
 			if (ptr)
 			{
-				// printf("cc %c\n", vrbl[ptr - vrbl - 1]);
 				if (!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl + 1) || (!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl) && env_ptr[i][ptr - vrbl] == '\0'))
 				{
 					free (env_ptr[i]);
@@ -180,7 +145,6 @@ char	*edit_env(char ***env, char *vrbl)
 				}
 				else if(!ft_strncmp(env_ptr[i], vrbl, ptr - vrbl - 1) && vrbl[ptr - vrbl - 1] == '+')
 				{
-					// free (env_ptr[i]);
 					env_ptr[i] = join_variabl(env_ptr[i], vrbl, ptr + 1);
 					if (env_ptr[i] == NULL)
 						return (NULL);
@@ -206,13 +170,14 @@ char	*edit_env(char ***env, char *vrbl)
 	return ((char *)1337);
 }
 
-void	print_to(char *s, char *e)
+void	substr_print(char *s, char *e)
 {
 	if (!s || !e || s > e)
 		return ;
 	while (s != e)
 		ft_putchar_fd(*s++, 1);
 }
+
 void	print_sored_env(char **res)
 {
 	int		i;
@@ -228,61 +193,19 @@ void	print_sored_env(char **res)
 			ft_putendl_fd(res[i++], 1);
 			continue;
 		}
-		print_to(res[i], eq + 1);
+		substr_print(res[i], eq + 1);
 		if (!eq[1])
 			ft_putstr_fd("\"\"", 1);
 		else
 		{
 			ft_putchar_fd('"', 1);
-			print_to(eq + 1, &eq[ft_strlen(eq)]);
+			substr_print(eq + 1, &eq[ft_strlen(eq)]);
 			ft_putchar_fd('"', 1);
 		}
 		ft_putchar_fd('\n', 1);
 		i++;
 	}
 }
-
-// void	print_sored_env(char **res)
-// {
-// 	int	i;
-// 	int	j;
-// 	int	flag;
-
-
-// 	i = 0;
-// 	while (res[i])
-// 	{
-// 		printf("declare -x ");
-// 		j = 0;
-// 		flag = 1;
-// 		if (ft_strchr(res[i], '=') == NULL)
-// 		{
-// 			printf("%s\n", res[i]);
-// 			i++;
-// 			continue;
-// 		}
-// 		while (res[i][j])
-// 		{
-// 			if (res[i][j] == '=' && flag)
-// 			{
-// 				flag = 0;
-// 				if (!res[i][j+1])
-// 					printf("%c\"\"",res[i][j]);
-// 				else
-// 					printf("%c\"",res[i][j]);
-// 				j++;
-// 				continue;
-// 			}
-// 			if(res[i][j + 1] == '\0')
-// 				printf("%c\"",res[i][j]);
-// 			else
-// 				printf("%c",res[i][j]);
-// 			j++;
-// 		}
-// 		printf("\n");
-// 		i++;
-// 	}
-// }
 
 int	ft_printexport(char **env)
 {
@@ -306,13 +229,13 @@ int	ft_printexport(char **env)
 	free(res);
 	return (0);
 }
+
 int	ft_export(char ***env, char **args)
 {
 	char	*ptr;
 	char	*tmp;
 	int		r;
 
-	// printf("args[0] %s\n", args[0]);
 	if (!count_args(args))
 		return (ft_printexport(*env));
 	else
@@ -333,52 +256,3 @@ int	ft_export(char ***env, char **args)
 	}
 	return (r);
 }
-
-// char	**create_env(char **env)
-// {
-// 	size_t	size;
-// 	char	**ptr;
-// 	size_t	i;
-
-// 	size = count_args(env);
-// 	ptr = malloc((size + 1) * sizeof(env));
-// 	if (!ptr)
-// 	{
-// 		perror("malloc");
-// 		return (NULL);
-// 	}
-// 	i = 0;
-// 	while (*env)
-// 	{
-// 		ptr[i++] = ft_strdup(*env++);
-// 		if (!ptr[i - 1])
-// 		{
-// 			perror("malloc");
-// 			free_env(ptr);
-// 			return (NULL);
-// 		}
-// 	}
-// 	ptr[i] = NULL;
-// 	return (ptr);
-// }
-
-// void fu()
-// {
-// 	system("leaks a.out");
-// }
-
-// int	main(int argc, char **argv, char **env)
-// {
-// 	atexit(fu);
-// 	char	**tmp;
-
-// 	env = create_env(env);
-// 	if (!env)
-// 		return (1);
-// 	ft_export(&env, argv+1);
-// 	// env = tmp;
-// 	ft_printenv(env);
-// 	free_env(env);
-// 	// printf("eenv %s, \n",getenv(argv[1]));
-// 	// printf("eenv %s, \n",getenv(argv[2]));
-// }

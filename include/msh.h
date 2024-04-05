@@ -121,6 +121,7 @@ int		exec_cmd(t_node *tree, int status, char *prg, char **args, char ***env);
 char	*get_prompt();
 
 void	sigint_handler(int sig);
+void sigint_handler2(int sig);
 bool	ft_change_last_pro(char ****eenv, char **args);
 char	**expander(char *s, int here_doc, int expand, int status);
 #endif

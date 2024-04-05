@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/04 02:45:47 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/05 06:52:20 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,10 +273,14 @@ bool	fill_file_heredoc(t_redirection *node, char *delem, int fd)
 	res = expander(delem, 0, 0, 0);
 	free(delem);
 	if (!res)
+	{
+		perror("malloc");
 		return (false);
+	}
 	delem = res[0];
 	len = ft_strlen(delem);
 	// fd = dup(node->here_fd); // check fail of dup
+	signal(SIGINT, sigint_handler2);
 	while (1)
 	{
 		s = readline("> ");
@@ -286,7 +290,16 @@ bool	fill_file_heredoc(t_redirection *node, char *delem, int fd)
 		write(fd, s, len_s);
 		write(fd, "\n", 1);
 		free(s);
+		if (got_sigint)
+		{
+			double_free(res);
+			close(fd);
+			got_sigint = 0;
+			signal(SIGINT, sigint_handler);
+			return (false);
+		}
 	}
+	signal(SIGINT, sigint_handler);
 	double_free(res);
 	free(s);
 	close(fd);
@@ -302,6 +315,7 @@ t_node	*parse_heredoc(t_node *node, char *start, char *end)
 	t_redirection	*red;
 	char	*file = "smo_0098731277";
 	int		fd;
+
 	red = malloc(sizeof(*red));
 	if (!red)
 		return (NULL);
@@ -325,7 +339,6 @@ t_node	*parse_heredoc(t_node *node, char *start, char *end)
 	{
 		red->node = node;
 		free_cmdtree((t_node *)red);
-		perror("malloc");
 		return (NULL);
 	}
 	return (add_redirection(red, node));
@@ -412,6 +425,12 @@ void sigint_handler(int sig)
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
+}
+
+void sigint_handler2(int sig)
+{
+	got_sigint = 1;
+	(void)sig;
 }
 
 t_node	*parse_exec(char **pcmd)
@@ -870,6 +889,14 @@ void	free_cmdtree(t_node *tree)
 	{
 		red = (t_redirection *)tree;
 		free(red->file);
+		free_cmdtree((t_node *)red->node);
+		free(red);
+	}
+	else if (tree->type == HEREDOC)
+	{
+		red = (t_redirection *)tree;
+		// free(red->file);
+		close(red->here_fd);
 		free_cmdtree((t_node *)red->node);
 		free(red);
 	}
