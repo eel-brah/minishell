@@ -19,14 +19,14 @@ int	is_valid_variable(char *s, int *plus)
 	return (*plus=1, 1);
 }
 
-bool	add_to_env(char ***env, char *vrbl)
+bool	add_to_env(char *vrbl)
 {
 	char	**new_env;
 	char	**env_ptr;
 	size_t	size;
 	size_t	i;
 
-	env_ptr = *env;
+	env_ptr = environ;
 	size = count_args(env_ptr);
 	new_env = malloc((size + 2) * sizeof(char *));
 	if (!new_env)
@@ -43,7 +43,7 @@ bool	add_to_env(char ***env, char *vrbl)
 	new_env[i] = vrbl;
 	new_env[i + 1] = NULL;
 	free(env_ptr);
-	*env = new_env;
+	environ = new_env;
 	return (true);
 }
 
@@ -75,14 +75,14 @@ char	*alloc_without_plus(char *vrbl)
 	return (res);
 }
 
-bool	add_to_env_plus(char ***env, char *vrbl)
+bool	add_to_env_plus(char *vrbl)
 {
 	char	**new_env;
 	char	**env_ptr;
 	size_t	size;
 	size_t	i;
 
-	env_ptr = *env;
+	env_ptr = environ;
 	size = count_args(env_ptr);
 	new_env = malloc((size + 2) * sizeof(char *));
 	if (!new_env)
@@ -99,7 +99,7 @@ bool	add_to_env_plus(char ***env, char *vrbl)
 	new_env[i + 1] = NULL;
 	free(env_ptr);
 	free(vrbl);
-	*env = new_env;
+	environ = new_env;
 	return (true);
 }
 
@@ -120,14 +120,14 @@ char	*join_variabl(char *old, char *new, char *ptr)
 	return (res);
 }
 
-char	*edit_env(char ***env, char *vrbl)
+char	*edit_env(char *vrbl)
 {
 	size_t	i;
 	char	**env_ptr;
 	char	*ptr;
 	int		v;
 
-	env_ptr = *env;
+	env_ptr = environ;
 	if (is_valid_variable(vrbl, &v))
 	{
 		i = 0;
@@ -157,9 +157,9 @@ char	*edit_env(char ***env, char *vrbl)
 				return ((char *)1337);
 			i++;
 		}
-		if (v == 1 && !add_to_env(env, vrbl))
+		if (v == 1 && !add_to_env(vrbl))
 			return (NULL);
-		if (v == 2 && !add_to_env_plus(env, vrbl))
+		if (v == 2 && !add_to_env_plus(vrbl))
 			return (NULL);
 	}
 	else
@@ -230,14 +230,14 @@ int	ft_printexport(char **env)
 	return (0);
 }
 
-int	ft_export(char ***env, char **args)
+int	ft_export(char **args)
 {
 	char	*ptr;
 	char	*tmp;
 	int		r;
 
 	if (!count_args(args))
-		return (ft_printexport(*env));
+		return (ft_printexport(environ));
 	else
 	{
 		r = 0;
@@ -246,7 +246,7 @@ int	ft_export(char ***env, char **args)
 			ptr = ft_strdup(*args);
 			if (!ptr)
 				return (perror("malloc"), 1);
-			tmp = edit_env(env, ptr);
+			tmp = edit_env(ptr);
 			if (tmp == NULL)
 				return (free(ptr), 1);
 			else if (tmp == (char *)42)

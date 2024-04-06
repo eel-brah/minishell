@@ -921,7 +921,7 @@ int	expand_here_doc(int fd, int status, int expand)
 	char	**res;
 	int		fd_res;
 	int		fd_ret;
-
+// random name
 	fd_res = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
 	fd_ret = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
 	if (fd_res == -1 || fd_ret == -1)
@@ -968,7 +968,7 @@ bool	ft_change_last_pro(char ****eenv, char **args)
 	res[1] = NULL;
 	if (!s)
 		return (false);
-	ret = ft_export(&environ, res);
+	ret = ft_export(res);
 	free(s);
 	return (ret);
 }

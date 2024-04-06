@@ -2,7 +2,7 @@
 
 extern char **environ;
 
-int	built_in(t_node *tree, char *prg, char **args, char ***env)
+int	built_in(t_node *tree, char *prg, char **args)
 {
 	unsigned int size;
 
@@ -15,23 +15,19 @@ int	built_in(t_node *tree, char *prg, char **args, char ***env)
 		return (ft_pwd(args + 1));
 	else if (size == ft_strlen("env") 
 		&& (!ft_strncmp(prg, "env", size) || !ft_strncmp(prg, "ENV", size)))
-		return (ft_env(*env, args + 1));
+		return (ft_env(environ, args + 1));
 	else if (size == ft_strlen("cd") 
 		&& !ft_strncmp(prg, "cd", size))
 		return (ft_cd(args + 1));
 	else if (size == ft_strlen("exit") 
 		&& !ft_strncmp(prg, "exit", size))
-		return (ft_exit(tree, args + 1, *env));
+		return (ft_exit(tree, args + 1));
 	else if (size == ft_strlen("export") 
 		&& !ft_strncmp(prg, "export", size))
-		{
-			bool a = ft_export(env, args + 1);
-			environ = *env;
-			return (a);
-		}
+			return (ft_export(args + 1));
 	else if (size == ft_strlen("unset") 
 		&& !ft_strncmp(prg, "unset", size))
-		return (ft_unset(*env, args + 1));
+		return (ft_unset(environ, args + 1));
 	return (-1);
 }
 
@@ -51,7 +47,7 @@ char	*ft_getenv(char **env, char *s)
 	return (NULL);
 }
 
-void	exec_cmd(t_node *tree, char *prg, char **args, char ***env)
+void	exec_cmd(t_node *tree, char *prg, char **args)
 {
 	char	*path;
 	char	**paths;
@@ -72,7 +68,7 @@ void	exec_cmd(t_node *tree, char *prg, char **args, char ***env)
 		exit_status(0, true, true);
 		return ;
 	}
-	t = built_in(tree, prg, args, env);
+	t = built_in(tree, prg, args);
 	if (t != -1)
 	{
 		exit_status(t, true, true);
@@ -113,17 +109,19 @@ void	exec_cmd(t_node *tree, char *prg, char **args, char ***env)
 			return ;
 		}
 
-		signal(SIGINT, SIG_IGN);
-		char **eenv = env_without_empty(*env);
+		// signal(SIGINT, SIG_IGN);
+		set_signal_handler(SIGINT, SIG_IGN);
+		char **eenv = env_without_empty(environ);
 		// if NULL
 		pid = fork();
 		if (pid == 0)
 		{
-			signal(SIGQUIT, SIG_DFL);
-			signal(SIGINT, SIG_DFL);
+			set_signal_handler(SIGINT, SIG_DFL);
+			set_signal_handler(SIGQUIT, SIG_DFL);
 			// ft_change_last_pro(&env, args);
 			execve(prg, args, eenv);
 			// handle signals if faild
+			free(eenv);
 			perror("execve");
 			exit_status(1, true, true);
 			return ;
@@ -132,17 +130,18 @@ void	exec_cmd(t_node *tree, char *prg, char **args, char ***env)
 		{
 			if (errno != EINTR)
 			{
+				free(eenv);
 				exit_status(1, true, true);
 				return ;
 			}
 		}
 		free(eenv);
-		signal(SIGQUIT, SIG_IGN);
-		signal(SIGINT, sigint_handler);
+		set_signal_handler(SIGINT, sigint_handler);
+		set_signal_handler(SIGQUIT, SIG_IGN);
 	}
 	else
 	{
-		path = ft_getenv(*env, "PATH");
+		path = getenv("PATH");
 		if (path && *prg)
 		{
 			paths = ft_split(path, ':');
@@ -193,16 +192,18 @@ void	exec_cmd(t_node *tree, char *prg, char **args, char ***env)
 			}
 			else
 			{
-				signal(SIGINT, SIG_IGN);
-				char **eenv = env_without_empty(*env);
+				set_signal_handler(SIGINT, SIG_IGN);
+				// signal(SIGINT, SIG_IGN);
+				char **eenv = env_without_empty(environ);
 				pid = fork();
 				if (pid == 0)
 				{
-					signal(SIGINT, SIG_DFL);
-					signal(SIGQUIT, SIG_DFL);
+					set_signal_handler(SIGINT, SIG_DFL);
+					set_signal_handler(SIGQUIT, SIG_DFL);
 					// ft_change_last_pro(&env, args);
 					execve(full_path, args, eenv);
 					perror("execve");
+					free(eenv);
 					exit_status(1, true, true);
 					return ;
 				}
@@ -210,13 +211,14 @@ void	exec_cmd(t_node *tree, char *prg, char **args, char ***env)
 				{
 					if (errno != EINTR) 
 					{
+						free(eenv);
 						exit_status(1, true, true);
 						return ;
 					}
 				}
 				free(eenv);
-				signal(SIGQUIT, SIG_IGN);
-				signal(SIGINT, sigint_handler);
+				set_signal_handler(SIGINT, sigint_handler);
+				set_signal_handler(SIGQUIT, SIG_IGN);
 				free(full_path);
 			}
 			free(pr_denied);

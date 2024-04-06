@@ -185,7 +185,7 @@ def run_tests(tests):
         got = subprocess.run(['bash', '-c', f"echo -e \'{tests[key]}\' | ./minishell"], capture_output=True)
         got, got_err = got.stdout, got.stderr
         got = got.split(b'\n')[1:-1]
-        got[-1] = got[-1][:-25] # remove b'minishell2.5>$ exit' eel-brah minishell2$ exit
+        got[-1] = got[-1][:-19] # remove b'minishell2.5>$ exit' eel-brah minishell2$ exit
         got = b'\n'.join(got)
 
         # adding \n to match expected
@@ -197,6 +197,7 @@ def run_tests(tests):
         else:
             print(f"{key} failed\nexpeced ---------------\n{expected}\ngot --------------\n{got}")
 # amokhtar minishelll$ 
+# eel-brah mini$
 
 if __name__ == '__main__':
     run_tests(simple_tests)

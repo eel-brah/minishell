@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/05 23:08:09 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/06 01:44:17 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,7 +181,7 @@ ssize_t	ft_atoi_v2(char *s, bool *valid)
 	return (nb);
 }
 
-int	ft_exit(t_node *tree, char **args, char **env)
+int	ft_exit(t_node *tree, char **args)
 {
 	unsigned int	count;
 	bool			valid;
@@ -191,7 +191,7 @@ int	ft_exit(t_node *tree, char **args, char **env)
 	if (count == 0)
 	{
 		free_cmdtree(tree);
-		double_free(env);
+		double_free(environ);
 		printf("exit\n");
 		exit(exit_status(0, false, false) >> 8);
 	}
@@ -206,7 +206,7 @@ int	ft_exit(t_node *tree, char **args, char **env)
 	{
 		print_error_2("exit", *args, "numeric argument required");
 		free_cmdtree(tree);
-		double_free(env);
+		double_free(environ);
 		exit(255);	
 	}
 	exit(nb);

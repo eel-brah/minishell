@@ -100,12 +100,12 @@ int		ft_echo(char **args);
 int		ft_env(char **env, char **args);
 int		ft_pwd(char **args);
 int		ft_unset(char **env, char **args);
-int		ft_exit(t_node *tree, char **args, char **env);
+int		ft_exit(t_node *tree, char **args);
 int		ft_cd(char **args);
-int		built_in(t_node *tree, char *prg, char **args, char ***env);
+int		built_in(t_node *tree, char *prg, char **args);
 char	*strdup_v2(char *start, char *end);
 ssize_t	ft_atoi_v2(char *s, bool *valid);
-int		ft_export(char ***env, char **args);
+int		ft_export(char **args);
 
 char	**env_without_empty(char **env);
 void	sort_2d_array(char ***res);
@@ -118,12 +118,23 @@ void	print_error(char *source, char *error);
 void	print_error_2(char *source, char *arg,char *error);
 bool	is_valid_variable_name(char *s);
 int		expand_here_doc(int fd, int status, int expand);
-void	exec_cmd(t_node *tree, char *prg, char **args, char ***env);
+void	exec_cmd(t_node *tree, char *prg, char **args);
 char	*get_prompt();
 int		exit_status(int	status, bool update, bool shift);
+void	set_signal_handler(int signal, void (*fun)(int));
 
 void	sigint_handler(int sig);
 void sigint_handler2(int sig);
 bool	ft_change_last_pro(char ****eenv, char **args);
 char	**expander(char *s, int here_doc, int expand, int status);
+
+char	**setup(int argc, char **argv, char **env);
+void sigint_handler(int sig);
+void sigint_handler2(int sig);
+void	set_signal_handler(int signal, void (*fun)(int));
+char	**create_env(char **env);
+char	**create_new_env();
+
+t_node	*parse_cmd(char *cmd);
+void	execute(t_node *node);
 #endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/03 02:35:52 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/06 02:52:08 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,3 +192,59 @@ char	*strdup_v2(char *start, char *end)
 	ft_strlcpy(s, start, size);
 	return (s);
 }
+
+int	exit_status(int	status, bool update, bool shift)
+{
+	static int s;
+
+	if (update && shift)
+		s = status << 8;
+	else if (update)
+		s = status;
+	return (s);
+}
+
+bool	_isdigit(int c)
+{
+	if (c >= 48 && c <= 57)
+		return (true);
+	return (false);
+}
+
+bool	_isalpha(int c)
+{
+	if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122))
+		return (true);
+	return (false);
+}
+
+
+bool	_isnumber(char *s)
+{
+	if (!s || !*s)
+		return (false);
+	while (*s)
+	{
+		if (!ft_isdigit(*s))
+			return (false);
+		s++;
+	}
+	return (true);
+}
+
+bool	_isword(char *s)
+{
+	if (!s || !*s)
+		return (false);
+	while (*s)
+	{
+		if (!_isalpha(*s) && *s != '_')
+			return (false);
+	}
+	return (true);
+}
+
+// bool	assignment_word(char *s)
+// {
+	
+// }
