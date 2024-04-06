@@ -302,6 +302,7 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 		{
 			if (token != ERROR)
 				print_error("minishell", "syntax error");
+			free_cmdtree(node);
 			return (NULL);
 		}
 		if (red != HERE_DOC)
@@ -320,7 +321,6 @@ t_node	*pars_and(char **pcmd);
 t_node	*parse_parenthesis(char **pcmd)
 {
 	t_node	*node;
-	t_node	*tmp;
 
 	get_token(pcmd, NULL, NULL);
 	node = pars_and(pcmd);
@@ -333,9 +333,7 @@ t_node	*parse_parenthesis(char **pcmd)
 		return (NULL);
 	}
 	get_token(pcmd, NULL, NULL);
-	tmp = node;
-	node = parse_redirection(node, pcmd);
-	return (node);
+	return (parse_redirection(node, pcmd));
 }
 
 t_node	*parse_exec(char **pcmd)

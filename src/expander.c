@@ -72,8 +72,10 @@ int    is_exist(int c, char *s)
 
     i = 0;
     while (s[i])
+	{
         if (s[i++] == c)
             return (1);
+	}
 	return (0);
 }
 
@@ -302,7 +304,7 @@ char	*handle_first_in_expand(t_elem **elem, char *s, int *start)
 char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 {
 	int		j;
-	char	a;
+	// char	a;
 
 	if (!env)
 	{
@@ -311,7 +313,7 @@ char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 		return (s);
 	}
 	j = 0;
-	a = '\0';
+	// a = '\0';
 	// if (ft_strchr(env, '\'') == NULL)
 	// 	a = '\'';
 	// else if(ft_strchr(env, '"') == NULL)
