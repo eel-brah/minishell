@@ -90,16 +90,12 @@ char	**expand_args(char **args)
 
 char	*expand_file(char *file)
 {
-	char **ex;
-	int	count;
+	char	**ex;
 
-	count = 0;
 	ex = expander(file, 0, 1, exit_status(0, false, false));
 	if (!ex)
 		return (NULL);
-	while(ex[count])
-		count++;
-	if (count == 1)
+	if (count_args(ex) == 1)
 	{
 		free(file);
 		file = *ex;
@@ -149,7 +145,7 @@ void	exec_type(t_node *node)
 		exit_status(0, true, true);
 }
 
-void	heredoc_type(t_redirection *red)
+bool	heredoc_type(t_redirection *red)
 {
 	int	fd;
 	int	fd_read;
@@ -157,65 +153,65 @@ void	heredoc_type(t_redirection *red)
 	fd_read = expand_here_doc(red->here_fd,
 		exit_status(0, false, false), red->expand);
 	if (fd_read == -1)
-		return ;
+		return (false);
 	fd = dup(red->fd);
 	if (fd == -1)
-	{
-		perror("dup");
-		return ;
-	}
+		return (perror("dup"), false);
 	close(red->here_fd);
 	red->here_fd = fd_read;
 	if (dup2(red->here_fd, red->fd) == -1)
-	{
-		close(fd);
-		perror("dup2");
-		return ;
-	}
+		return (close(fd), perror("dup2"), false);
 	execute(red->node);
 	if (dup2(fd, red->fd) == -1)
-		perror("dup2");
+		return (close(fd), perror("dup2"), false);
 	close(fd);
+	return (true);
+}
+
+bool	red_type(t_redirection *red)
+{
+	int		or;
+	char	*tmp2;
+	int		fd;
+
+	tmp2 = expand_file(red->file);
+	if (!tmp2)
+		return (false);
+	red->file = tmp2;
+	// S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); /* rw-rw-rw- 
+	or = open(red->file, red->flags, PREMISSIONS);
+	if(or == -1)
+		return (perror("open"), false);
+	fd = dup(red->fd);
+	if (fd == -1)
+		return (close(or), perror("dup"), false);
+	if (dup2(or, red->fd) == -1)
+		return (close(or), close(fd), perror("dup2"), false);
+	close(or);
+	execute(red->node);
+	if (dup2(fd, red->fd) == -1)
+		return (close(fd), perror("dup2"), false);
+	close(fd);
+	return (true);
 }
 
 void	execute(t_node *node)
 {
-	t_redirection	*red;
 	t_div			*div;
 	pid_t			pid[3];
 	int				p[2];
-	int				or;
 	
 	if (node->type == EXEC)
 		exec_type(node);
 	else if (node->type == HEREDOC)
-		heredoc_type((t_redirection*)node);
+	{
+		if (!heredoc_type((t_redirection*)node))
+			exit_status(1, true, true);
+	}
 	else if (node->type == RED)
 	{
-		red = (t_redirection*)node;
-		char *tmp2;
-		tmp2 = expand_file(red->file);
-		if (!tmp2)
-		{
+		if (!red_type((t_redirection*)node))
 			exit_status(1, true, true);
-			return ;
-		}
-		red->file = tmp2;
-		// S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); /* rw-rw-rw- 
-		or = open(red->file, red->flags, PREMISSIONS);
-		if(or < 0)
-		{
-			exit_status(1, true, true);
-			perror("open");
-			return ;
-		}
-		// if signal arrive while this happning
-		int fd = dup(red->fd);
-		dup2(or, red->fd);
-		close(or);
-		execute(red->node);
-		dup2(fd, red->fd);
-		close(fd);
 	}
 	else if (node->type == PIPE)
 	{
