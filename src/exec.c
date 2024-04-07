@@ -135,9 +135,8 @@ void	exec_cmd(t_node *tree, char *prg, char **args)
 				return ;
 			}
 		}
-		free(eenv);
 		set_signal_handler(SIGINT, sigint_handler);
-		set_signal_handler(SIGQUIT, SIG_IGN);
+		free(eenv);
 	}
 	else
 	{
@@ -216,9 +215,8 @@ void	exec_cmd(t_node *tree, char *prg, char **args)
 						return ;
 					}
 				}
-				free(eenv);
 				set_signal_handler(SIGINT, sigint_handler);
-				set_signal_handler(SIGQUIT, SIG_IGN);
+				free(eenv);
 				free(full_path);
 			}
 			free(pr_denied);

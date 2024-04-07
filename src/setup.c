@@ -14,7 +14,7 @@ char	**setup(int argc, char **argv, char **env)
 		return (NULL);
 	}
 	set_signal_handler(SIGINT, sigint_handler);
-	set_signal_handler(SIGQUIT, sigint_handler);
+	set_signal_handler(SIGQUIT, SIG_IGN);
 	_env = create_env(env);
 	if (!_env)
 		return (NULL);

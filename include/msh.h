@@ -83,6 +83,8 @@ typedef struct s_redirection
 #define CLOSE_PER 'T'
 #define ERROR 'e'
 
+#define REDIRECTION token == OUT_RED || token == IN_RED || token == APP_RED
+
 #define PREMISSIONS 0644
 
 #define EXEC	1

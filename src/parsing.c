@@ -34,7 +34,7 @@ bool	get_token_cmp1(char *p, char *r)
 	return (true);
 }
 
-void	get_token_word(char **dp, char *r, bool print)
+void	get_token_word(char **dp, char *r)
 {
 	char	*p;
 	bool	Q;
@@ -53,11 +53,7 @@ void	get_token_word(char **dp, char *r, bool print)
 		p++;
 	}
 	if (Q)
-	{
-		if (print)
-			print_error("minishell", "syntax error");
 		*r = ERROR;
-	}
 	else
 		*r = WORD;
 	*dp = p;
@@ -80,13 +76,12 @@ char	get_token(char **s, char **st, char **et)
 	else if (get_token_cmp1(p, &r))
 		p += 1;
 	else
-		get_token_word(&p, &r, 0);
+		get_token_word(&p, &r);
 	if (et)
 		*et = p;
 	*s = p;
 	return (r);
 }
-
 
 char	token_peek(char *p)
 {
@@ -101,7 +96,7 @@ char	token_peek(char *p)
 	else if (get_token_cmp1(p, &r))
 		p += 1;
 	else
-		get_token_word(&p, &r, false);
+		get_token_word(&p, &r);
 	return (r);
 }
 
@@ -170,6 +165,7 @@ t_node	*create_redirection(t_node *node, char *file, int flags, int fd)
 	red = malloc(sizeof(*red));
 	if (!red)
 		return (NULL);
+	ft_memset(red, 0, sizeof(*red));
 	red->type = RED;
 	red->file = file;
 	red->flags = flags;
@@ -177,15 +173,31 @@ t_node	*create_redirection(t_node *node, char *file, int flags, int fd)
 	return (add_redirection(red, node));
 }
 
-bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
+void	close_heredoc(int fd, int fd2, char *s, char **res)
 {
-	char	*s;
+	close(fd);
+	close(fd2);
+	free(s);
+	double_free(res);
+	set_signal_handler(SIGINT, sigint_handler);
+	got_sigint = 0;
+}
+
+char	**heredoc_setup(char *delim, t_redirection *node, unsigned int *len, int *fd2)
+{
 	char	**res;
-	int		len;
-	int		len_s;
 
 	if (!delim)
-		return (false);
+	{
+		perror("malloc");
+		return (NULL);
+	}
+	*fd2 = dup(0);
+	if (*fd2 == -1)
+	{
+		perror("dup");
+		return (NULL);
+	}
 	if (ft_strchr(delim, '\'') || ft_strchr(delim, '"'))
 		node->expand = false;
 	res = expander(delim, 0, 0, 0);
@@ -193,68 +205,89 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 	if (!res)
 	{
 		perror("malloc");
-		return (false);
+		return (NULL);
 	}
-	delim = res[0];
-	len = ft_strlen(delim);
-	// fd = dup(node->here_fd); // check fail of dup
+	*len = ft_strlen(res[0]);
+	return (res);
+}
+
+void	write_line_to_file(int fd, char *s, unsigned int len_s)
+{
+	write(fd, s, len_s);
+	write(fd, "\n", 1);
+}
+
+bool	_reset(int fd, int fd2, char *s, char **res)
+{
+	set_signal_handler(SIGINT, SIG_IGN);
+	if (dup2(fd2, 0) == -1)
+		perror("dup2");
+	close_heredoc(fd, fd2, s, res);
+	return (false);
+}
+
+bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
+{
+	char			*s;
+	char			**res;
+	unsigned int	len;
+	unsigned int	len_s;
+	int				fd2;
+
+	res = heredoc_setup(delim, node, &len, &fd2);
+	if (!res)
+		return (false);
 	set_signal_handler(SIGINT, sigint_handler2);
-	// signal(SIGINT, sigint_handler2);
-	int fd2 = dup(0);
 	while (1)
 	{
 		s = readline("> ");
 		if (got_sigint)
-		{
-			dup2(fd2, 0);
-			close(fd2);
-			double_free(res);
-			free(s);
-			close(fd);
-			got_sigint = 0;
-			set_signal_handler(SIGINT, sigint_handler);
-			return (false);
-		}
+			return (_reset(fd, fd2, s, res));
 		len_s = ft_strlen(s);
-		if (!s || (len == len_s && !ft_strncmp(s, delim, len)))
+		if (!s || (len == len_s && !ft_strncmp(s, res[0], len)))
 			break ;
-		write(fd, s, len_s);
-		write(fd, "\n", 1);
+		write_line_to_file(fd, s, len_s);
 		free(s);
+		s = NULL;
 	}
-	set_signal_handler(SIGINT, sigint_handler);
-	double_free(res);
-	free(s);
-	close(fd);
-	close(fd2);
+	close_heredoc(fd, fd2, s, res);
 	return (!!1337);
+}
+
+bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd)
+{
+	char	*file = "smo_0098731277";
+
+	red->file = file;
+	red->here_fd = open(file, red->flags, PREMISSIONS);
+	*fd = open(file, red->flags, PREMISSIONS);
+	unlink(file);
+	if (red->here_fd == -1 || *fd == -1)
+	{
+		close(*fd);
+		close(red->here_fd);
+		red->node = node;
+		free_cmdtree((t_node *)red);
+		perror("open");
+		return (false);
+	}
+	return (true);
 }
 
 t_node	*parse_heredoc(t_node *node, char *start, char *end)
 {
 	t_redirection	*red;
-	char	*file = "smo_0098731277";
-	int		fd;
+	int				fd;
 
 	red = malloc(sizeof(*red));
 	if (!red)
 		return (NULL);
 	red->fd = 0;
 	red->type = HEREDOC;
-	red->file = file;
 	red->flags = O_RDWR|O_CREAT|O_TRUNC;
-	red->here_fd = open(file, red->flags, PREMISSIONS);
-	fd = open(file, red->flags, PREMISSIONS);
-	if (red->here_fd == -1 || fd == -1)
-	{
-		// close 
-		red->node = node;
-		free_cmdtree((t_node *)red);
-		perror("open");
-		return (NULL);
-	}
-	unlink(file);
 	red->expand = true;
+	if (!open_herdoc_file(red, node, &fd))
+		return (NULL);
 	if (!fill_file_heredoc(red, strdup_v2(start, end), fd))
 	{
 		red->node = node;
@@ -300,8 +333,8 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 		token = get_token(pcmd, &st, &et);
 		if (token != WORD)
 		{
-			if (token != ERROR)
-				print_error("minishell", "syntax error");
+			exit_status(258, true, true);
+			print_error("minishell", "syntax error");
 			free_cmdtree(node);
 			return (NULL);
 		}
@@ -329,6 +362,7 @@ t_node	*parse_parenthesis(char **pcmd)
 	if (token_peek(*pcmd) != CLOSE_PER)
 	{
 		free_cmdtree(node);
+		exit_status(258, true, true);
 		print_error("minishell", "syntax error 4");
 		return (NULL);
 	}
@@ -336,14 +370,47 @@ t_node	*parse_parenthesis(char **pcmd)
 	return (parse_redirection(node, pcmd));
 }
 
+char	**fill_argv(char token, char **pcmd, t_node *node, t_exec *cmd)
+{
+	char	*st;
+	char	*et;
+	char	**tmp;
+
+	if (token != WORD)
+	{
+		exit_status(258, true, true);
+		print_error("minishell", "syntax error");
+		free_cmdtree(node);
+		return (NULL);
+	}
+	get_token(pcmd, &st, &et);
+	tmp = ptrs_realloc(cmd->argv, strdup_v2(st, et));
+	if (!tmp)
+	{
+		free_cmdtree(node);
+		return (NULL);
+	}
+	cmd->argv = tmp;
+	return (tmp);
+}
+
+t_node	*check_exec(t_exec *cmd, t_node *node)
+{
+	if (!cmd->argv && node == (t_node *)cmd)
+	{
+		free_cmdtree(node);
+		exit_status(258, true, true);
+		print_error("minishell", "syntax error");
+		return (NULL);
+	}
+	return (node);
+}
+
 t_node	*parse_exec(char **pcmd)
 {
 	t_exec	*cmd;
 	t_node	*node;
-	char	*st;
-	char	*et;
 	char	token;
-	char	**tmp;
 
 	if(token_peek(*pcmd) == OPEN_PER)
 		return (parse_parenthesis(pcmd));
@@ -356,32 +423,14 @@ t_node	*parse_exec(char **pcmd)
 	token = token_peek(*pcmd);
 	while (token && token != PIPELINE && token != OAND && token != OOR && token != CLOSE_PER)
 	{
-		if (token != WORD)
-		{
-			print_error("minishell", "syntax error");
-			free_cmdtree(node);
+		if (!fill_argv(token, pcmd, node, cmd))
 			return (NULL);
-		}
-		get_token(pcmd, &st, &et);
-		tmp = ptrs_realloc(cmd->argv, strdup_v2(st, et));
-		if (!tmp)
-		{
-			free_cmdtree(node);
-			return (NULL);
-		}
-		cmd->argv = tmp;
 		node = parse_redirection(node, pcmd);
 		if (!node)
 			return (NULL);
 		token = token_peek(*pcmd);
 	}
-	if (!cmd->argv && node == (t_node *)cmd)
-	{
-		free_cmdtree(node);
-		print_error("minishell", "syntax error");
-		return (NULL);
-	}
-	return (node);
+	return (check_exec(cmd, node));
 }
 
 t_node	*parse_pipe(char **pcmd)
@@ -450,6 +499,7 @@ t_node	*parse_cmd(char *cmd)
 		cmd++;
 	if (*cmd)
 	{
+		exit_status(258, true, true);
 		print_error("minishell", "syntax error");
 		free_cmdtree(tree);
 		return (NULL);

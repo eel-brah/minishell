@@ -6,27 +6,14 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/06 02:53:46 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/06 22:20:04 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
 
 volatile sig_atomic_t got_sigint = 0;
-
-char	*get_cmd(char *prompt)
-{
-	char	*cmd;
-
-	if (!prompt)
-		cmd = readline("$ ");
-	else
-		cmd = readline(prompt);
-	free(prompt);
-	if (cmd && *cmd)
-		add_history(cmd);
-	return (cmd);
-}
+extern char **environ;
 
 void	free_cmdtree(t_node *tree)
 {
@@ -80,13 +67,24 @@ void	free_cmdtree(t_node *tree)
 	}
 }
 
-
 void fu()
 {
 	system("leaks minishell");
 }
 
-extern char **environ;
+char	*get_cmd(char *prompt)
+{
+	char	*cmd;
+
+	if (!prompt)
+		cmd = readline("$ ");
+	else
+		cmd = readline(prompt);
+	free(prompt);
+	if (cmd && *cmd)
+		add_history(cmd);
+	return (cmd);
+}
 
 int	main(int argc, char **argv, char **env)
 {

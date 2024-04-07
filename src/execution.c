@@ -143,6 +143,11 @@ void	execute(t_node *node)
 				exit_status(130, true, true);
 				ft_putchar_fd('\n', 1);
 			}
+			else if (WTERMSIG(s) == SIGQUIT)
+			{
+				exit_status(131, true, true);
+				ft_putstr_fd("Quit: 3\n", 1);
+			}
 		}
 		else
 			exit_status(0, true, true);
