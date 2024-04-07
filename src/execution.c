@@ -112,62 +112,84 @@ char	*expand_file(char *file)
 }
 
 // system calls returns
+
+void		signal_exting(int s)
+{
+	if (WTERMSIG(s) == SIGINT)
+	{
+		exit_status(130, true, true);
+		ft_putchar_fd('\n', 1);
+	}
+	else if (WTERMSIG(s) == SIGQUIT)
+	{
+		exit_status(131, true, true);
+		ft_putstr_fd("Quit: 3\n", 1);
+	}
+}
+
+void	exec_type(t_node *node)
+{
+	t_exec	*cmd;
+	char	**tmp;
+
+	cmd = (t_exec *)node;
+	if (cmd->argv)
+	{
+		tmp = expand_args(cmd->argv);
+		if (!tmp)
+		{
+			exit_status(1, true, true);
+			return ;
+		}
+		cmd->argv = tmp;
+		exec_cmd(node, cmd->argv[0], cmd->argv);
+		signal_exting(exit_status(0, false, false));
+	}
+	else
+		exit_status(0, true, true);
+}
+
+void	heredoc_type(t_redirection *red)
+{
+	int	fd;
+	int	fd_read;
+	
+	fd_read = expand_here_doc(red->here_fd,
+		exit_status(0, false, false), red->expand);
+	if (fd_read == -1)
+		return ;
+	fd = dup(red->fd);
+	if (fd == -1)
+	{
+		perror("dup");
+		return ;
+	}
+	close(red->here_fd);
+	red->here_fd = fd_read;
+	if (dup2(red->here_fd, red->fd) == -1)
+	{
+		close(fd);
+		perror("dup2");
+		return ;
+	}
+	execute(red->node);
+	if (dup2(fd, red->fd) == -1)
+		perror("dup2");
+	close(fd);
+}
+
 void	execute(t_node *node)
 {
-	t_exec			*cmd;
 	t_redirection	*red;
 	t_div			*div;
 	pid_t			pid[3];
 	int				p[2];
 	int				or;
-	char **tmp;
 	
 	if (node->type == EXEC)
-	{
-		cmd = (t_exec *)node;
-		if (cmd->argv)
-		{
-			tmp = expand_args(cmd->argv);
-			if (!tmp)
-			{
-				exit_status(1, true, true);
-				return ;
-			}
-			cmd->argv = tmp;
-			exec_cmd(node, cmd->argv[0], cmd->argv);
-			// if (WIFSIGNALED(*status))
-			// || WTERMSIG(*status) == SIGQUIT
-			int s = exit_status(0, false, false);
-			if (WTERMSIG(s) == SIGINT)
-			{
-				exit_status(130, true, true);
-				ft_putchar_fd('\n', 1);
-			}
-			else if (WTERMSIG(s) == SIGQUIT)
-			{
-				exit_status(131, true, true);
-				ft_putstr_fd("Quit: 3\n", 1);
-			}
-		}
-		else
-			exit_status(0, true, true);
-	}
+		exec_type(node);
 	else if (node->type == HEREDOC)
-	{
-		red = (t_redirection*)node;
-		int fd = dup(red->fd);
-		int fd_read = expand_here_doc(red->here_fd, exit_status(0, false, false), red->expand);
-		close(red->here_fd);
-		// check error and free
-		if (fd_read == -1)
-			return ;
-		red->here_fd = fd_read;
-		dup2(red->here_fd, red->fd);
-		close(red->here_fd);
-		execute(red->node);
-		dup2(fd, red->fd);
-		close(fd);
-	}
+		heredoc_type((t_redirection*)node);
 	else if (node->type == RED)
 	{
 		red = (t_redirection*)node;

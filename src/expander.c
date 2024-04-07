@@ -937,7 +937,7 @@ int	expand_here_doc(int fd, int status, int expand)
 			break ;
 		res = expander(s, 1, expand, status);
 		if (!res)
-			return (close(fd_res), free(s), -2);
+			return (close(fd_res), free(s), -1);
 		write(fd_res, *res, ft_strlen(*res));
 		double_free(res);
 		free(s);
