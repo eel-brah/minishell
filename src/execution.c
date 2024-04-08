@@ -195,94 +195,109 @@ bool	red_type(t_redirection *red)
 	return (true);
 }
 
+void	_child(t_node *node, int usingp, int closingp, int s)
+{
+	int	status;
+
+	if (dup2(usingp, s) == -1)
+	{
+		perror("dup2");
+		close(usingp);
+		close(closingp);
+		exit (1);
+	}
+	close(usingp);
+	close(closingp);
+	execute(node);
+	status = exit_status(0, false, false);
+	exit(WEXITSTATUS(status));
+}
+
+void	wating_for_childs(pid_t *pid)
+{
+	int	s;
+
+	while (waitpid(pid[0], &s, 0) == -1)
+	{
+		if (errno != EINTR)
+		{
+			kill(pid[0], SIGINT);
+			perror("waitpid");
+			break ;
+		}
+	}
+	while (waitpid(pid[1], &s, 0) == -1)
+	{
+		if (errno != EINTR) 
+		{
+			s = 1 << 8;
+			kill(pid[1], SIGINT);
+			perror("waitpid");
+			break ;
+		}
+	}
+	exit_status(s, true, false);
+}
+
+bool	pipe_type(t_div *div)
+{
+	pid_t	pid[2];
+	int		p[2];
+
+	if(pipe(p) == -1)
+		return (perror("pipe"), false);
+	set_signal_handler(SIGINT, SIG_IGN);
+	pid[0] = fork();
+	if (pid[0] == -1)
+		return (close(p[0]), close(p[1]), perror("fork"), false);
+	if (pid[0] == 0)
+		_child(div->left, p[1], p[0], 1);
+	pid[1] = fork();
+	if (pid[1] == -1)
+	{
+		kill(pid[0], SIGINT);
+		return (close(p[0]), close(p[1]), perror("fork"), false);
+	}
+	if (pid[1] == 0)
+		_child(div->right, p[0], p[1], 0);
+	close(p[0]);
+	close(p[1]);
+	wating_for_childs(pid);
+	set_signal_handler(SIGINT, sigint_handler);
+	return (true);
+}
+
+void	and_type(t_div *div)
+{
+	execute(div->left);
+	if (!exit_status(0, false, false))
+		execute(div->right);
+}
+
+void	or_type(t_div *div)
+{
+	execute(div->left);
+	if (exit_status(0, false, false))
+		execute(div->right);
+}
+
 void	execute(t_node *node)
 {
-	t_div			*div;
-	pid_t			pid[3];
-	int				p[2];
-	
+	bool	b;
+
+	b = true;
 	if (node->type == EXEC)
 		exec_type(node);
 	else if (node->type == HEREDOC)
-	{
-		if (!heredoc_type((t_redirection*)node))
-			exit_status(1, true, true);
-	}
+		b = heredoc_type((t_redirection*)node);
 	else if (node->type == RED)
-	{
-		if (!red_type((t_redirection*)node))
-			exit_status(1, true, true);
-	}
+		b = red_type((t_redirection*)node);
 	else if (node->type == PIPE)
-	{
-		div = (t_div*)node;
-		if(pipe(p) < 0)
-		{
-			perror("pipe");
-			return ;
-		}
-		set_signal_handler(SIGINT, SIG_IGN);
-		pid[0] = fork();
-		if (pid[0] < 0)
-		{
-			perror("fork");
-			return ;
-		}
-		if (!pid[0])
-		{
-			dup2(p[1], 1);
-			close(p[1]);
-			close(p[0]);
-			execute(div->left);
-			int s = exit_status(0, false, false);
-			exit(WEXITSTATUS(s));
-		}
-		pid[1] = fork();
-		if (pid[1] < 0)
-		{
-			// status
-			perror("fork");
-			return ;
-		}
-		if (!pid[1])
-		{
-			dup2(p[0], 0);
-			close(p[1]);
-			close(p[0]);
-			execute(div->right);
-			int s = exit_status(0, false, false);
-			exit(WEXITSTATUS(s));
-		}
-		close(p[0]);
-		close(p[1]);
-		int s;
-		while (waitpid(pid[0], &s, 0) == -1)
-		{
-			// status
-			if (errno != EINTR) 
-				return ;
-		}
-		while (waitpid(pid[1], &s, 0) == -1)
-		{
-			if (errno != EINTR) 
-				return ;
-		}
-		exit_status(s, true, false);
-
-		set_signal_handler(SIGINT, sigint_handler);
-	}
+		b = pipe_type((t_div *)node);
 	else if (node->type == AND)
-	{
-		div = (t_div*)node;
-		execute(div->left);
-		if (!exit_status(0, false, false))
-			execute(div->right);
-	}
+		and_type((t_div*)node);
 	else if (node->type == OR)
-	{
-		div = (t_div*)node;
-		execute(div->left);
-		if (exit_status(0, false, false))
-			execute(div->right);
-	}
+		or_type((t_div*)node);
+	if (!b)
+		exit_status(1, true, true);
 }
