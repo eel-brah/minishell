@@ -149,16 +149,18 @@ bool	heredoc_type(t_redirection *red)
 {
 	int	fd;
 	int	fd_read;
-	
-	fd_read = expand_here_doc(red->here_fd,
-		exit_status(0, false, false), red->expand);
-	if (fd_read == -1)
-		return (false);
+
+	if (red->expand == true)
+	{
+		fd_read = expand_here_doc(red->here_fd, exit_status(0, false, false), red->expand);
+		if (fd_read == -1)
+			return (false);
+		close(red->here_fd);
+		red->here_fd = fd_read;
+	}
 	fd = dup(red->fd);
 	if (fd == -1)
 		return (perror("dup"), false);
-	close(red->here_fd);
-	red->here_fd = fd_read;
 	if (dup2(red->here_fd, red->fd) == -1)
 		return (close(fd), perror("dup2"), false);
 	execute(red->node);
