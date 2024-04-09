@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/06 02:52:08 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/08 22:48:30 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,7 @@ int	nb_without_empty(char **env)
 	}
 	return (res);
 }
+
 char	**env_without_empty(char **env)
 {
 	int		i;
@@ -150,7 +151,7 @@ char	**env_without_empty(char **env)
 	size = nb_without_empty(env);
 	res = malloc(sizeof(char *) * (size + 1));
 	if (!res)
-		return (perror("malloc"), NULL);
+		return (NULL);
 	i = 0;
 	index = 0;
 	while (env[i])
@@ -162,6 +163,7 @@ char	**env_without_empty(char **env)
 	res[index] = NULL;
 	return (res); 
 }
+
 void	ft_printenv(char **env)
 {
 	while (env && *env)

@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/06 22:20:04 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/08 22:12:23 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,5 +110,4 @@ int	main(int argc, char **argv, char **env)
 		execute(tree);
 		free_cmdtree(tree);
 	}
-	double_free(environ);
 }

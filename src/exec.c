@@ -47,6 +47,81 @@ char	*ft_getenv(char **env, char *s)
 	return (NULL);
 }
 
+void	execute_prg_child(char *prg, char **args, char **eenv)
+{
+	set_signal_handler(SIGINT, SIG_DFL);
+	set_signal_handler(SIGQUIT, SIG_DFL);
+	execve(prg, args, eenv);
+	print_error_2("minishell", "execve", strerror(errno));
+	exit(1);
+}
+
+void	wating_for_child(pid_t pid)
+{
+	int		s;
+
+	while (waitpid(pid, &s, 0) == -1)
+	{
+		if (errno != EINTR)
+		{
+			s = 1 << 8;
+			print_error_2("minishell", "waitpid", strerror(errno));
+			kill(pid, SIGINT);
+			break ;
+		}
+	}
+	exit_status(s, true, false);
+}
+
+void	execute_prg(char *prg, char **args)
+{
+	char	**eenv;
+	pid_t	pid;
+
+	set_signal_handler(SIGINT, SIG_IGN);
+	eenv = env_without_empty(environ);
+	if (!eenv)
+	{
+		print_error_2("minishell", "malloc", strerror(errno));
+		exit_status(1, true, true);
+		return ;
+	}
+	pid = fork();
+	if (pid == -1)
+	{
+		print_error_2("minishell", "fork", strerror(errno));
+		exit_status(1, true, true);
+		free(eenv);
+		return ;
+	}
+	if (pid == 0)
+		execute_prg_child(prg, args, eenv);
+	wating_for_child(pid);
+	free(eenv);
+	set_signal_handler(SIGINT, sigint_handler);
+}
+
+void	prg_has_path(char *prg, char **args)
+{
+	struct stat statbuf;
+
+	if (stat(prg, &statbuf))
+	{
+		print_error_2("minishell", prg, strerror(errno));
+		exit_status(127, true, true);
+		return ;
+	}
+	if (access(prg, X_OK) == -1 || S_ISDIR(statbuf.st_mode))
+	{
+		if (!errno)
+			errno = 21;
+		print_error_2("minishell", prg, strerror(errno));
+		exit_status(126, true, true);
+		return ;
+	}
+	execute_prg(prg, args);
+}
+
 void	exec_cmd(t_node *tree, char *prg, char **args)
 {
 	char	*path;
@@ -54,106 +129,30 @@ void	exec_cmd(t_node *tree, char *prg, char **args)
 	int		i;
 	char	*slashed;
 	char	*full_path;
-	pid_t	pid;
-	struct stat statbuf;
-	bool	is_path;
 	char	*pr_denied;
-	bool	acc;
-	int t;
-		int s;
+	int		t;
 
-
-	if (!prg)
-	{
-		exit_status(0, true, true);
-		return ;
-	}
 	t = built_in(tree, prg, args);
 	if (t != -1)
-	{
 		exit_status(t, true, true);
-		return ;
-	}
-	if (!ft_strncmp(prg, ".", 2) || !ft_strncmp(prg, "..", 3))
-	{
-		print_error(prg, "command not found");
-		exit_status(127, true, true);
-		return ;
-	}
-	is_path = !!ft_strchr(prg, '/');
-	acc = access(prg, F_OK);
-	if (is_path && acc)
-	{
-		perror(prg);
-		exit_status(127, true, true);
-		return ;
-	}
-	else if (is_path && !acc)
-	{
-		if (access(prg, X_OK))
-		{
-			perror(prg);
-			exit_status(126, true, true);
-			return ;
-		}
-		if (stat(prg, &statbuf))
-		{
-			perror("stat");
-			exit_status(1, true, true);
-			return ;
-		}
-		if (S_ISDIR(statbuf.st_mode))
-		{
-			print_error(prg, "Is a directory");
-			exit_status(126, true, true);
-			return ;
-		}
-
-		// signal(SIGINT, SIG_IGN);
-		set_signal_handler(SIGINT, SIG_IGN);
-		char **eenv = env_without_empty(environ);
-		// if NULL
-		pid = fork();
-		if (pid == 0)
-		{
-			set_signal_handler(SIGINT, SIG_DFL);
-			set_signal_handler(SIGQUIT, SIG_DFL);
-			// ft_change_last_pro(&env, args);
-			execve(prg, args, eenv);
-			// handle signals if faild
-			free(eenv);
-			perror("execve");
-			exit_status(1, true, true);
-			return ;
-		}
-		while (waitpid(pid, &s, 0) == -1)
-		{
-			if (errno != EINTR)
-			{
-				free(eenv);
-				exit_status(1, true, true);
-				return ;
-			}
-		}
-		set_signal_handler(SIGINT, sigint_handler);
-		free(eenv);
-	}
+	else if (ft_strchr(prg, '/'))
+		prg_has_path(prg, args);
 	else
 	{
 		path = getenv("PATH");
-		if (path && *prg)
+		if (path && *prg && !(!ft_strncmp(prg, ".", 2) || !ft_strncmp(prg, "..", 3)))
 		{
 			paths = ft_split(path, ':');
 			if (!paths)
 			{
-				perror("malloc");
+				print_error_2("minishell", "malloc", strerror(errno));
 				exit_status(1, true, true);
 				return ;
 			}
 			slashed = ft_strjoin("/", prg);
 			if (!slashed)
 			{
-				perror("malloc");
+				print_error_2("minishell", "malloc", strerror(errno));
 				double_free(paths);
 				exit_status(1, true, true);
 				return ;
@@ -163,12 +162,20 @@ void	exec_cmd(t_node *tree, char *prg, char **args)
 			while (paths[i])
 			{
 				full_path = ft_strjoin(paths[i], slashed);
+				if (!full_path)
+				{
+					print_error_2("minishell", "malloc", strerror(errno));
+					double_free(paths);
+					free(slashed);
+					exit_status(1, true, true);
+					return ;
+				}
 				if (access(full_path, F_OK) == 0)
 				{
-					if (access(full_path, X_OK))
+					if (access(full_path, X_OK) == -1)
 					{
 						if (!pr_denied)
-							pr_denied = ft_strdup(full_path);
+							pr_denied = full_path;
 						i++;
 						continue;
 					}
@@ -177,91 +184,35 @@ void	exec_cmd(t_node *tree, char *prg, char **args)
 				free(full_path);
 				i++;
 			}
-			if (!paths[i] && pr_denied)
+			bool	end = !!paths[i];
+			free(slashed);
+			double_free(paths);
+			if (!end && pr_denied)
 			{
-				print_error(pr_denied, "Permission denied");
+				print_error_2("minishell", pr_denied, "Permission denied");
 				exit_status(126, true, true);
+				free(pr_denied);
 				return ;
 			}
-			else if (!paths[i])
+			else if (!end)
 			{
-				print_error(prg, "command not found");
+				print_error_2("minishell", prg, "command not found");
 				exit_status(127, true, true);
 				return ;
 			}
 			else
 			{
-				set_signal_handler(SIGINT, SIG_IGN);
-				// signal(SIGINT, SIG_IGN);
-				char **eenv = env_without_empty(environ);
-				pid = fork();
-				if (pid == 0)
-				{
-					set_signal_handler(SIGINT, SIG_DFL);
-					set_signal_handler(SIGQUIT, SIG_DFL);
-					// ft_change_last_pro(&env, args);
-					execve(full_path, args, eenv);
-					perror("execve");
-					free(eenv);
-					exit_status(1, true, true);
-					return ;
-				}
-				while (waitpid(pid, &s, 0) == -1)
-				{
-					if (errno != EINTR) 
-					{
-						free(eenv);
-						exit_status(1, true, true);
-						return ;
-					}
-				}
-				set_signal_handler(SIGINT, sigint_handler);
-				free(eenv);
+				free(pr_denied);
+				execute_prg(full_path, args);
 				free(full_path);
 			}
-			free(pr_denied);
-			double_free(paths);
-			free(slashed);
 		}
 		else
 		{
-			print_error(prg, "command not found");
+			print_error_2("minishell", prg, "command not found");
 			exit_status(127, true, true);
 			return ;
 		}
 	}
-	exit_status(s, true, false);
 	return ;
 }
-
-// int main()
-// {
-// 	char	*line;
-// 	char	*cmd;
-// 	char	**args;
-
-// 	while (true)
-// 	{
-// 		line = readline("$");
-// 		if (line && *line)
-// 		{
-// 			cmd = ft_strtrim(line, "\t\n\v\f\r ");
-// 			if (!cmd)
-// 				perror("malloc");
-// 			else if (*cmd)
-// 			{
-// 				args = ft_split(cmd, ' ');
-// 				if (!args)
-// 				{
-// 					perror("malloc");
-// 					free(cmd);
-// 					continue;
-// 				}
-// 				exec_cmd(args[0], args);
-// 				double_free(args);
-// 			}
-// 			free(cmd);
-// 		}
-// 		free(line);
-// 	}
-// }
