@@ -281,8 +281,12 @@ if __name__ == '__main__':
 	# export b="*'*"*'"*"'"'"
 
 # mkdir test && touch test/t5555
-# export PATH+=:{pull_path}/test
-# ./t5555
+# export PATH+=:ath/test
+# t5555
 # mkdir test2 && echo !#/bin/sh > test2/t5555 && echo ls -a >> test2/t5555 && chmod 7777 test2/t5555
-# export PATH+=:{pull_path}/test2
-# ./t5555
+# export PATH+=:path/test2
+# t5555
+
+# mkdir -p test/t5555
+# export PATH+=:path/test
+# t5555
