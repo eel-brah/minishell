@@ -72,10 +72,8 @@ int    is_exist(int c, char *s)
 
     i = 0;
     while (s[i])
-	{
         if (s[i++] == c)
             return (1);
-	}
 	return (0);
 }
 
@@ -304,7 +302,7 @@ char	*handle_first_in_expand(t_elem **elem, char *s, int *start)
 char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 {
 	int		j;
-	// char	a;
+	char	a;
 
 	if (!env)
 	{
@@ -313,21 +311,21 @@ char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 		return (s);
 	}
 	j = 0;
-	// a = '\0';
+	a = '\0';
 	// if (ft_strchr(env, '\'') == NULL)
 	// 	a = '\'';
 	// else if(ft_strchr(env, '"') == NULL)
 	// 	a = '"';
-	// if (set_caractere(*elem, a) == NULL)
-	// 		return (NULL);
+	if ((*elem)->here_doc == 0 && set_caractere(*elem, 20) == NULL)
+			return (NULL);
 	while (env[j])
 	{
 		if (set_caractere(*elem, env[j]) == NULL)
 			return (NULL);
 		j++;
 	}
-	// if (set_caractere(*elem, a) == NULL)
-	// 		return (NULL);
+	if ((*elem)->here_doc == 0 && set_caractere(*elem, 20) == NULL)
+			return (NULL);
 	return (NULL);
 }
 char	*split_expand(t_elem **elem, char *s, char ****res)
@@ -445,17 +443,31 @@ char	*alloc_without_quotes(char *s, int len)
 	int		q;
 	char	*res;
 	int		i;
+	int		f;
 
 	res = malloc(len + 1);
 	if (!res)
 		return (NULL);
 	i = 0;
 	len = 0;
+	f = 1;
 	qoute = 0;
 	q = '\0';
 	while (s && s[i])
 	{
-		if ((s[i] == '\'' || s[i] == '\"' ) && (qoute == 0 || q == s[i]))
+		if (s[i] == 20 && f == 1) 
+		{
+			i++;
+			f = 0;
+			continue;
+		}
+		if (s[i] == 20 && f == 0)
+		{
+			i++;
+			f = 1;
+			continue;
+		}
+		if ((s[i] == '\'' || s[i] == '\"' ) && (qoute == 0 || q == s[i]) && f)
 		{
 			if (qoute == 0)
 			{
@@ -563,6 +575,7 @@ char	*delete_quotes(char *s)
 {
 	int		qoute;
 	int		q;
+	int		f;
 	int		i;
 	int		len;
 
@@ -570,9 +583,22 @@ char	*delete_quotes(char *s)
 	len = 0;
 	qoute = 0;
 	q = '\0';
+	f = 1;
 	while (s && s[i])
 	{
-		if ((s[i] == '\'' || s[i] == '\"' ) && (qoute == 0 || q == s[i]))
+		if (s[i] == 20 && f == 1) 
+		{
+			i++;
+			f = 0;
+			continue;
+		}
+		if (s[i] == 20 && f == 0)
+		{
+			i++;
+			f = 1;
+			continue;
+		}
+		if ((s[i] == '\'' || s[i] == '\"' ) && (qoute == 0 || q == s[i]) && f)
 		{
 			if (qoute == 0)
 			{
@@ -923,7 +949,7 @@ int	expand_here_doc(int fd, int status, int expand)
 	char	**res;
 	int		fd_res;
 	int		fd_ret;
-// random name
+
 	fd_res = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
 	fd_ret = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
 	if (fd_res == -1 || fd_ret == -1)
@@ -937,7 +963,7 @@ int	expand_here_doc(int fd, int status, int expand)
 			break ;
 		res = expander(s, 1, expand, status);
 		if (!res)
-			return (close(fd_res), free(s), -1);
+			return (close(fd_res), free(s), -2);
 		write(fd_res, *res, ft_strlen(*res));
 		double_free(res);
 		free(s);
@@ -951,7 +977,7 @@ bool	ft_change_last_pro(char ****eenv, char **args)
 	int		len;
 	char	*s;
 	char	**res;
-	bool	ret;
+	bool	ret = true;
 
 
 	// printf("hereheresdfdsf\n");
@@ -970,7 +996,7 @@ bool	ft_change_last_pro(char ****eenv, char **args)
 	res[1] = NULL;
 	if (!s)
 		return (false);
-	ret = ft_export(res);
+	// ret = ft_export(&environ, res);
 	free(s);
 	return (ret);
 }

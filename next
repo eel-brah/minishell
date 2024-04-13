@@ -1,5 +1,6 @@
 error messages 
 handle `%s'  in export error to std error
+ls | exit
 
 random file in heredoc
 default envarment varaibles should be added if there are not there

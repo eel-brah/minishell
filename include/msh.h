@@ -108,6 +108,7 @@ int		built_in(t_node *tree, char *prg, char **args);
 char	*strdup_v2(char *start, char *end);
 ssize_t	ft_atoi_v2(char *s, bool *valid);
 int		ft_export(char **args);
+void	free_cmdtree(t_node *tree);
 
 char	**env_without_empty(char **env);
 void	sort_2d_array(char ***res);

@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/06 01:44:17 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/13 12:35:18 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,8 @@ int	ft_echo(char **args)
 		i = 1;
 		while (args[0][i] == 'n')
 			i++;
+		if (args[0][i] && args[0][i] != ' ')
+			break ;
 		if (!args[0][i])
 		{
 			args++;

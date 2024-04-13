@@ -111,6 +111,7 @@ void	prg_with_path(char *prg, char **args)
 		exit_status(127, true, true);
 		return ;
 	}
+	errno = 0;
 	if (access(prg, X_OK) == -1 || S_ISDIR(statbuf.st_mode))
 	{
 		if (!errno)
@@ -221,6 +222,8 @@ void	exec_cmd(t_node *tree, char *prg, char **args)
 	char	*path;
 	int		t;
 
+	if (!prg)
+		return ;
 	t = built_in(tree, prg, args);
 	if (t != -1)
 		exit_status(t, true, true);

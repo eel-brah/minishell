@@ -4,38 +4,26 @@ char	**ptrs_realloc2(char **tokens, char **arg, int count, int index)
 {
 	size_t	size;
 	char	**ntokens;
+	char	**p2;
+	char	**p;
 
-	size = 0;
-	while (tokens[size])
-			size++;
+	size = count_args(tokens);
 	size += count;
 	ntokens = malloc(sizeof(char *) * size);
 	if (!ntokens)
 		return (NULL);
-	// int j = 0;
-	// int i = 0;
-	// char k[] = "0123456";
-	// char **p1 = arg;
-	char **p2 = tokens;
-	char **p = ntokens;
-	ft_memcpy ((char *) ntokens, (char *) tokens, index * sizeof (char *));
+	p2 = tokens;
+	p = ntokens;
+	ft_memcpy ((char *)ntokens, (char *)tokens, index * sizeof (char *));
 	ntokens += index;
 	tokens += index;
 	free(*tokens++);
-	ft_memcpy ((char *) ntokens, (char *) arg, count * sizeof (char *));
+	ft_memcpy ((char *)ntokens, (char *)arg, count * sizeof (char *));
 	ntokens += count;
-	ft_memcpy ((char *) ntokens, (char *) tokens, (size - count - index - 1) * sizeof (char *));
+	ft_memcpy ((char *)ntokens, (char *)tokens,
+		(size - count - index - 1) * sizeof (char *));
 	ntokens += (size - count - index - 1);
-	// while (tokens[j] && index != j)
-	// 	ntokens[i++] = tokens[j++];
-	// int k = 0;
-	// while (arg[k])
-	// 	ntokens[i++] = arg[k++];
-	// free(tokens[j++]);
-	// while (tokens[j])
-	// 	ntokens[i++] = tokens[j++];
 	*ntokens = NULL;
-	// free(p1);
 	free(p2);
 	return (p);
 }
@@ -55,6 +43,26 @@ void	rm_ptr(char **args)
 	free(ptr);
 }
 
+char	**mv_args(char ***args, char **ex, unsigned int count, unsigned int index)
+{
+	if (count == 1)
+	{
+		free((*args)[index]);
+		(*args)[index] = *ex;
+	}
+	else if (count > 1)
+	{
+		*args = ptrs_realloc2(*args, ex, count, index);
+		if (!*args)
+		{
+			print_error_2("minishell", "malloc", strerror(errno));
+			double_free(ex);
+			return (NULL);
+		}
+	}
+	return ((void *)1);
+}
+
 char	**expand_args(char **args)
 {
 	unsigned int	i;
@@ -69,19 +77,13 @@ char	**expand_args(char **args)
 		if (!ex)
 			return (NULL);
 		count = count_args(ex);
-		if (count == 1)
+		if (count == 0)
+			rm_ptr(&args[i]);
+		else
 		{
-			free(args[i]);
-			args[i] = *ex;
-		}
-		else if (count > 1)
-		{
-			args = ptrs_realloc2(args, ex, count, i);
-			if (!args)
+			if (!mv_args(&args, ex, count, i))
 				return (NULL);
 		}
-		else
-			rm_ptr(&args[i]);
 		i += count;
 		free(ex);
 	}
@@ -106,8 +108,6 @@ char	*expand_file(char *file)
 	double_free(ex);
 	return (NULL);
 }
-
-// system calls returns
 
 void		signal_exting(int s)
 {
