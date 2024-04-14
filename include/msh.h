@@ -109,6 +109,17 @@ char	*strdup_v2(char *start, char *end);
 ssize_t	ft_atoi_v2(char *s, bool *valid);
 int		ft_export(char **args);
 void	free_cmdtree(t_node *tree);
+char	token_peek(char *p);
+char	get_token(char **s, char **st, char **et);
+t_node	*parse_redirection_create(char *st, char *et, t_node *node, char red);
+t_node	*add_redirection(t_redirection *red, t_node *node);
+t_node	*diversion(t_node *left, t_node *right, int token);
+t_exec	*create_exec();
+t_node	*pars_and(char **pcmd);
+t_node	*parse_exec(char **pcmd);
+bool	fill_file_heredoc(t_redirection *node, char *delim, int fd);
+bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd);
+t_node	*parse_heredoc(t_node *node, char *start, char *end);
 
 char	**env_without_empty(char **env);
 void	sort_2d_array(char ***res);

@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/13 12:35:18 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/14 16:21:48 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,22 +194,24 @@ int	ft_exit(t_node *tree, char **args)
 	{
 		free_cmdtree(tree);
 		double_free(environ);
-		printf("exit\n");
+		ft_putstr_fd("exit\n", 1);
 		exit(exit_status(0, false, false) >> 8);
-	}
-	else if (count > 1)
-	{
-		printf("exit\n");
-		print_error("exit", "too many arguments");
-		return (1);
 	}
 	nb = ft_atoi_v2(*args, &valid);
 	if (!*args || !valid)
 	{
+		// 2 or 1
+		ft_putstr_fd("exit\n", 1);
 		print_error_2("exit", *args, "numeric argument required");
 		free_cmdtree(tree);
 		double_free(environ);
 		exit(255);	
+	}
+	if (count > 1)
+	{
+		ft_putstr_fd("exit\n", 1);
+		print_error("exit", "too many arguments");
+		return (1);
 	}
 	exit(nb);
 	return (0);

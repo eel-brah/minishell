@@ -290,3 +290,6 @@ if __name__ == '__main__':
 # mkdir -p test/t5555
 # export PATH+=:path/test
 # t5555
+
+# exit 88k 88
+# exit 88 88
