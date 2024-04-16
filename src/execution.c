@@ -210,6 +210,7 @@ void	_child(t_node *node, int usingp, int closingp, int s)
 	}
 	close(usingp);
 	close(closingp);
+	in_pipe(1);
 	execute(node);
 	status = exit_status(0, false, false);
 	exit(WEXITSTATUS(status));
@@ -262,6 +263,7 @@ bool	pipe_type(t_div *div)
 	}
 	if (pid[1] == 0)
 		_child(div->right, p[0], p[1], 0);
+	in_pipe(0);
 	close(p[0]);
 	close(p[1]);
 	wating_for_childs(pid);

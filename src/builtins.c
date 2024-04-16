@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/14 16:21:48 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/16 18:30:20 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,25 +183,35 @@ ssize_t	ft_atoi_v2(char *s, bool *valid)
 	return (nb);
 }
 
+bool	in_pipe(int	i)
+{
+	static int	p;
+
+	if (i == 0)
+		p = 0;
+	else if (i == 1)
+		p = 1;
+	return (p);
+}
+
 int	ft_exit(t_node *tree, char **args)
 {
 	unsigned int	count;
 	bool			valid;
 	ssize_t			nb;
 
+	if (!in_pipe(3))
+		ft_putstr_fd("exit\n", 2);
 	count = count_args(args);
 	if (count == 0)
 	{
 		free_cmdtree(tree);
 		double_free(environ);
-		ft_putstr_fd("exit\n", 1);
 		exit(exit_status(0, false, false) >> 8);
 	}
 	nb = ft_atoi_v2(*args, &valid);
 	if (!*args || !valid)
 	{
-		// 2 or 1
-		ft_putstr_fd("exit\n", 1);
 		print_error_2("exit", *args, "numeric argument required");
 		free_cmdtree(tree);
 		double_free(environ);
@@ -209,7 +219,6 @@ int	ft_exit(t_node *tree, char **args)
 	}
 	if (count > 1)
 	{
-		ft_putstr_fd("exit\n", 1);
 		print_error("exit", "too many arguments");
 		return (1);
 	}

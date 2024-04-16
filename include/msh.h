@@ -151,4 +151,6 @@ char	**create_new_env();
 
 t_node	*parse_cmd(char *cmd);
 void	execute(t_node *node);
+bool	in_pipe(int	i);
+
 #endif
