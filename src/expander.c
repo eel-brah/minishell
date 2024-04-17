@@ -190,7 +190,8 @@ char	*handle_dollar_special(char *s, t_elem **elem, int status)
 			return (NULL);
 		return (s);
 	}
-	num = ft_itoa(WEXITSTATUS(status));
+	// num = ft_itoa(WEXITSTATUS(status));
+	num = ft_itoa(status >> 8);
 	if (!num)
 		return (NULL);
 	while(num[j])

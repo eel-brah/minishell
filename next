@@ -10,3 +10,8 @@ handle _ , shell level
 
 << $""
 << $"USER"
+
+< l > p
+(ls -l) >> file << file <<file4 >>>file4
+
+(((ls d k f d s >> l && ls) > ls > l if_it_didnt_catch_this_then_it_is_not_workign << d | ls  > ls << l  && (cat | ls || l) >> ls < l ) || (ls a idn sndu >> kkd) >> l )  > ls < l  >> l << d

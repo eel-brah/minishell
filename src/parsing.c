@@ -79,6 +79,8 @@ t_node	*pars_and(char **pcmd)
 t_node	*parse_cmd(char *cmd)
 {
 	t_node	*tree;
+	char	*st;
+	char	*et;
 
 	while (*cmd && ft_strchr(WHITESPACES, *cmd))
 		cmd++;
@@ -87,12 +89,11 @@ t_node	*parse_cmd(char *cmd)
 	tree = pars_and(&cmd);
 	if (!tree)
 		return (NULL);
-	while (*cmd && ft_strchr(WHITESPACES, *cmd))
-		cmd++;
-	if (*cmd)
+	if (get_token(&cmd, &st, &et))
 	{
 		exit_status(258, true, true);
-		print_error("minishell", "syntax error");
+		// print_error("minishell", "syntax error 0");
+		syntax_error("minishell", "syntax error near unexpected token", st, et);
 		free_cmdtree(tree);
 		return (NULL);
 	}

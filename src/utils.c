@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/08 22:48:30 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/17 16:57:02 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,19 @@ void	print_error(char *source, char *error)
 	ft_putstr_fd(source, 2);
 	ft_putstr_fd(": ", 2);
 	ft_putendl_fd(error, 2);
+}
+
+void	syntax_error(char *source, char *error, char *start, char *end)
+{
+	ft_putstr_fd(source, 2);
+	ft_putstr_fd(": ", 2);
+	ft_putstr_fd(error, 2);
+	ft_putstr_fd(" `", 2);
+	if (start && !*start)
+		ft_putstr_fd("newline", 2);
+	else
+		substr_print(start, end);
+	ft_putstr_fd("'\n", 2);
 }
 
 void	print_error_2(char *source, char *arg, char *error)

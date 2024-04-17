@@ -293,3 +293,7 @@ if __name__ == '__main__':
 
 # exit 88k 88
 # exit 88 88
+
+# ls > ls > l kk
+# (ls) > ls > l kk
+# < l > p

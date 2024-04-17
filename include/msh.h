@@ -120,6 +120,8 @@ t_node	*parse_exec(char **pcmd);
 bool	fill_file_heredoc(t_redirection *node, char *delim, int fd);
 bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd);
 t_node	*parse_heredoc(t_node *node, char *start, char *end);
+void	substr_print(char *s, char *e);
+void	syntax_error(char *source, char *error, char *start, char *end);
 
 char	**env_without_empty(char **env);
 void	sort_2d_array(char ***res);
