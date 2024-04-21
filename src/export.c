@@ -176,6 +176,7 @@ void	substr_print(char *s, char *e)
 		return ;
 	while (s != e)
 		ft_putchar_fd(*s++, 1);
+	// script faildes in test () because ) print in stdoiut not stderr but if print to stderr some other test fail hhhh 
 }
 
 void	print_sored_env(char **res)

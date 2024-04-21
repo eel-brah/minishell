@@ -3,7 +3,7 @@ import os
 
 simple_tests = {
         "normal test": "ls -l",
-        # "unset": "unset HOME && echo $HOME",
+        "unset": "unset HOME && echo $HOME",
         # echo hi | > file4 grep h > file2
         # echo hi | > file3 grep h
         # echo hi | > file grep h > file
@@ -20,6 +20,11 @@ simple_tests = {
         "expand 11": "echo '$HOME'$sdfsf$USER$HOME",
         "expand 12": "echo $'HOME'\"$sdfsf\"$USER$HOME",
         "expand 13": 'echo $HOME======',
+        "expand 14": "echo $USER'\"\"'",
+        "expand 15": "echo $USER'\"\"',,$USER'$USER'_____$USER==____",
+        "expand 16": "echo $USER''$USER\"$USER===\"'\"'",
+        "expand 17": "echo $USER''$USER\"$USER===\"'\"'",
+        "expand and and": "export a=s && $''l''\"\"''\"\"''$a", 
         "wildcard": "echo *",
         "wildcard 2": "echo ****",
         "wildcard 3": "echo \"h\"****",
@@ -182,23 +187,25 @@ def run_tests(tests):
         expected = subprocess.run(['bash', '-c', f"echo -e \'{tests[key]}\' | bash"], capture_output=True)
         #expected = subprocess.run(['bash', '-c', tests[key]], capture_output=True)
         expected, expected_err = expected.stdout, expected.stderr
+
         got = subprocess.run(['bash', '-c', f"echo -e \'{tests[key]}\' | ./minishell"], capture_output=True)
         got, got_err = got.stdout, got.stderr
+        # print(got_err + " error stderr")
+        # print(got)
         got = got.split(b'\n')[1:-1]
-        got[-1] = got[-1][:-19] # remove b'minishell2.5>$ exit' eel-brah minishell2$ exit
+        got[-1] = got[-1][:-25] # remove b'minishell2.5>$ exit'
         got = b'\n'.join(got)
 
         # adding \n to match expected
-        #if len(expected) >= 1 and expected[-1] == 10:
-            #got += b'\n'
+        # if len(expected) >= 1 and expected[-1] == 10:
+            # got += b'\n'
 
         if got == expected and (not got_err) == (not expected_err):
-            print("yaaaay")
+            print(f"{key} sucesssssss")
         else:
             print(f"{key} failed\nexpeced ---------------\n{expected}\ngot --------------\n{got}")
 # amokhtar minishelll$ 
 # eel-brah mini$
-
 if __name__ == '__main__':
     run_tests(simple_tests)
     #run_sofisticated_tests(sofisticated_tests)
@@ -297,3 +304,5 @@ if __name__ == '__main__':
 # ls > ls > l kk
 # (ls) > ls > l kk
 # < l > p
+
+# $USER'""'

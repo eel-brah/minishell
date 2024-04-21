@@ -7,6 +7,7 @@ typedef struct s_elem
 	int		here_doc;
 	int		capacity;
 	int		qoute;
+	int		expand;
 	int		q;
 	int		i;
 	char	*arr;
@@ -21,6 +22,7 @@ typedef struct s_elem
 
 char	**match_pattern(char *pattern, int handle_quote);
 char	*delete_quotes(char *s);
+char	*delete_quotes_in(char *s);
 char	*alloc_for_expand_without_q(char *s, t_elem ***elem);
 char	**concat_two_array(char **res, char **concat);
 char    *ft_strrealloc2(char *str, size_t size);
@@ -292,11 +294,16 @@ char	*handle_first_in_expand(t_elem **elem, char *s, int *start)
 	}
 	while (s[(*elem)->i + *start] && is_alpha_num(s[(*elem)->i + *start]))
 		(*start)++;
-	if (*start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc))
+	if ((*start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc)) || ((*elem)->expand == 0 && *start != 0))
 	{
 		(*elem)->i--;
 		(*elem)->arr[(*elem)->index] = s[(*elem)->i];
 		((*elem)->index)++;
+		return (s);
+	}
+	else if((*elem)->expand == 0 && *start == 0)
+	{
+		(*elem)->i--;
 		return (s);
 	}
 	return (NULL);
@@ -360,6 +367,8 @@ char	*handle_dollar(char *s, char ****res, t_elem **elem)
 
 	if (handle_first_in_expand(elem, s, &start) != NULL)
 		return (s);
+	// if ((*elem)->expand == 0)
+	// 	return (s);
 	exp = malloc(start + 1);
 	if (!exp)
 		return (NULL);
@@ -425,6 +434,8 @@ char	*alloc_for_expand_without_q(char *s, t_elem ***elem)
 				(**elem)->qoute = 0;
 				(**elem)->q = '\0';
 			}
+			if (set_caractere(**elem, s[((**elem)->i)]) == NULL)
+				return (NULL);
 			((**elem)->i)++;
 			continue ;
 		}
@@ -435,6 +446,8 @@ char	*alloc_for_expand_without_q(char *s, t_elem ***elem)
 			(((**elem)->i))++;
 		}
 	}
+	// printf("%s    ,,\n", (**elem)->arr);
+	// printf("%d    ,,\n", (int)s[((**elem)->i)]);
 	((**elem)->i)--;
 	return ((char *)42);
 }
@@ -492,6 +505,48 @@ char	*alloc_without_quotes(char *s, int len)
 	res[len] = '\0';
 	return (res);
 }
+
+char	*alloc_without_quotes_in(char *s, int len)
+{
+	int		qoute;
+	int		q;
+	char	*res;
+	int		i;
+
+	res = malloc(len + 1);
+	if (!res)
+		return (NULL);
+	i = 0;
+	len = 0;
+	qoute = 0;
+	q = '\0';
+	while (s && s[i])
+	{
+		if ((s[i] == '\'' || s[i] == '\"' ) && (qoute == 0 || q == s[i]))
+		{
+			if (qoute == 0)
+			{
+				q = s[i];
+				qoute = 1;
+			}
+			else
+			{
+				qoute = 0;
+				q = '\0';
+			}
+			i++;
+			continue ;
+		}
+		else
+		{
+			res[len++] = s[i];
+			i++;
+		}
+	}
+	res[len] = '\0';
+	return (res);
+}
+
 char	**concat_two_array(char **res, char **concat)
 {
 	char	**result;
@@ -622,6 +677,45 @@ char	*delete_quotes(char *s)
 	}
 	return (alloc_without_quotes(s, len));
 }
+
+char	*delete_quotes_in(char *s)
+{
+	int		qoute;
+	int		q;
+	int		i;
+	int		len;
+
+	i = 0;
+	len = 0;
+	qoute = 0;
+	q = '\0';
+	while (s && s[i])
+	{
+	
+		if ((s[i] == '\'' || s[i] == '\"' ) && (qoute == 0 || q == s[i]))
+		{
+			if (qoute == 0)
+			{
+				q = s[i];
+				qoute = 1;
+			}
+			else
+			{
+				qoute = 0;
+				q = '\0';
+			}
+			i++;
+			continue ;
+		}
+		else
+		{
+			i++;
+			len++;
+		}
+	}
+	return (alloc_without_quotes_in(s, len));
+}
+
 char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, char *s, int status)
 {
 	// char	*arrt;
@@ -643,7 +737,7 @@ char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, cha
 		if (handle_dollar_special(s, &elem, status) == NULL)
 			return (free(elem->arr), free_arr(*res), *res = NULL, perror("malloc "), NULL);
 	}
-	else if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc) && expand)
+	else if (s[elem->i] == '$' && (elem->q == '\"' || elem->q == '\0' || here_doc))
 	{
 		if (handle_dollar(s, &res, &elem) == NULL)
 			return (free(elem->arr), free_arr(*res), *res = NULL, perror("malloc "), NULL);
@@ -737,6 +831,7 @@ char	**expander(char *s, int here_doc, int expand, int status)
 	
 	if (intial_struct(&elem, &word, &res, here_doc) == NULL)
 		return (NULL);
+	elem.expand = expand;
 	while (s && s[elem.i])
 	{
 		if ((s[elem.i] == '\'' || s[elem.i] == '\"' ) && (elem.qoute == 0 || elem.q == s[elem.i]))

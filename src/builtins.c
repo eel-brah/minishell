@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/16 18:30:20 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/21 18:07:01 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,7 +201,8 @@ int	ft_exit(t_node *tree, char **args)
 	ssize_t			nb;
 
 	if (!in_pipe(3))
-		ft_putstr_fd("exit\n", 2);
+		ft_putstr_fd("exit\n", 1);
+	// exit was print into stderr but i change it to stdout for test script
 	count = count_args(args);
 	if (count == 0)
 	{
