@@ -50,7 +50,7 @@ void	set_signal_handler(int signal, void (*fun)(int))
 	sigemptyset(&sig.sa_mask);
 	sigaction(signal, &sig, NULL);
 }
-char	*handl_path_pwd(char **env, size_t *i, char **ptr)
+bool	handl_path_pwd(char **env, size_t *i, char **ptr)
 {
 	if (env_is_there(env, "PATH") == false)
 	{
@@ -60,7 +60,7 @@ char	*handl_path_pwd(char **env, size_t *i, char **ptr)
 		{
 			perror("malloc");
 			double_free(ptr);
-			return (NULL);
+			return (false);
 		}
 	}
 	if (env_is_there(env, "PWD") == false)
@@ -68,17 +68,26 @@ char	*handl_path_pwd(char **env, size_t *i, char **ptr)
 		printf("herererer\n");
 		char *tmp = getcwd(NULL, 0);
 		if (!tmp)
-			return (perror("getcwd"), NULL);
+			return (perror("getcwd"), false);
 		char *tmp1 = ft_strjoin("PWD=", tmp);
 		ptr[(*i)++] = tmp1;
 		if (!ptr[(*i) - 1])
 		{
 			perror("malloc");
 			double_free(ptr);
-			return (NULL);
+			return (false);
 		}
 	}
-	return ((char *)1337);
+	return (!!1337);
+}
+void	check_path_pwd(char **env, size_t *i, int *add)
+{
+	*add = 0;
+	*i = 0;
+	if (env_is_there(env, "PATH") == false)
+		(*add)++;
+	if (env_is_there(env, "PWD") == false)
+		(*add)++;
 }
 char	**create_env(char **env)
 {
@@ -87,32 +96,23 @@ char	**create_env(char **env)
 	size_t	i;
 	int		add;
 
-	add = 0;
 	size = count_args(env);
 	if (size == 0)
 		return (create_new_env());
-	if (env_is_there(env, "PATH") == false)
-		add++;
-	if (env_is_there(env, "PWD") == false)
-		add++;
+	check_path_pwd(env, &i, &add);
 	ptr = malloc((size + 1 + add) * sizeof(env));
 	if (!ptr)
 		return (perror("malloc"), NULL);
-	i = 0;
 	while (env[i])
 	{
 		ptr[i] = ft_strdup(env[i]);
 		if (!ptr[i])
-		{
-			perror("malloc");
-			double_free(ptr);
-			return (NULL);
-		}
+			return (perror("malloc"), double_free(ptr), NULL);
 		i++;
 	}
-	handl_path_pwd(env, &i, ptr);
-	ptr[i] = NULL;
-	return (ptr);
+	if (!handl_path_pwd(env, &i, ptr))
+		return (NULL);
+	return (ptr[i] = NULL, ptr);
 }
 
 char	**create_new_env()

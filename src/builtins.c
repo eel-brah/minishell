@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/21 18:07:01 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/22 15:21:10 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,30 +14,38 @@
 
 int	ft_cd(char **args)
 {
-	// PWD OLDPWD
 	char			*home;
+	char			*pwd;
+	char			*current;
 	char			*target;
 
+	pwd = getenv("PWD");
 	if (count_args(args) < 1)
 	{
 		home = getenv("HOME");
 		if (!home)
-		{
-			ft_putstr_fd("cd: HOME not set\n", 2);
-			return (1);
-		}
+			return (ft_putstr_fd("cd: HOME not set\n", 2), 1);
 		target = home;
 	}
 	else
 		target = args[0];
 	if (*target)
 	{
+		// int a = chdir(target);
+		// printf("chdir val %d\n", a);
 		if (chdir(target))
-		{
-			ft_putstr_fd("cd: ", 2);
-			perror(target);
+			return (ft_putstr_fd("cd: ", 2), perror(target), 1);
+		// if (a)
+		// {
+			// return (ft_putstr_fd("cd: ", 2), perror(target), 1);
+		// }
+		current = getcwd(NULL, 0);
+		if (!current)
+			return (perror("getcwd"), 1);
+		if (!ft_setenv(environ, "OLDPWD=", pwd))
 			return (1);
-		}
+		if (!ft_setenv(environ, "PWD=", current))
+			return (1);
 	}
 	return (0);
 }
