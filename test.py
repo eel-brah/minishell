@@ -188,8 +188,9 @@ def run_tests(tests):
         expected = subprocess.run(['bash', '-c', f"echo -e \'{tests[key]}\' | bash"], capture_output=True)
         #expected = subprocess.run(['bash', '-c', tests[key]], capture_output=True)
         expected, expected_err = expected.stdout, expected.stderr
-
+        # print(expected)
         got = subprocess.run(['bash', '-c', f"echo -e \'{tests[key]}\' | ./minishell"], capture_output=True)
+        # print(got)
         got, got_err = got.stdout, got.stderr
         # print(got_err + " error stderr")
         # print(got)
