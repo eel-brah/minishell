@@ -109,7 +109,7 @@ t_node	*parse_exec(char **pcmd)
 	{
 		node = parse_parenthesis(pcmd);
 		char token = token_peek(*pcmd);
-		if (node && token == WORD)
+		if (node && (token == WORD || token == ERROR))
 		{
 			exit_status(258, true, true);
 			get_token(pcmd, &st, &et);

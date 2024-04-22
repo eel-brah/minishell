@@ -195,7 +195,7 @@ def run_tests(tests):
         # print(got_err + " error stderr")
         # print(got)
         got = got.split(b'\n')[1:-1]
-        got[-1] = got[-1][:-25] # remove b'minishell2.5>$ exit'
+        got[-1] = got[-1][:-19] # remove b'minishell2.5>$ exit'
         got = b'\n'.join(got)
 
         # adding \n to match expected

@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/16 18:24:29 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/22 18:52:15 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,25 @@ char	*get_cmd(char *prompt)
 	if (cmd && *cmd)
 		add_history(cmd);
 	return (cmd);
+}
+
+void	pre_trv(t_node *node) 
+{
+	if (node->type == EXEC || node->type == RED)
+	{
+		t_node *ptr = node;
+		while (ptr->type == RED)
+		{
+			printf("RED %s\n", ((t_redirection *)ptr)->file);
+			ptr = ((t_redirection *)ptr)->node;
+		}
+		printf("EXEX: %s\n", ((t_exec *)ptr)->argv[0]);
+		return ;
+	}
+	else
+		printf("%i\n", node->type);
+	pre_trv(((t_div *)node)->left);
+	pre_trv(((t_div *)node)->right);
 }
 
 int	main(int argc, char **argv, char **env)

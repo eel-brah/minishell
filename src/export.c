@@ -170,13 +170,12 @@ char	*edit_env(char *vrbl)
 	return ((char *)1337);
 }
 
-void	substr_print(char *s, char *e)
+void	substr_print(char *s, char *e, int fd)
 {
 	if (!s || !e || s > e)
 		return ;
 	while (s != e)
-		ft_putchar_fd(*s++, 1);
-	// script faildes in test () because ) print in stdoiut not stderr but if print to stderr some other test fail hhhh 
+		ft_putchar_fd(*s++, fd);
 }
 
 void	print_sored_env(char **res)
@@ -194,13 +193,13 @@ void	print_sored_env(char **res)
 			ft_putendl_fd(res[i++], 1);
 			continue;
 		}
-		substr_print(res[i], eq + 1);
+		substr_print(res[i], eq + 1, 1);
 		if (!eq[1])
 			ft_putstr_fd("\"\"", 1);
 		else
 		{
 			ft_putchar_fd('"', 1);
-			substr_print(eq + 1, &eq[ft_strlen(eq)]);
+			substr_print(eq + 1, &eq[ft_strlen(eq)], 1);
 			ft_putchar_fd('"', 1);
 		}
 		ft_putchar_fd('\n', 1);

@@ -68,6 +68,7 @@ t_node	*create_redirection(t_node *node, char *file, int flags, int fd)
 	ft_memset(red, 0, sizeof(*red));
 	red->type = RED;
 	red->file = file;
+	printf("%s\n", file);
 	red->flags = flags;
 	red->fd = fd;
 	return (add_redirection(red, node));
