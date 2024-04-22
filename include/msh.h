@@ -154,5 +154,6 @@ char	**create_new_env();
 t_node	*parse_cmd(char *cmd);
 void	execute(t_node *node);
 bool	in_pipe(int	i);
-
+bool	ft_setenv(char **env, char *name, char *val);
+bool	env_is_there(char **env, char *name);
 #endif

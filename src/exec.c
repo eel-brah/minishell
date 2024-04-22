@@ -79,6 +79,7 @@ void	execute_prg(char *prg, char **args)
 	pid_t	pid;
 
 	set_signal_handler(SIGINT, SIG_IGN);
+	ft_setenv(environ, "_=", prg); // check if return false malloc failed
 	eenv = env_without_empty(environ);
 	if (!eenv)
 	{
