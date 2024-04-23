@@ -107,14 +107,23 @@ char	*join_variabl(char *old, char *new, char *ptr)
 {
 	char	*tmp;
 	char	*res;
+	char	*addplus;
 
 	tmp = ft_strdup(ptr);
 	if (!tmp)
 		return (perror("malloc"), NULL);
-	res = ft_strjoin(old, tmp);
+	if (ft_strchr(old, '=') == NULL)
+	{
+		addplus = ft_strjoin(old, "=");
+		if (!addplus)
+			return (free(tmp), tmp = NULL, perror("malloc"), NULL);
+		res = ft_strjoin(addplus, tmp);
+	}
+	else
+		res = ft_strjoin(old, tmp);
 	free(tmp);
 	if (!res)
-		return (perror("malloc"), NULL);
+		return (free(addplus), perror("malloc"), NULL);
 	free(old);
 	free(new);
 	return (res);
@@ -152,9 +161,13 @@ char	*edit_env(char *vrbl)
 				}
 			}
 			else if (!ft_strncmp(env_ptr[i], vrbl, ft_strlen(vrbl)) && env_ptr[i][ft_strlen(vrbl)] == '=')
+			{
 				return ((char *)1337);
+			}
 			else if (!ft_strncmp(env_ptr[i], vrbl, ft_strlen(vrbl)) && env_ptr[i][ft_strlen(vrbl)] == '\0')
+			{
 				return ((char *)1337);
+			}
 			i++;
 		}
 		if (v == 1 && !add_to_env(vrbl))
