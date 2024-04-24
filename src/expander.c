@@ -224,7 +224,7 @@ char *get_pid()
 		handle_child_get_pid(file);
 	waitpid(pid, &exitt, 0);
 	if (WEXITSTATUS(exitt) != 0)
-		return (unlinke(file), free(file), NULL);
+		return (unlink(file), free(file), NULL);
 	int fd = open(file, O_CREAT | O_RDWR, PREMISSIONS);
 	unlink(file);
 	free(file);

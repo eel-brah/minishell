@@ -54,29 +54,26 @@ bool	handl_path_pwd(char **env, size_t *i, char **ptr)
 {
 	if (env_is_there(env, "PATH") == false)
 	{
-		printf("herererer\n");
 		ptr[(*i)++] = ft_strdup("PATH=/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.");
 		if (!ptr[(*i) - 1])
-		{
-			perror("malloc");
-			double_free(ptr);
-			return (false);
-		}
+			return (perror("malloc"), double_free(ptr), false);
+	}
+	if (env_is_there(env, "SHLVL") == false)
+	{
+		ptr[(*i)++] = ft_strdup("SHLVL=1");
+		// printf("%s\n",ptr[(*i) - 1]);
+		if (!ptr[(*i) - 1])
+			return (perror("malloc"), double_free(ptr), false);
 	}
 	if (env_is_there(env, "PWD") == false)
 	{
-		printf("herererer\n");
 		char *tmp = getcwd(NULL, 0);
 		if (!tmp)
 			return (perror("getcwd"), false);
 		char *tmp1 = ft_strjoin("PWD=", tmp);
 		ptr[(*i)++] = tmp1;
 		if (!ptr[(*i) - 1])
-		{
-			perror("malloc");
-			double_free(ptr);
-			return (false);
-		}
+			return (perror("malloc"), double_free(ptr), false);
 	}
 	return (!!1337);
 }
@@ -88,6 +85,48 @@ void	check_path_pwd(char **env, size_t *i, int *add)
 		(*add)++;
 	if (env_is_there(env, "PWD") == false)
 		(*add)++;
+	if (env_is_there(env, "SHLVL") == false)
+		(*add)++;
+}
+bool	is_all_digit(char *s)
+{
+	while (s && *s)
+	{
+		if (!ft_isdigit(*s))
+			return (false);
+		s++;
+	}
+	return (true);
+}
+bool	handle_shlvl(char *val, char **ptr, int i)
+{
+	int		shlvl;
+	char	**spl;
+	int		c;
+
+	spl = ft_split(val, '=');
+	if (!spl)
+		return (perror("malloc"), false);
+	c = count_args(spl);
+	if ( c > 2 || (c == 2 && !is_all_digit(spl[1])) || c == 1)
+		ptr[i] = ft_strdup("SHLVL=1");
+	else if (c == 2)
+	{
+		shlvl = ft_atoi(spl[1]) + 1;
+		if (shlvl == 1000)
+			ptr[i] = ft_strdup("SHLVL=");
+		else if (shlvl > 1000)
+		{
+			print_error("minishell", "warning: shell level is too high, resetting to 1");
+			ptr[i] = ft_strdup("SHLVL=1");
+		}
+		else
+			ptr[i] = ft_strjoin("SHLVL=", ft_itoa(shlvl));
+	}
+	double_free(spl);
+	if (!ptr[i])
+		return (perror("malloc"), false);
+	return (true);
 }
 char	**create_env(char **env)
 {
@@ -105,7 +144,13 @@ char	**create_env(char **env)
 		return (perror("malloc"), NULL);
 	while (env[i])
 	{
-		ptr[i] = ft_strdup(env[i]);
+		if (ft_strncmp(env[i], "SHLVL=", 6) == 0)
+		{
+			if (!handle_shlvl(env[i], ptr, i))
+				return (perror("malloc"), double_free(ptr), NULL);
+		}
+		else
+			ptr[i] = ft_strdup(env[i]);
 		if (!ptr[i])
 			return (perror("malloc"), double_free(ptr), NULL);
 		i++;
