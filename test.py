@@ -65,6 +65,7 @@ simple_tests = {
         "export 3": 'export a++=a && export | grep "a="',
         "export 4": 'export a++=a && ls',
         "export 5": 'export aaa && export | grep "aaa"',
+        "export and && ": 'export a && export a+=b && echo $a',
         "export syntax error": 'export a++=a',
         "export syntax error 2": 'export =sdfsf',
         "export syntax error 3": 'export =sdfsf ++ ++++ hello',
@@ -195,7 +196,7 @@ def run_tests(tests):
         # print(got_err + " error stderr")
         # print(got)
         got = got.split(b'\n')[1:-1]
-        got[-1] = got[-1][:-19] # remove b'minishell2.5>$ exit'
+        got[-1] = got[-1][:-25] # remove b'minishell2.5>$ exit'
         got = b'\n'.join(got)
 
         # adding \n to match expected

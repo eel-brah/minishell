@@ -178,14 +178,84 @@ char    *ft_strrealloc2(char *str, size_t size)
     free(str);
     return (new_str);
 }
+bool	handle_child_get_pid(char *file)
+{
+	char	**arr;
+	int		or;
+
+	arr = malloc(sizeof(char *) * 4);
+	if (!arr)
+		return (perror("malloc"), free(file), false);
+	arr[0] = ft_strdup("/bin/bash");
+	if (!arr[0])
+		return (perror("malloc"), free(file), double_free(arr), exit(1), false);
+	arr[1] = ft_strdup("-c");
+	if (!arr[1])
+		return (perror("malloc"), free(file), double_free(arr), exit(1), false);
+	arr[2] = ft_strdup("ps -j $$ | awk 'NR==2 {print $3}'");
+	if (!arr[2])
+		return (perror("malloc"), free(file), double_free(arr), exit(1), false);
+	arr[3] = NULL;
+	or = open(file, O_CREAT | O_RDWR, PREMISSIONS);
+	if(or == -1)
+		return (perror("open"), free(file), double_free(arr), exit(1), false);
+	if (dup2(or, 1) == -1)
+		return (close(or), perror("dup2"), free(file), double_free(arr), exit(1), false);
+	close(or);
+	if (execve("/bin/bash",arr, environ) == -1)
+		return (perror("exceve"), free(file), double_free(arr), exit(1) , false);
+	return (true);
+}
+
+char *get_pid()
+{
+	int 	pid;
+	int		exitt;
+	char	*file;
+	char	*line;
+
+	file = ft_itoa((int)&get_pid);
+	if (!file)
+		return (perror("malloc"), NULL);
+	pid = fork();
+	if (pid == -1)
+		return (free(file), perror("fork"), NULL);
+	if (pid == 0)
+		handle_child_get_pid(file);
+	waitpid(pid, &exitt, 0);
+	if (WEXITSTATUS(exitt) != 0)
+		return (unlinke(file), free(file), NULL);
+	int fd = open(file, O_CREAT | O_RDWR, PREMISSIONS);
+	unlink(file);
+	free(file);
+	if (fd == -1)
+		return (NULL);
+	line = get_next_line(fd);
+	close(fd);
+	if (!line)
+		return (NULL);
+	return (line);
+}
 char	*handle_dollar_special(char *s, t_elem **elem, int status)
 {
 	char	*num;
 	int		j;
 	j = 0;
-	
+
 	//WEXITSTATUS  (((*(int *)&(status)) >> 8) & 0x000000ff)
+	char *pid = get_pid();
 	((*elem)->i)++;
+	if (s[(*elem)->i] == '$')
+	{
+		int i = 0;
+		while (pid && pid[i] && pid[i] != '\n')
+		{
+			if (set_caractere(*elem, pid[i]) == NULL)
+				return (NULL);
+			i++;
+		}
+		return (s);
+	}
 	if (s[(*elem)->i] != '?')
 	{
 		if (set_caractere(*elem, s[(*elem)->i]) == NULL)
@@ -1042,30 +1112,45 @@ char	**match_pattern(char *pattern, int handle_quote)
 int	expand_here_doc(int fd, int status, int expand)
 {
 	char	*s;
+	int		count;
+	char	*name;
 	char	**res;
 	int		fd_res;
 	int		fd_ret;
 
-	fd_res = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
-	fd_ret = open("fd_res", O_CREAT | O_RDWR | O_TRUNC, PREMISSIONS);
+	count = 69;
+	name = ft_itoa((int)&expand_here_doc);
+	if (!name)
+		return (perror("malloc"), -1);
+	fd_res = open(name, O_CREAT | O_RDWR | O_TRUNC | O_EXCL, PREMISSIONS);
+	while (fd_res == -1  && errno == EEXIST)
+	{
+		free(name);
+		name = ft_itoa((int)&expand_here_doc + count);
+		if (!name)
+			return (perror("malloc"), -1);
+		fd_res = open(name, O_CREAT | O_RDWR | O_TRUNC | O_EXCL, PREMISSIONS);
+		count++;
+	}
+	fd_ret = open(name, O_RDWR, PREMISSIONS);
+	// printf("name player %s\n", name);
+	// 261237824
+	unlink(name);
 	if (fd_res == -1 || fd_ret == -1)
-		return (perror("open"), -1); // close 
-	unlink("fd_res");
+		return (perror("open"), free(name), close(fd_res), close(fd_ret), -1);
 	while (1)
 	{
-		// check if get_next fails
 		s = get_next_line(fd);
 		if (!s)
 			break ;
 		res = expander(s, 1, expand, status);
 		if (!res)
-			return (close(fd_res), free(s), -2);
+			return (close(fd_res), close(fd_ret), free(name), free(s), -1);
 		write(fd_res, *res, ft_strlen(*res));
 		double_free(res);
 		free(s);
 	}
-	close(fd_res);
-	return (fd_ret);
+	return (close(fd_res), free(name), fd_ret);
 }
 
 bool	ft_change_last_pro(char ****eenv, char **args)

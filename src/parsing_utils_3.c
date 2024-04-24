@@ -80,12 +80,17 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 
 bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd)
 {
-	char	*file = "smo_0098731277";
+	char	*file;
 
+	file = ft_itoa((int)&open_herdoc_file);
+	if (!file)
+		return (perror("malloc"), false);
 	red->file = file;
 	red->here_fd = open(file, red->flags, PREMISSIONS);
 	*fd = open(file, red->flags, PREMISSIONS);
+	// printf("name open here %s\n", file);
 	unlink(file);
+	free(file);
 	if (red->here_fd == -1 || *fd == -1)
 	{
 		close(*fd);

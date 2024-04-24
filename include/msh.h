@@ -156,4 +156,5 @@ void	execute(t_node *node);
 bool	in_pipe(int	i);
 bool	ft_setenv(char **env, char *name, char *val);
 bool	env_is_there(char **env, char *name);
+int		ft_close(int fd);
 #endif
