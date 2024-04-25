@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <stdbool.h>
@@ -23,7 +24,7 @@
 #include <limits.h>
 #include <signal.h>
 #include "get_next_line.h"
-
+// #define malloc(x) NULL
 #include <string.h>
 #include "../libft/include/libft.h"
 #include <sys/types.h>
@@ -32,6 +33,20 @@
 #include <errno.h>
 
 extern char **environ;
+
+typedef struct s_elem
+{
+	int		wild;
+	int		index;
+	int		here_doc;
+	int		capacity;
+	int		qoute;
+	int		expand;
+	int		q;
+	int		i;
+	char	*arr;
+	char	*tmp;
+}	t_elem;
 
 typedef struct s_node 
 {
@@ -49,6 +64,14 @@ typedef struct s_exec
 	int		type;
 	char	**argv;
 }	t_exec;
+
+typedef struct wild_patt
+{
+	char	*wild;
+	char	*tmp;
+	int		quote;
+	int		q;
+}	t_wild_patt;
 
 typedef struct s_div
 {
@@ -157,4 +180,18 @@ bool	in_pipe(int	i);
 bool	ft_setenv(char **env, char *name, char *val);
 bool	env_is_there(char **env, char *name);
 int		ft_close(int fd);
+char	*alloc_without_quotes(char *s, int len, int i, int qoute);
+char	*delete_quotes(char *s, int i, int len);
+bool	itterate_pattern(t_wild_patt *pa, char **p, char **name, int h);
+int		check_pattern(char *pattern, char *name, int handle_quot);
+char	*patter_true(char *arr, char ***res, int *capacity, char *s);
+char	**match_pattern(char *pattern, int handle_quote, int flag, int capacity);
+char    *ft_strrealloc2(char *str, size_t size);
+char    **ft_realloc(char **lines, char *line);
+char	*alloc_for_expand_without_q(char *s, t_elem ***elem);
+char	*set_caractere(t_elem *elem, int c);
+int    is_exist(int c, char *s);
+bool	handle_child_get_pid(char *file);
+void	d_free(char **ptr);
+char	*get_pid(int pid, int exitt);
 #endif

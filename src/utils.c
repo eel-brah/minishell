@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 03:31:48 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/22 18:32:52 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/04/25 18:26:04 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,17 @@ void	double_free(char **ptr)
 		free(*tmp++);
 	free(ptr);
 }
+
+void	d_free(char **ptr)
+{
+	char	**tmp;
+
+	tmp = ptr;
+	while(tmp && *tmp)
+		free(*tmp++);
+	free(ptr);
+}
+
 
 void	print_error(char *source, char *error)
 {

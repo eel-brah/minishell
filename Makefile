@@ -1,5 +1,5 @@
 CC := cc
-# CFLAGS := -Wall -Wextra -Werror -g
+CFLAGS := -Wall -Wextra -Werror -g
 CFLAGS := -Wall -Wextra -Werror -g -fsanitize=address
 
 PARN_DIR := .
@@ -15,7 +15,8 @@ SRC := msh.c exec.c prompt.c utils.c setup.c \
 	builtins.c expander.c export.c get_next_line.c \
 	parsing.c execution.c free.c \
 	parsing_utils_0.c parsing_utils_1.c parsing_utils_2.c \
-	parsing_utils_3.c ft_setenv.c
+	parsing_utils_3.c ft_setenv.c expander_utils.c expander_utils1.c\
+	expander_utils2.c
 OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
 
 LIBFT := $(LIBFTDIR)/libft.a
