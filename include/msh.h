@@ -194,4 +194,10 @@ int    is_exist(int c, char *s);
 bool	handle_child_get_pid(char *file);
 void	d_free(char **ptr);
 char	*get_pid(int pid, int exitt);
+char	*alloc_for_elem(t_elem *elem, int here_doc, char *word, char ***res);
+char	**concat_two_array(char **res, char **concat);
+char	*handle_wild_inside_expand(char *****res, char **sp, int i, char *tmp);
+char	*handle_first_in_expand(t_elem **elem, char *s, int *start);
+int		is_alpha_num(int c);
+
 #endif

@@ -159,35 +159,7 @@ char	*handle_dollar_special(char *s, t_elem **elem, int status)
 	return (s);
 }
 
-char	*handle_wild_inside_expand(char *****res, char **sp, int i)
-{
-	char	*tmp;
-	char	**tmp1;
-	char	**exp;
 
-	exp = match_pattern(sp[i], 0, 0, 1024);
-	if (!exp)
-		return (free_arr(sp), perror("malloc "), NULL);
-	else if (exp == (char **)42)
-	{
-		tmp = ft_strdup(sp[i]);
-		if (!tmp)
-			return (free(sp), perror("malloc "), NULL);
-		tmp1 = ft_realloc(***res, tmp);
-		if (!tmp1)
-			return (free_arr(***res), ***res = NULL, free_arr(sp), perror("malloc "), NULL);
-		else
-			***res = tmp1;
-	}
-	else
-	{
-		tmp1 = concat_two_array(***res, exp);
-		if (tmp1 == NULL)
-			return (perror("malloc "), free_arr(sp), NULL);
-		***res = tmp1;
-	}
-	return ((char *)42);
-}
 
 char	*handle_expand_without_wild(char **sp, char *****res, int i)
 {
@@ -208,11 +180,12 @@ char	*handle_wild_in_dollar(char *arr,char *****res)
 {
 	char	**sp;
 	int		i;
-	// char	*tmp;
+	char	*tmp;
 	// char	**tmp1;
 	// char	**exp;
 
 	i = 0;
+	tmp = NULL;
 	sp = ft_split(arr, ' ');
 	if (!sp)
 		return (NULL);
@@ -220,7 +193,7 @@ char	*handle_wild_in_dollar(char *arr,char *****res)
 	{
 		if (ft_strchr(sp[i], '*'))
 		{
-			if (handle_wild_inside_expand(res, sp, i) == NULL)
+			if (handle_wild_inside_expand(res, sp, i, tmp) == NULL)
 				return (NULL);
 		}
 		else
@@ -232,32 +205,7 @@ char	*handle_wild_in_dollar(char *arr,char *****res)
 	}
 	return (free_arr(sp), (char *)42);
 }
-char	*handle_first_in_expand(t_elem **elem, char *s, int *start)
-{
-	(*elem)->i++;
-	if (s[(*elem)->i] >= '0' && s[(*elem)->i] <= '9')
-		return (s);
-	*start = 0;
-	if (s[(*elem)->i] == '\0')
-	{
-		(*elem)->i--;
-		(*elem)->arr[(*elem)->index] = s[(*elem)->i];
-		(*elem)->index++;
-		return (s);
-	}
-	while (s[(*elem)->i + *start] && is_alpha_num(s[(*elem)->i + *start]))
-		(*start)++;
-	if ((*start == 0 && ((*elem)->qoute == 1 || (*elem)->here_doc)) || ((*elem)->expand == 0 && *start != 0))
-	{
-		(*elem)->i--;
-		(*elem)->arr[(*elem)->index] = s[(*elem)->i];
-		((*elem)->index)++;
-		return (s);
-	}
-	else if((*elem)->expand == 0 && *start == 0)
-		return ((*elem)->i--, s);
-	return (NULL);
-}
+
 
 char	*handle_env_in_expand(char *env, t_elem **elem, char *s)
 {
@@ -365,52 +313,6 @@ char	**concat_two_array(char **res, char **concat)
 		i++;
 	}
 	return (free(res), free(concat), result[i] = NULL, result);
-}
-char	*alloc_for_elem(t_elem *elem, int here_doc, char *word, char ***res)
-{
-	char	**tmp;
-	char	**concat;
-	int 	flag;
-
-
-	flag = 1;
-	tmp = NULL;
-	concat = NULL;
-	if (elem->wild && here_doc == 0)
-	{
-		concat = match_pattern(elem->arr, 1, 0, 1024);
-		if (concat == (char **)42)
-			word = delete_quotes(elem->arr, 0, 0);
-		else if (concat == NULL)
-			return (perror("malloc"), free(elem->arr), free_arr(*res), NULL);
-		else
-		{
-			tmp = concat_two_array(*res, concat);
-			if (tmp == NULL)
-				return (perror("malloc"), free(elem->arr), free_arr(*res), NULL);
-			*res = tmp;
-			flag = 0;
-		}
-		elem->wild = 0;
-
-	}
-	else if (here_doc == 0)
-		word = delete_quotes(elem->arr, 0, 0);
-	else
-		word = ft_strdup(elem->arr);
-	if (flag)
-	{
-		if (!word)
-			return (perror("malloc"), free(elem->arr), free_arr(*res), NULL);
-		tmp = ft_realloc(*res, word);
-		if (!tmp)
-			return (free_arr(*res) , free(word), free(elem->arr), perror("malloc"), NULL);
-		else
-			*res = tmp;
-	}
-	elem->index = 0;
-	ft_memset(elem->arr, 0, elem->capacity);
-	return ((char *)42);
 }
 
 char	*handl_other_carac(t_elem *elem, char ***res, int here_doc, int expand, char *s, int status)
