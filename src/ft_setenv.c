@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 09:54:07 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/22 12:26:31 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/27 20:03:10 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@ bool	env_is_there(char **env, char *name)
 	{
 		len = ft_strlen(name);
 		if (ft_strncmp(env[i], name, len) == 0)
+		{
 			return (true);
+		}
 		i++;
 	}
 	return (false);	
@@ -34,16 +36,15 @@ bool	update_env(char **env, char *name, char *val)
 	char	*res;
 
 	i = 0;
-	(void)env;
 	while (environ[i])
 	{
 		len = ft_strlen(name);
 		if (ft_strncmp(environ[i], name, len) == 0)
 		{
-			free(environ[i]);
 			res = ft_strjoin(name, val);
 			if (!res)
 				return (false);
+			free(environ[i]);
 			environ[i] = res;
 			return (true);			
 		}
@@ -58,21 +59,19 @@ bool	add_new_env(char **env, char *name, char *val)
 	char	*res;
 	char	**tmp;
 	
-	count = 0;
-	while (env[count])
-		count++;
+	count = count_args(env);
 	tmp = malloc(sizeof(char *) * (count + 2));
 	if (!tmp)
 		return (false);
 	i = 0;
-	while (env[i])
+	while (env && env[i])
 	{
 		tmp[i] = env[i];
 		i++;
 	}
 	res = ft_strjoin(name, val);
 	if (!res)
-		return (false);
+		return (d_free(tmp), false);
 	tmp[i++] = res;
 	tmp[i] = NULL;
 	free(environ);

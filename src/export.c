@@ -178,6 +178,7 @@ char	*edit_env(char *vrbl)
 	else
 	{
 		print_error_2("export", vrbl, "not a valid identifier");
+		free(vrbl);
 		return ((char *)42);
 	}
 	return ((char *)1337);
