@@ -124,19 +124,22 @@ char	*handle_dollar_special(char *s, t_elem **elem, int status)
 	char	*num;
 	int		j;
 	j = 0;
+	char	*pid;
 
 	//WEXITSTATUS  (((*(int *)&(status)) >> 8) & 0x000000ff)
-	char *pid = get_pid(0, 0);
+	
 	((*elem)->i)++;
 	if (s[(*elem)->i] == '$')
 	{
 		int i = 0;
+		pid = get_pid(0, 0);
 		while (pid && pid[i] && pid[i] != '\n')
 		{
 			if (set_caractere(*elem, pid[i]) == NULL)
-				return (NULL);
+				return (free(pid), NULL);
 			i++;
 		}
+		free(pid);
 		return (s);
 	}
 	if (s[(*elem)->i] != '?')
@@ -187,6 +190,7 @@ char	*handle_wild_in_dollar(char *arr,char *****res)
 	i = 0;
 	tmp = NULL;
 	sp = ft_split(arr, ' ');
+	free(arr);
 	if (!sp)
 		return (NULL);
 	while (sp[i])
