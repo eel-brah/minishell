@@ -1,13 +1,14 @@
 #include "../include/msh.h"
 
-void	get_evnr(char **user, char **cwd)
+void	get_evnr(char **user, char **cwd, int *len)
 {
 	char	**ptr;
 	char	**t_ptr;
 
 	*user = getenv("USER");
 	*cwd = getenv("PWD");
-	if (ft_strlen(*cwd) > 1)
+	*len = ft_strlen(*cwd);
+	if (*len > 1)
 	{
 		ptr = ft_split(*cwd, '/');
 		if (ptr)
@@ -54,13 +55,14 @@ char	*get_prompt()
 	char	*user;
 	char	*cwd;
 	char	*prompt;
+	int		len;
 
 	prompt = getenv("PROMPT");
 	if (prompt)
 		return (ft_strdup(prompt));
-	get_evnr(&user, &cwd);
+	get_evnr(&user, &cwd, &len);
 	prompt = create_prompt(user, cwd);
-	if (ft_strlen(cwd) > 1)
+	if (len > 1)
 		free(cwd);
 	return (prompt);
 }
