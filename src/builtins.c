@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/22 18:10:54 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/27 00:45:29 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,10 @@ int	ft_cd(char **args)
 		if (!current)
 			return (perror("getcwd"), 1);
 		if (!ft_setenv(environ, "OLDPWD=", pwd))
-			return (1);
+			return (free(current), 1);
 		if (!ft_setenv(environ, "PWD=", current))
-			return (1);
+			return (free(current), 1);
+		free(current);
 	}
 	return (0);
 }

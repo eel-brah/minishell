@@ -20,7 +20,7 @@ char	**setup(int argc, char **argv, char **env)
 		return (NULL);
 	rl_catch_signals = 0;
 	environ = _env;
-	return (_env);
+	return (environ);
 }
 
 void sigint_handler(int sig)
@@ -71,6 +71,7 @@ bool	handl_path_pwd(char **env, size_t *i, char **ptr)
 		if (!tmp)
 			return (perror("getcwd"), false);
 		char *tmp1 = ft_strjoin("PWD=", tmp);
+		free(tmp);
 		ptr[(*i)++] = tmp1;
 		if (!ptr[(*i) - 1])
 			return (perror("malloc"), double_free(ptr), false);
@@ -103,6 +104,7 @@ bool	handle_shlvl(char *val, char **ptr, int i)
 	int		shlvl;
 	char	**spl;
 	int		c;
+	char	*tmp;
 
 	spl = ft_split(val, '=');
 	if (!spl)
@@ -121,7 +123,13 @@ bool	handle_shlvl(char *val, char **ptr, int i)
 			ptr[i] = ft_strdup("SHLVL=1");
 		}
 		else
-			ptr[i] = ft_strjoin("SHLVL=", ft_itoa(shlvl));
+		{
+			tmp = ft_itoa(shlvl);
+			if (!tmp)
+				return (perror("malloc"), d_free(spl), false);
+			ptr[i] = ft_strjoin("SHLVL=", tmp);
+			free(tmp);
+		}
 	}
 	double_free(spl);
 	if (!ptr[i])
@@ -140,6 +148,7 @@ char	**create_env(char **env)
 		return (create_new_env());
 	check_path_pwd(env, &i, &add);
 	ptr = malloc((size + 1 + add) * sizeof(env));
+	// printf("%p\n",ptr);
 	if (!ptr)
 		return (perror("malloc"), NULL);
 	while (env[i])
@@ -166,7 +175,6 @@ char	**create_new_env()
 	char	*tmp;
 	char	*tmp1;
 
-	printf("here pWd\n");
 	env = malloc(sizeof(char *) * 5);
 	if (!env)
 		return (perror("malloc"), NULL);
@@ -174,6 +182,7 @@ char	**create_new_env()
 	if (!tmp)
 		return (perror("getcwd"), NULL);
 	tmp1 = ft_strjoin("PWD=", tmp);
+	free(tmp);
 	env[0] = tmp1;
 	tmp = ft_strdup("SHLVL=1");
 	if (!tmp || !tmp1)
