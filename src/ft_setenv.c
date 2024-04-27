@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 09:54:07 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/27 20:03:10 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/27 20:22:56 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ bool	update_env(char **env, char *name, char *val)
 	char	*res;
 
 	i = 0;
+	(void)env;
 	while (environ[i])
 	{
 		len = ft_strlen(name);

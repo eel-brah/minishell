@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/27 20:16:14 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/27 21:23:23 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,19 +45,20 @@ void	fix_env(char **env)
 	char		*lines;
 	static bool	flag;
 	
-	if (!flag)
-	{
+	// if (!flag)
+	// {
 		flag = true;
 		columns = getenv("COLUMNS");
 		lines = getenv("LINES");
+		// printf("env in %p \n", env);
 		environ = env;
 		if (lines )
 			ft_setenv(environ, "LINES=", lines);
 		if (columns)
 			ft_setenv(environ, "COLUMNS=", columns);
-	}
-	else
-		environ = env;
+	// }
+	// else
+		// environ = env;
 }
 
 char	*get_cmd(char *prompt)
@@ -66,11 +67,14 @@ char	*get_cmd(char *prompt)
 	char	**env;
 
 	env = environ;
+	// printf("environ before %p \n",environ);
 	if (!prompt)
 		cmd = readline("$ ");
 	else
 		cmd = readline(prompt);
+	// printf("environ after %p \n",environ);
 	fix_env(env);
+	// printf("env in %p \n", env);
 	// environ = env;
 	free(prompt);
 	if (cmd && *cmd)
