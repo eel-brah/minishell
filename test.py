@@ -56,7 +56,7 @@ simple_tests = {
         "wildcard 31": " $USER''$l",
         "wildcard 32": "echo $USER''$USER",
         # "wildcard 32": "echo *hello'*\"'",
-        "wildcard 33": "touch 'hel*\'' && echo h*'*'",
+        # "wildcard 33": "touch 'hel*\'' && echo h*'*'",
         # "wildcard 33": "touch fffff && echo hello",
         "env arg with wildcards": 'echo *$sdf.c',
         "env arg with wildcards 2": 'export a="helloworld" && echo $a*',

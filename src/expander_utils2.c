@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 18:27:08 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/27 13:25:13 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/29 13:11:03 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ char	*get_pid(int pid, int exitt)
 	return (line);
 }
 
-char	*no_name(t_elem *elem, char **word, char ***res, int here_doc)
+static char	*alloc(t_elem *elem, char **word, char ***res, int here_doc)
 {
 	char	**tmp;
 	char	**concat;
@@ -78,7 +78,7 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char *word, char ***res)
 	tmp = NULL;
 	concat = NULL;
 	elem->i = 1;
-	if (!no_name(elem, &word, res, here_doc))
+	if (!alloc(elem, &word, res, here_doc))
 		return (NULL);
 	if (elem->i)
 	{

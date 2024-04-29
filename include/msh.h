@@ -37,6 +37,7 @@ extern char **environ;
 typedef struct s_elem
 {
 	int		wild;
+	int		status;
 	int		index;
 	int		here_doc;
 	int		capacity;
@@ -45,6 +46,7 @@ typedef struct s_elem
 	int		q;
 	int		i;
 	char	*arr;
+	char	*s;
 	char	*tmp;
 }	t_elem;
 
@@ -199,5 +201,13 @@ char	**concat_two_array(char **res, char **concat);
 char	*handle_wild_inside_expand(char *****res, char **sp, int i, char *tmp);
 char	*handle_first_in_expand(t_elem **elem, char *s, int *start);
 int		is_alpha_num(int c);
-
+char	*handle_env_in_expand(char *env, t_elem **elem, char *s);
+char	*handle_wild_in_dollar(char *arr, char *****res);
+char	*handle_expand_without_wild(char **sp, char *****res, int i);
+char	*handle_dollar(char *s, char ****res, t_elem **elem);
+char	**concat_two_array(char **res, char **concat);
+char	*split_expand(t_elem **elem, char *s, char ****res);
+char	*handl_other_carac(t_elem *elem, char ***res, char *s);
+char	*home_set(t_elem **elem);
+char	*handle_dollar_special(char *s, t_elem **elem, int status);
 #endif
