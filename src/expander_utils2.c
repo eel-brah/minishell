@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 18:27:08 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/29 13:11:03 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/01 21:11:32 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@ char	*get_pid(int pid, int exitt)
 	char	*line;
 	int		fd;
 
-	file = ft_itoa((int)&get_pid);
+	file = name_file_rand((int)&get_pid);
 	if (!file)
-		return (perror("malloc"), NULL);
+		return (NULL);
 	pid = fork();
 	if (pid == -1)
 		return (free(file), perror("fork"), NULL);

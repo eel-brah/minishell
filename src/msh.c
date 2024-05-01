@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/04/27 21:23:23 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/01 18:39:45 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,12 +116,12 @@ int	main(int argc, char **argv, char **env)
 		else if (!*cmd)
 		{
 			free(cmd);
-			continue;
+			continue ;
 		}
 		tree = parse_cmd(cmd);
 		free(cmd);
 		if (!tree)
-			continue;
+			continue ;
 		execute(tree);
 		free_cmdtree(tree);
 	}

@@ -6,13 +6,13 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/29 14:04:04 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/29 16:34:54 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/29 18:43:48 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
 
-char	*no_name(t_elem *elem, char ***res, char *s)
+char	*handle_spec_tild(t_elem *elem, char ***res, char *s)
 {
 	int	d;
 	int	c;
@@ -48,7 +48,7 @@ char	*handl_other_carac(t_elem *elem, char ***res, char *s)
 	d = s[elem->i + 1];
 	if (c == '*' && elem->qoute == 0)
 		elem->wild = 1;
-	tmp = no_name(elem, res, s);
+	tmp = handle_spec_tild(elem, res, s);
 	if (!tmp)
 		return (NULL);
 	else if (tmp == (char *)1337)
@@ -65,4 +65,69 @@ char	*handl_other_carac(t_elem *elem, char ***res, char *s)
 			return (free(elem->arr), d_free(*res), *res = NULL, NULL);
 	}
 	return ((char *)42);
+}
+
+char	*split_expand(t_elem **elem, char *s, char ****res)
+{
+	char	*exp;
+
+	if ((*elem)->qoute == 0 && (*elem)->here_doc == 0)
+	{
+		(*elem)->tmp = alloc_for_expand_without_q(s, &elem);
+		if ((*elem)->tmp == (char *)16)
+			return (s);
+		else if ((*elem)->tmp == NULL)
+			return (NULL);
+		exp = delete_quotes((*elem)->arr, 0, 0);
+		if (!exp)
+			return (NULL);
+		(*elem)->tmp = handle_wild_in_dollar(exp, &res);
+		if ((*elem)->tmp == NULL)
+			return (NULL);
+		ft_memset((*elem)->arr, 0, (*elem)->index);
+		(*elem)->index = 0;
+	}
+	return (s);
+}
+
+int	ft_strcmp(char *s1, char *s2)
+{
+	int	i;
+
+	i = 0;
+	if (!s1)
+		return (-1);
+	if (!s2)
+		return (1);
+	while (s1[i] && s2[i])
+	{
+		if (s1[i] != s2[i])
+			return (s1[i] - s2[i]);
+		i++;
+	}
+	return (s1[i] - s2[i]);
+}
+
+void	sort_2d_array(char ***res)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+
+	i = 0;
+	while (res && (*res)[i] != NULL)
+	{
+		j = i + 1;
+		while ((*res)[j] != NULL)
+		{
+			if (ft_strcmp((*res)[i], (*res)[j]) > 0)
+			{
+				tmp = (*res)[i];
+				(*res)[i] = (*res)[j];
+				(*res)[j] = tmp;
+			}
+			j++;
+		}
+		i++;
+	}
 }

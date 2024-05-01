@@ -82,9 +82,9 @@ bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd)
 {
 	char	*file;
 
-	file = ft_itoa((int)&open_herdoc_file);
+	file = name_file_rand((int)&open_herdoc_file);
 	if (!file)
-		return (perror("malloc"), false);
+		return (false);
 	red->file = file;
 	red->here_fd = open(file, red->flags, PREMISSIONS);
 	*fd = open(file, red->flags, PREMISSIONS);

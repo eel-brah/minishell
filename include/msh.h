@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-extern char **environ;
+extern char	**environ;
 
 typedef struct s_elem
 {
@@ -166,7 +166,6 @@ void	set_signal_handler(int signal, void (*fun)(int));
 
 void	sigint_handler(int sig);
 void sigint_handler2(int sig);
-bool	ft_change_last_pro(char ****eenv, char **args);
 char	**expander(char *s, int here_doc, int expand, int status);
 
 char	**setup(int argc, char **argv, char **env);
@@ -210,4 +209,19 @@ char	*split_expand(t_elem **elem, char *s, char ****res);
 char	*handl_other_carac(t_elem *elem, char ***res, char *s);
 char	*home_set(t_elem **elem);
 char	*handle_dollar_special(char *s, t_elem **elem, int status);
+char	*shell_name(t_elem **elem);
+char	*intial_struct(t_elem *elem, char **word, char ***res, int here_doc);
+char	*update_quote(char *s, t_elem *elem);
+char	*handle_o_char_sp(t_elem *elem, char *s, char *word, char ***res);
+char	*handle_last(t_elem *elem, char ***res, char *word);
+char	*edit_env(char *vrbl);
+int		is_valid_variable(char *s, int *plus);
+bool	add_to_env(char *vrbl);
+char	*alloc_without_plus(char *vrbl);
+char	*alloc_without_plus(char *vrbl);
+bool	add_to_env_plus(char *vrbl);
+bool	add_to_env_plus(char *vrbl);
+char	*join_variabl(char *old, char *new, char *ptr);
+char	*name_file_rand(int number);
+
 #endif

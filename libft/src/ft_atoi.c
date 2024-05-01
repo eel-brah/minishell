@@ -12,6 +12,7 @@
 
 #include "../include/libft.h"
 
+
 static int	ft_isspace(char c)
 {
 	if (c == '\t' || c == '\n' || c == '\v'

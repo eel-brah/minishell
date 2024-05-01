@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/29 13:30:24 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/29 13:39:53 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/04/29 18:52:03 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,31 +88,18 @@ char	*handle_o_char_sp(t_elem *elem, char *s, char *word, char ***res)
 	return (s);
 }
 
-char	**expander(char *s, int here_doc, int expand, int status)
+char	*shell_name(t_elem **elem)
 {
-	char	**res;
-	char	*word;
-	t_elem	elem;
+	char	*s;
+	int		i;
 
-	if (intial_struct(&elem, &word, &res, here_doc) == NULL)
-		return (NULL);
-	(1) && (elem.expand = expand, elem.status = status);
-	while (s && s[elem.i])
+	s = "WachtaShell";
+	i = 0;
+	while (s && s[i])
 	{
-		if ((s[elem.i] == '\'' || s[elem.i] == '\"' )
-			&& (elem.qoute == 0 || elem.q == s[elem.i]))
-		{
-			if (update_quote(s, &elem) == NULL)
-				return (free(elem.arr), d_free(res), NULL);
-		}
-		else
-		{
-			if (handle_o_char_sp(&elem, s, word, &res) == NULL)
-				return (NULL);
-		}
-		elem.i++;
+		if (set_caractere(*elem, s[i]) == NULL)
+			return (NULL);
+		i++;
 	}
-	if (handle_last(&elem, &res, word) == NULL)
-		return (NULL);
-	return (free(elem.arr), res);
+	return (s);
 }
