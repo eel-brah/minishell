@@ -14,7 +14,7 @@ INCLUDE := $(addprefix $(INCLUDE_DIR)/,$(INCLUDE))
 SRC := msh.c exec.c exec_utils.c prompt.c setup.c \
 	builtins.c expander.c export.c get_next_line.c \
 	parsing.c execution.c execution_utils_0.c \
-	utils.c utils_0.c utils_1.c utils_2.c utils_t.c \
+	utils.c utils_0.c utils_1.c utils_2.c \
 	execution_utils_1.c free.c errors.c builtins_2.c\
 	parsing_utils_0.c parsing_utils_1.c parsing_utils_2.c \
 	parsing_utils_3.c ft_setenv.c expander_utils.c expander_utils1.c\
