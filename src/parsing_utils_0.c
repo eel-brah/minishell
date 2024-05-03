@@ -1,11 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing_utils_0.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 20:54:05 by eel-brah          #+#    #+#             */
+/*   Updated: 2024/05/03 22:52:03 by eel-brah         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/msh.h"
 
-bool	get_token_cmp2(char *p, char *r)
+static bool	get_token_cmp2(char *p, char *r)
 {
 	if (!ft_strncmp(p, "&&", 2))
-		*r = OAND;
+		*r = TAND;
 	else if (!ft_strncmp(p, "||", 2))
-		*r = OOR;
+		*r = TOR;
 	else if (!ft_strncmp(p, "<<", 2))
 		*r = HERE_DOC;
 	else if (!ft_strncmp(p, ">>", 2))
@@ -15,7 +27,7 @@ bool	get_token_cmp2(char *p, char *r)
 	return (true);
 }
 
-bool	get_token_cmp1(char *p, char *r)
+static bool	get_token_cmp1(char *p, char *r)
 {
 	if (*p == '|')
 		*r = PIPELINE;
@@ -32,25 +44,25 @@ bool	get_token_cmp1(char *p, char *r)
 	return (true);
 }
 
-void	get_token_word(char **dp, char *r)
+static void	get_token_word(char **dp, char *r)
 {
 	char	*p;
-	bool	Q;
+	bool	is_q;
 	char	q;
 
-	Q = false;
+	is_q = false;
 	p = *dp;
 	while (*p && ((!ft_strchr(WHITESPACES, *p) && (!ft_strchr(SYMBOL, *p)
-		|| (*p == '&' && *(p + 1) != '&'))) || Q))
+					|| (*p == '&' && *(p + 1) != '&'))) || is_q))
 	{
-		if ((*p == '\"' || *p == '\'') && (!Q || (Q && *p == q)))
+		if ((*p == '\"' || *p == '\'') && (!is_q || (is_q && *p == q)))
 		{
 			q = *p;
-			Q = !Q;
+			is_q = !is_q;
 		}
 		p++;
 	}
-	if (Q)
+	if (is_q)
 		*r = ERROR;
 	else
 		*r = WORD;

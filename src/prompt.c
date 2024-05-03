@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   prompt.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 19:43:17 by eel-brah          #+#    #+#             */
+/*   Updated: 2024/05/03 19:43:17 by eel-brah         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/msh.h"
 
-void	get_evnr(char **user, char **cwd, int *len)
+static void	get_evnr(char **user, char **cwd, int *len)
 {
 	char	**ptr;
 	char	**t_ptr;
@@ -22,7 +34,7 @@ void	get_evnr(char **user, char **cwd, int *len)
 	}
 }
 
-char	*create_prompt(char *user, char *cwd)
+static char	*create_prompt(char *user, char *cwd)
 {
 	char	*prompt;
 	char	*tmp[5];
@@ -50,7 +62,7 @@ char	*create_prompt(char *user, char *cwd)
 	return (prompt);
 }
 
-char	*get_prompt()
+char	*get_prompt(void)
 {
 	char	*user;
 	char	*cwd;

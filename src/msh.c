@@ -3,103 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   msh.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/01 18:39:45 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/03 22:59:46 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
-
-volatile sig_atomic_t got_sigint = 0;
-extern char **environ;
-
-void fu()
-{
-	system("leaks minishell");
-}
-void	ft_printenv_no_empty1(char **env)
-{
-	int fd = open("file1", O_CREAT | O_RDWR, 0777);
-	while (env && *env)
-	{
-		ft_putendl_fd(*env, fd);
-		env++;
-	}
-}
-
-void	ft_printenv_no_empty2(char **env)
-{
-	int fd = open("file2", O_CREAT | O_RDWR, 0777);
-	while (env && *env)
-	{
-		ft_putendl_fd(*env, fd);
-		env++;
-	}
-}
-
-void	fix_env(char **env)
-{
-	char		*columns;
-	char		*lines;
-	static bool	flag;
-	
-	// if (!flag)
-	// {
-		flag = true;
-		columns = getenv("COLUMNS");
-		lines = getenv("LINES");
-		// printf("env in %p \n", env);
-		environ = env;
-		if (lines )
-			ft_setenv(environ, "LINES=", lines);
-		if (columns)
-			ft_setenv(environ, "COLUMNS=", columns);
-	// }
-	// else
-		// environ = env;
-}
-
-char	*get_cmd(char *prompt)
-{
-	char	*cmd;
-	char	**env;
-
-	env = environ;
-	// printf("environ before %p \n",environ);
-	if (!prompt)
-		cmd = readline("$ ");
-	else
-		cmd = readline(prompt);
-	// printf("environ after %p \n",environ);
-	fix_env(env);
-	// printf("env in %p \n", env);
-	// environ = env;
-	free(prompt);
-	if (cmd && *cmd)
-		add_history(cmd);
-	return (cmd);
-}
-
-void	pre_trv(t_node *node) 
-{
-	if (node->type == EXEC || node->type == RED)
-	{
-		t_node *ptr = node;
-		while (ptr->type == RED)
-		{
-			printf("RED %s\n", ((t_redirection *)ptr)->file);
-			ptr = ((t_redirection *)ptr)->node;
-		}
-		printf("EXEX: %s\n", ((t_exec *)ptr)->argv[0]);
-		return ;
-	}
-	else
-		printf("%i\n", node->type);
-	pre_trv(((t_div *)node)->left);
-	pre_trv(((t_div *)node)->right);
-}
 
 int	main(int argc, char **argv, char **env)
 {
@@ -125,4 +36,53 @@ int	main(int argc, char **argv, char **env)
 		execute(tree);
 		free_cmdtree(tree);
 	}
+}
+
+static char	*get_cmd(char *prompt)
+{
+	char	*cmd;
+	char	**env;
+
+	env = environ;
+	if (!prompt)
+		cmd = readline("$ ");
+	else
+		cmd = readline(prompt);
+	fix_env(env);
+	free(prompt);
+	if (cmd && *cmd)
+		add_history(cmd);
+	return (cmd);
+}
+
+void	execute(t_node *node)
+{
+	bool	b;
+
+	b = true;
+	if (node->type == EXEC)
+		exec_type(node);
+	else if (node->type == HEREDOC)
+		b = heredoc_type((t_redirection *)node);
+	else if (node->type == RED)
+		b = red_type((t_redirection *)node);
+	else if (node->type == PIPE)
+		b = pipe_type((t_div *)node);
+	else if (node->type == AND)
+		and_type((t_div *)node);
+	else if (node->type == OR)
+		or_type((t_div *)node);
+	if (!b)
+		exit_status(1, true, true);
+}
+
+int	exit_status(int status, bool update, bool shift)
+{
+	static int	s;
+
+	if (update && shift)
+		s = status << 8;
+	else if (update)
+		s = status;
+	return (s);
 }

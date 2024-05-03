@@ -1,7 +1,19 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   setup.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 21:25:42 by eel-brah          #+#    #+#             */
+/*   Updated: 2024/05/03 21:25:44 by eel-brah         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/msh.h"
 
+volatile sig_atomic_t got_sigint = 0;
 extern int rl_catch_signals;
-extern volatile sig_atomic_t got_sigint;
 
 char	**setup(int argc, char **argv, char **env)
 {
@@ -48,8 +60,10 @@ void	set_signal_handler(int signal, void (*fun)(int))
 	sig.sa_handler = fun;
 	sig.sa_flags = 0;
 	sigemptyset(&sig.sa_mask);
-	sigaction(signal, &sig, NULL);
+	if (sigaction(signal, &sig, NULL) == -1)
+		print_error_2("minishell", "sigaction", strerror(errno));
 }
+
 bool	handl_path_pwd(char **env, size_t *i, char **ptr)
 {
 	if (env_is_there(env, "PATH") == false)
@@ -78,6 +92,7 @@ bool	handl_path_pwd(char **env, size_t *i, char **ptr)
 	}
 	return (!!1337);
 }
+
 void	check_path_pwd(char **env, size_t *i, int *add)
 {
 	*add = 0;
@@ -89,6 +104,7 @@ void	check_path_pwd(char **env, size_t *i, int *add)
 	if (env_is_there(env, "SHLVL") == false)
 		(*add)++;
 }
+
 bool	is_all_digit(char *s)
 {
 	while (s && *s)
@@ -99,6 +115,7 @@ bool	is_all_digit(char *s)
 	}
 	return (true);
 }
+
 bool	handle_shlvl(char *val, char **ptr, int i)
 {
 	int		shlvl;
@@ -136,6 +153,7 @@ bool	handle_shlvl(char *val, char **ptr, int i)
 		return (perror("malloc"), false);
 	return (true);
 }
+
 char	**create_env(char **env)
 {
 	size_t	size;

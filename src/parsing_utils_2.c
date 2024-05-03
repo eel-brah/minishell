@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing_utils_2.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 20:46:50 by eel-brah          #+#    #+#             */
+/*   Updated: 2024/05/03 22:14:23 by eel-brah         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/msh.h"
 
 t_node	*parse_redirection(t_node *node, char **pcmd)
@@ -8,18 +20,13 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 	char	token;
 
 	token = token_peek(*pcmd);
-	while (token == OUT_RED || token == IN_RED || token == APP_RED || token == HERE_DOC)
+	while (token == OUT_RED || token == IN_RED
+		|| token == APP_RED || token == HERE_DOC)
 	{
 		red = get_token(pcmd, 0, 0);
 		token = get_token(pcmd, &st, &et);
 		if (token != WORD)
-		{
-			exit_status(258, true, true);
-			// print_error("minishell", "syntax error 2");
-			syntax_error("minishell", "syntax error near unexpected token", st, et); 
-			free_cmdtree(node);
-			return (NULL);
-		}
+			return (invalid_red(node, st, et));
 		if (red != HERE_DOC)
 			node = parse_redirection_create(st, et, node, red);
 		else
@@ -63,14 +70,14 @@ char	**fill_argv(char token, char **pcmd, t_node *node, t_exec *cmd)
 	if (token != WORD)
 	{
 		exit_status(258, true, true);
-		// print_error("minishell", "syntax error 5");
 		if (token == OPEN_PER)
 			get_token(pcmd, &st, &et);
-		syntax_error("minishell", "syntax error near unexpected token", st, et); 
+		syntax_error("minishell",
+			"syntax error near unexpected token", st, et);
 		free_cmdtree(node);
 		return (NULL);
 	}
-	tmp = ptrs_realloc(cmd->argv, strdup_v2(st, et));
+	tmp = add_ptr_to_ptrs(cmd->argv, strdup_v2(st, et));
 	if (!tmp)
 	{
 		free_cmdtree(node);
@@ -80,18 +87,20 @@ char	**fill_argv(char token, char **pcmd, t_node *node, t_exec *cmd)
 	return (tmp);
 }
 
-t_node	*check_exec(t_exec *cmd, t_node *node, char *pcmd)
+t_node	*parenthesis_handler(t_node *node, char **pcmd)
 {
+	char	token;
 	char	*st;
 	char	*et;
 
-	if (!cmd->argv && node == (t_node *)cmd)
+	node = parse_parenthesis(pcmd);
+	token = token_peek(*pcmd);
+	if (node && (token == WORD || token == ERROR))
 	{
-		free_cmdtree(node);
 		exit_status(258, true, true);
-		// print_error("minishell", "syntax error 3");
-		get_token(&pcmd, &st, &et);
+		get_token(pcmd, &st, &et);
 		syntax_error("minishell", "syntax error near unexpected token", st, et);
+		free_cmdtree(node);
 		return (NULL);
 	}
 	return (node);
@@ -102,23 +111,9 @@ t_node	*parse_exec(char **pcmd)
 	t_exec	*cmd;
 	t_node	*node;
 	char	token;
-	char	*st;
-	char	*et;
 
-	if(token_peek(*pcmd) == OPEN_PER)
-	{
-		node = parse_parenthesis(pcmd);
-		char token = token_peek(*pcmd);
-		if (node && (token == WORD || token == ERROR))
-		{
-			exit_status(258, true, true);
-			get_token(pcmd, &st, &et);
-			syntax_error("minishell", "syntax error near unexpected token", st, et);
-			free_cmdtree(node);
-			return (NULL);
-		}
-		return (node);
-	}
+	if (token_peek(*pcmd) == OPEN_PER)
+		return (parenthesis_handler(node, pcmd));
 	cmd = create_exec();
 	if (!cmd)
 		return (NULL);
@@ -126,7 +121,8 @@ t_node	*parse_exec(char **pcmd)
 	if (!node)
 		return (NULL);
 	token = token_peek(*pcmd);
-	while (token && token != PIPELINE && token != OAND && token != OOR && token != CLOSE_PER)
+	while (token && token != PIPELINE
+		&& token != TAND && token != TOR && token != CLOSE_PER)
 	{
 		if (!fill_argv(token, pcmd, node, cmd))
 			return (NULL);

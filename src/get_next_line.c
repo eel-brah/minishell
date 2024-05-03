@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 21:24:32 by eel-brah          #+#    #+#             */
+/*   Updated: 2024/05/03 22:49:53 by eel-brah         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/msh.h"
 
-size_t	ft_gnl_find_nl(size_t i, char *buf, int *rt)
+static size_t	ft_gnl_find_nl(size_t i, char *buf, int *rt)
 {
 	while (i < (size_t)BUFFER_SIZE && buf[i])
 	{
@@ -15,7 +27,7 @@ size_t	ft_gnl_find_nl(size_t i, char *buf, int *rt)
 	return (i);
 }
 
-char	*ft_gnl_free(char **buf, char *line, char cs)
+static char	*ft_gnl_free(char **buf, char *line, char cs)
 {
 	if (cs == -1)
 	{
@@ -32,7 +44,7 @@ char	*ft_gnl_free(char **buf, char *line, char cs)
 	}
 }
 
-char	*ft_gnl_generate_line(char **line, size_t r, size_t i, char **buf)
+static char	*ft_gnl_generate_line(char **line, size_t r, size_t i, char **buf)
 {
 	char	*tmp;
 	size_t	len;
@@ -59,7 +71,7 @@ char	*ft_gnl_generate_line(char **line, size_t r, size_t i, char **buf)
 	return (tmp);
 }
 
-char	*ft_gnl_get_line(t_buffer *buffer, int fd, int rt)
+static char	*ft_gnl_get_line(t_buffer *buffer, int fd, int rt)
 {
 	size_t			r;
 	ssize_t			rd;

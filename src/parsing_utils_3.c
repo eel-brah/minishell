@@ -1,8 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing_utils_3.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 20:46:47 by eel-brah          #+#    #+#             */
+/*   Updated: 2024/05/03 22:53:20 by eel-brah         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/msh.h"
 
-extern volatile sig_atomic_t got_sigint;
-
-void	close_heredoc(int fd, int fd2, char *s, char **res)
+static void	close_heredoc(int fd, int fd2, char *s, char **res)
 {
 	close(fd);
 	close(fd2);
@@ -12,19 +22,20 @@ void	close_heredoc(int fd, int fd2, char *s, char **res)
 	got_sigint = 0;
 }
 
-char	**heredoc_setup(char *delim, t_redirection *node, unsigned int *len, int *fd2)
+static char	**heredoc_setup(char *delim, t_redirection *node,
+		unsigned int *len, int *fd2)
 {
 	char	**res;
 
 	if (!delim)
 	{
-		perror("malloc");
+		print_error_2("minishell", "malloc", strerror(errno));
 		return (NULL);
 	}
 	*fd2 = dup(0);
 	if (*fd2 == -1)
 	{
-		perror("dup");
+		print_error_2("minishell", "dup", strerror(errno));
 		return (NULL);
 	}
 	if (ft_strchr(delim, '\'') || ft_strchr(delim, '"'))
@@ -33,14 +44,14 @@ char	**heredoc_setup(char *delim, t_redirection *node, unsigned int *len, int *f
 	free(delim);
 	if (!res)
 	{
-		perror("malloc");
+		print_error_2("minishell", "malloc", strerror(errno));
 		return (NULL);
 	}
 	*len = ft_strlen(res[0]);
 	return (res);
 }
 
-bool	_reset(int fd, int fd2, char *s, char **res)
+static bool	_reset(int fd, int fd2, char *s, char **res)
 {
 	set_signal_handler(SIGINT, SIG_IGN);
 	if (dup2(fd2, 0) == -1)
@@ -75,22 +86,18 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 		s = NULL;
 	}
 	close_heredoc(fd, fd2, s, res);
-	return (!!1337);
+	return (true);
 }
 
 bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd)
 {
-	char	*file;
-
-	file = name_file_rand((int)&open_herdoc_file);
-	if (!file)
+	red->file = name_file_rand((int)&open_herdoc_file);
+	if (!red->file)
 		return (false);
-	red->file = file;
-	red->here_fd = open(file, red->flags, PREMISSIONS);
-	*fd = open(file, red->flags, PREMISSIONS);
-	// printf("name open here %s\n", file);
-	unlink(file);
-	free(file);
+	red->here_fd = open(red->file, red->flags, PREMISSIONS);
+	*fd = open(red->file, red->flags, PREMISSIONS);
+	unlink(red->file);
+	free(red->file);
 	if (red->here_fd == -1 || *fd == -1)
 	{
 		close(*fd);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_setenv.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 09:54:07 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/27 20:22:56 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/03 21:24:17 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,9 @@ bool	env_is_there(char **env, char *name)
 		}
 		i++;
 	}
-	return (false);	
+	return (false);
 }
+
 bool	update_env(char **env, char *name, char *val)
 {
 	int		i;
@@ -47,19 +48,20 @@ bool	update_env(char **env, char *name, char *val)
 				return (false);
 			free(environ[i]);
 			environ[i] = res;
-			return (true);			
+			return (true);
 		}
 		i++;
 	}
 	return (true);
 }
+
 bool	add_new_env(char **env, char *name, char *val)
 {
 	int		count;
 	int		i;
 	char	*res;
 	char	**tmp;
-	
+
 	count = count_args(env);
 	tmp = malloc(sizeof(char *) * (count + 2));
 	if (!tmp)

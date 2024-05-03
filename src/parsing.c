@@ -1,6 +1,16 @@
-#include "../include/msh.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/03 20:46:24 by eel-brah          #+#    #+#             */
+/*   Updated: 2024/05/03 22:58:18 by eel-brah         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-extern volatile sig_atomic_t got_sigint;
+#include "../include/msh.h"
 
 t_node	*parse_heredoc(t_node *node, char *start, char *end)
 {
@@ -12,7 +22,7 @@ t_node	*parse_heredoc(t_node *node, char *start, char *end)
 		return (NULL);
 	red->fd = 0;
 	red->type = HEREDOC;
-	red->flags = O_RDWR|O_CREAT|O_TRUNC;
+	red->flags = O_RDWR | O_CREAT | O_TRUNC;
 	red->expand = true;
 	if (!open_herdoc_file(red, node, &fd))
 		return (NULL);
@@ -25,7 +35,7 @@ t_node	*parse_heredoc(t_node *node, char *start, char *end)
 	return (add_redirection(red, node));
 }
 
-t_node	*parse_pipe(char **pcmd)
+static t_node	*parse_pipe(char **pcmd)
 {
 	t_node	*node;
 
@@ -42,14 +52,14 @@ t_node	*parse_pipe(char **pcmd)
 	return (node);
 }
 
-t_node	*pars_or(char **pcmd)
+static t_node	*pars_or(char **pcmd)
 {
 	t_node	*node;
 
 	node = parse_pipe(pcmd);
 	if (!node)
 		return (NULL);
-	if (token_peek(*pcmd) == OOR)
+	if (token_peek(*pcmd) == TOR)
 	{
 		get_token(pcmd, 0, 0);
 		node = diversion(node, pars_or(pcmd), OR);
@@ -66,7 +76,7 @@ t_node	*pars_and(char **pcmd)
 	node = pars_or(pcmd);
 	if (!node)
 		return (NULL);
-	if (token_peek(*pcmd) == OAND)
+	if (token_peek(*pcmd) == TAND)
 	{
 		get_token(pcmd, 0, 0);
 		node = diversion(node, pars_and(pcmd), AND);
@@ -92,7 +102,6 @@ t_node	*parse_cmd(char *cmd)
 	if (get_token(&cmd, &st, &et))
 	{
 		exit_status(258, true, true);
-		// print_error("minishell", "syntax error 0");
 		syntax_error("minishell", "syntax error near unexpected token", st, et);
 		free_cmdtree(tree);
 		return (NULL);
