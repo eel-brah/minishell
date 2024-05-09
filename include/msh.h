@@ -72,7 +72,7 @@ char	**setup(int argc, char **argv, char **env);
 void sigint_handler(int sig);
 void sigint_handler2(int sig);
 void	set_signal_handler(int signal, void (*fun)(int));
-char	**create_env(char **env);
+char	**create_env(char **env, size_t size, int add, size_t i);
 char	**create_new_env();
 void	prg_with_path(char *prg, char **args);
 void	execute_prg(char *prg, char **args);
@@ -127,5 +127,7 @@ char	*name_file_rand(int number);
 void	fix_env(char **env);
 t_node	*check_exec(t_exec *cmd, t_node *node, char *pcmd);
 t_node	*invalid_red(t_node *node, char *st, char *et);
+void	check_path_pwd(char **env, size_t *i, int *add);
+bool	handl_path_pwd(char **env, size_t *i, char **p);
 
 #endif

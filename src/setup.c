@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   setup.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 21:25:42 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 21:25:44 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/09 15:18:01 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
 
-volatile sig_atomic_t got_sigint = 0;
-extern int rl_catch_signals;
+volatile sig_atomic_t	got_sigint = 0;
+extern int				rl_catch_signals;
 
 char	**setup(int argc, char **argv, char **env)
 {
@@ -27,7 +27,7 @@ char	**setup(int argc, char **argv, char **env)
 	}
 	set_signal_handler(SIGINT, sigint_handler);
 	set_signal_handler(SIGQUIT, SIG_IGN);
-	_env = create_env(env);
+	_env = create_env(env, 0, 0, 0);
 	if (!_env)
 		return (NULL);
 	rl_catch_signals = 0;
@@ -35,7 +35,7 @@ char	**setup(int argc, char **argv, char **env)
 	return (environ);
 }
 
-void sigint_handler(int sig)
+void	sigint_handler(int sig)
 {
 	exit_status(1, true, true);
 	(void)sig;
@@ -45,7 +45,7 @@ void sigint_handler(int sig)
 	rl_redisplay();
 }
 
-void sigint_handler2(int sig)
+void	sigint_handler2(int sig)
 {
 	exit_status(1, true, true);
 	got_sigint = 1;
@@ -64,155 +64,31 @@ void	set_signal_handler(int signal, void (*fun)(int))
 		print_error_2("minishell", "sigaction", strerror(errno));
 }
 
-bool	handl_path_pwd(char **env, size_t *i, char **ptr)
+bool	handl_path_pwd(char **env, size_t *i, char **p)
 {
-	if (env_is_there(env, "PATH") == false)
-	{
-		ptr[(*i)++] = ft_strdup("PATH=/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.");
-		if (!ptr[(*i) - 1])
-			return (perror("malloc"), double_free(ptr), false);
-	}
-	if (env_is_there(env, "SHLVL") == false)
-	{
-		ptr[(*i)++] = ft_strdup("SHLVL=1");
-		// printf("%s\n",ptr[(*i) - 1]);
-		if (!ptr[(*i) - 1])
-			return (perror("malloc"), double_free(ptr), false);
-	}
-	if (env_is_there(env, "PWD") == false)
-	{
-		char *tmp = getcwd(NULL, 0);
-		if (!tmp)
-			return (perror("getcwd"), false);
-		char *tmp1 = ft_strjoin("PWD=", tmp);
-		free(tmp);
-		ptr[(*i)++] = tmp1;
-		if (!ptr[(*i) - 1])
-			return (perror("malloc"), double_free(ptr), false);
-	}
-	return (!!1337);
-}
-
-void	check_path_pwd(char **env, size_t *i, int *add)
-{
-	*add = 0;
-	*i = 0;
-	if (env_is_there(env, "PATH") == false)
-		(*add)++;
-	if (env_is_there(env, "PWD") == false)
-		(*add)++;
-	if (env_is_there(env, "SHLVL") == false)
-		(*add)++;
-}
-
-bool	is_all_digit(char *s)
-{
-	while (s && *s)
-	{
-		if (!ft_isdigit(*s))
-			return (false);
-		s++;
-	}
-	return (true);
-}
-
-bool	handle_shlvl(char *val, char **ptr, int i)
-{
-	int		shlvl;
-	char	**spl;
-	int		c;
-	char	*tmp;
-
-	spl = ft_split(val, '=');
-	if (!spl)
-		return (perror("malloc"), false);
-	c = count_args(spl);
-	if ( c > 2 || (c == 2 && !is_all_digit(spl[1])) || c == 1)
-		ptr[i] = ft_strdup("SHLVL=1");
-	else if (c == 2)
-	{
-		shlvl = ft_atoi(spl[1]) + 1;
-		if (shlvl == 1000)
-			ptr[i] = ft_strdup("SHLVL=");
-		else if (shlvl > 1000)
-		{
-			print_error("minishell", "warning: shell level is too high, resetting to 1");
-			ptr[i] = ft_strdup("SHLVL=1");
-		}
-		else
-		{
-			tmp = ft_itoa(shlvl);
-			if (!tmp)
-				return (perror("malloc"), d_free(spl), false);
-			ptr[i] = ft_strjoin("SHLVL=", tmp);
-			free(tmp);
-		}
-	}
-	double_free(spl);
-	if (!ptr[i])
-		return (perror("malloc"), false);
-	return (true);
-}
-
-char	**create_env(char **env)
-{
-	size_t	size;
-	char	**ptr;
-	size_t	i;
-	int		add;
-
-	size = count_args(env);
-	if (size == 0)
-		return (create_new_env());
-	check_path_pwd(env, &i, &add);
-	ptr = malloc((size + 1 + add) * sizeof(env));
-	// printf("%p\n",ptr);
-	if (!ptr)
-		return (perror("malloc"), NULL);
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], "SHLVL=", 6) == 0)
-		{
-			if (!handle_shlvl(env[i], ptr, i))
-				return (perror("malloc"), double_free(ptr), NULL);
-		}
-		else
-			ptr[i] = ft_strdup(env[i]);
-		if (!ptr[i])
-			return (perror("malloc"), double_free(ptr), NULL);
-		i++;
-	}
-	if (!handl_path_pwd(env, &i, ptr))
-		return (NULL);
-	return (ptr[i] = NULL, ptr);
-}
-
-char	**create_new_env()
-{
-	char	**env;
 	char	*tmp;
 	char	*tmp1;
 
-	env = malloc(sizeof(char *) * 5);
-	if (!env)
-		return (perror("malloc"), NULL);
-	tmp = getcwd(NULL, 0);
-	if (!tmp)
-		return (perror("getcwd"), NULL);
-	tmp1 = ft_strjoin("PWD=", tmp);
-	free(tmp);
-	env[0] = tmp1;
-	tmp = ft_strdup("SHLVL=1");
-	if (!tmp || !tmp1)
-		return (perror("malloc"), NULL);
-	env[1]= tmp;
-	tmp = ft_strdup("_=/usr/bin/minishell"); // handle it
-	if (!tmp)
-		return (perror("malloc"), NULL);
-	env[2]= tmp;
-	tmp = ft_strdup("PATH=/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.");
-	if (!tmp)
-		return (perror("malloc"), NULL); // free the previous ones
-	env[3]= tmp;
-	return (env[4]= NULL, env);
+	if (env_is_there(env, "SHLVL") == false)
+	{
+		p[(*i)++] = ft_strdup("SHLVL=1");
+		if (!p[(*i) - 1])
+			return (perror("malloc"), d_free(p), false);
+	}
+	if (env_is_there(env, "PATH") == false)
+	{
+		p[*i] = ft_strdup("PATH=/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.");
+		if (((*i)++ || *i != 1) && !p[(*i) - 1])
+			return (perror("malloc"), d_free(p), false);
+	}
+	if (env_is_there(env, "PWD") == false)
+	{
+		tmp = getcwd(NULL, 0);
+		if (!tmp)
+			return (perror("getcwd"), false);
+		(1) && (tmp1 = ft_strjoin("PWD=", tmp), free(tmp), p[(*i)++] = tmp1);
+		if (!p[(*i) - 1])
+			return (perror("malloc"), d_free(p), false);
+	}
+	return (!!1337);
 }

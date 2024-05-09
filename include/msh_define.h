@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   msh_define.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 19:36:57 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 19:41:05 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/09 15:19:51 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MSH_DEFINE_H
 # define MSH_DEFINE_H
 
-extern volatile sig_atomic_t got_sigint;
-extern char	**environ;
+extern volatile sig_atomic_t	got_sigint;
+extern char						**environ;
 
 typedef struct s_node 
 {

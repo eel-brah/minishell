@@ -19,7 +19,8 @@ SRC := msh.c exec.c exec_utils.c prompt.c setup.c \
 	parsing_utils_0.c parsing_utils_1.c parsing_utils_2.c \
 	parsing_utils_3.c ft_setenv.c expander_utils.c expander_utils1.c\
 	expander_utils2.c expander_utils3.c expander_utils4.c expander_utils5.c \
-	expand_here_doc.c expander_utils6.c expander_utils7.c export_utils.c export_utils1.c
+	expand_here_doc.c expander_utils6.c expander_utils7.c export_utils.c export_utils1.c \
+	setup_utils.c setup_utils1.c
 OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
 
 LIBFT := $(LIBFTDIR)/libft.a
