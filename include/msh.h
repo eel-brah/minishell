@@ -15,6 +15,7 @@
 
 #include "msh_libs.h"
 #include "msh_define.h"
+#include <termios.h>
 
 size_t	count_args(char **ptrs);
 void	free_cmdtree(t_node *tree);
