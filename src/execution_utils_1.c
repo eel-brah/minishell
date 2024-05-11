@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:57:39 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:48:17 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/11 03:27:02 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ static void	signal_exting(int s)
 	else if (WTERMSIG(s) == SIGQUIT)
 	{
 		exit_status(131, true, true);
+		reset_term();
 		ft_putstr_fd("Quit: 3\n", 1);
 	}
 }

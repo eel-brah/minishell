@@ -130,5 +130,5 @@ t_node	*check_exec(t_exec *cmd, t_node *node, char *pcmd);
 t_node	*invalid_red(t_node *node, char *st, char *et);
 void	check_path_pwd(char **env, size_t *i, int *add);
 bool	handl_path_pwd(char **env, size_t *i, char **p);
-
+bool	reset_term();
 #endif
