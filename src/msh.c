@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/11 17:58:21 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/11 18:48:02 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ int	main(int argc, char **argv, char **env)
 		exit(1);
 	while (1)
 	{
-		// cmd = get_cmd(get_prompt());
-		cmd = ft_strdup("ls -l | echo hi");
+		cmd = get_cmd(get_prompt());
+		// cmd = ft_strdup("ls -l | echo hi");
 		if (!cmd)
 			ft_exit(NULL, NULL);
 		else if (!*cmd)
@@ -36,7 +36,7 @@ int	main(int argc, char **argv, char **env)
 			continue ;
 		execute(tree);
 		free_cmdtree(tree);
-		ft_exit(NULL, NULL);
+		// ft_exit(NULL, NULL);
 	}
 }
 
