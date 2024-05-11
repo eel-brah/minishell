@@ -32,7 +32,10 @@ static char	**first_realloc(char *arg, size_t size)
 
 	nptrs = malloc(sizeof(char *) * size);
 	if (!nptrs)
+	{
+		free(arg);
 		return (NULL);
+	}
 	nptrs[0] = arg;
 	nptrs[1] = NULL;
 	return (nptrs);
@@ -54,7 +57,10 @@ char	**add_ptr_to_ptrs(char **ptrs, char *ptr)
 			size++;
 		nptrs = malloc(sizeof(char *) * (size + 1));
 		if (!nptrs)
+		{
+			free(ptr);
 			return (NULL);
+		}
 		args_to_nargs(nptrs, ptrs, ptr);
 	}
 	free(ptrs);

@@ -27,8 +27,8 @@ static void	_child(t_node *node, int usingp, int closingp, int s)
 	close(closingp);
 	in_pipe(1);
 	execute(node);
-	status = GET_STAUS;
-	exit(WEXITSTATUS(status));
+	// status = GET_STAUS;
+	// exit(WEXITSTATUS(status));
 }
 
 static void	wating_for_childs(pid_t *pid)
@@ -69,7 +69,11 @@ bool	pipe_type(t_div *div)
 	if (pid[0] == -1)
 		return (close(p[0]), close(p[1]), perror("fork"), false);
 	if (pid[0] == 0)
+	{
 		_child(div->left, p[1], p[0], 1);
+		free_cmdtree((t_node *)div);
+		ft_exit(NULL, NULL);
+	}
 	pid[1] = fork();
 	if (pid[1] == -1)
 	{
@@ -77,7 +81,11 @@ bool	pipe_type(t_div *div)
 		return (close(p[0]), close(p[1]), perror("fork"), false);
 	}
 	if (pid[1] == 0)
+	{
 		_child(div->right, p[0], p[1], 0);
+		free_cmdtree((t_node *)div);
+		ft_exit(NULL, NULL);
+	}
 	in_pipe(0);
 	close(p[0]);
 	close(p[1]);
