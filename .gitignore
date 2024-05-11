@@ -4,3 +4,5 @@ mit.c
 minishell
 .DS_Store
 test.c
+hello.asm
+ft_strlen.c

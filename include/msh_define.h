@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 19:36:57 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/09 15:28:36 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/11 16:02:02 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,13 @@
 
 extern volatile sig_atomic_t	got_sigint;
 extern char						**environ;
+
+// int setenv(const char *name, const char *value, int overwrite)
+// {
+// 	return 0;
+// }
+
+int	ft_strcmp(char *s1, char *s2);
 
 typedef struct s_node 
 {

@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/29 19:01:02 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/29 23:04:33 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/11 12:36:30 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,20 @@ bool	check_exp(char **e, char *vr, int i)
 {
 	if (!ft_strncmp(e[i], vr, ft_strlen(vr))
 		&& e[i][ft_strlen(vr)] == '=')
+	{
+		free(vr);
 		return (true);
+	}
 	else if (!ft_strncmp(e[i], vr, ft_strlen(vr))
 		&& e[i][ft_strlen(vr)] == '\0')
+	{
+		free(vr);
 		return (true);
+	}
 	return (false);
 }
 
-char	*np_name(char *pt, char *vr, int i)
+char	*handle_exp(char *pt, char *vr, int i)
 {
 	char	**e;
 
@@ -62,7 +68,7 @@ char	*edit_env(char *vrbl)
 	{
 		ptr = ft_strchr(vrbl, '=');
 		i = 0;
-		tmp = np_name(ptr, vrbl, i);
+		tmp = handle_exp(ptr, vrbl, i);
 		if (tmp == NULL)
 			return (NULL);
 		else if (tmp == (char *)1337)

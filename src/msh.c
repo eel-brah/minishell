@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   msh.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/11 03:24:58 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/11 17:58:21 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ static char	*get_cmd(char *prompt)
 		cmd = readline("$ ");
 	else
 		cmd = readline(prompt);
-	fix_env(env);
+	environ = env;
 	free(prompt);
 	if (cmd && *cmd)
 		add_history(cmd);

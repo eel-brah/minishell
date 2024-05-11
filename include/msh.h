@@ -125,7 +125,6 @@ bool	add_to_env_plus(char *vrbl);
 bool	add_to_env_plus(char *vrbl);
 char	*join_variabl(char *old, char *new, char *ptr);
 char	*name_file_rand(int number);
-void	fix_env(char **env);
 t_node	*check_exec(t_exec *cmd, t_node *node, char *pcmd);
 t_node	*invalid_red(t_node *node, char *st, char *et);
 void	check_path_pwd(char **env, size_t *i, int *add);

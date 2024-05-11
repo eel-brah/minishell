@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils_1.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 22:24:03 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:33:56 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/11 17:58:13 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,22 +21,6 @@ bool	in_pipe(int i)
 	else if (i == 1)
 		p = 1;
 	return (p);
-}
-
-void	fix_env(char **env)
-{
-	char		*columns;
-	char		*lines;
-	static bool	flag;
-
-	flag = true;
-	columns = getenv("COLUMNS");
-	lines = getenv("LINES");
-	environ = env;
-	if (lines)
-		ft_setenv(environ, "LINES=", lines);
-	if (columns)
-		ft_setenv(environ, "COLUMNS=", columns);
 }
 
 bool	is_valid_variable_name(char *s)
