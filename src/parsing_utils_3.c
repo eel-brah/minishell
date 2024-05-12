@@ -67,6 +67,7 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 	unsigned int	len;
 	unsigned int	len_s;
 	int				fd2;
+	char			**env;
 
 	res = heredoc_setup(delim, node, &len, &fd2);
 	if (!res)
@@ -74,7 +75,9 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 	set_signal_handler(SIGINT, sigint_handler2);
 	while (1)
 	{
+		env = environ;
 		s = readline("> ");
+		environ = env;
 		if (got_sigint)
 			return (_reset(fd, fd2, s, res));
 		len_s = ft_strlen(s);

@@ -22,21 +22,21 @@ int	main(int argc, char **argv, char **env)
 	while (1)
 	{
 		cmd = get_cmd(get_prompt());
-		// cmd = ft_strdup("ls -l | echo hi");
+		//  cmd = ft_strdup("ls -l | echo hi");
 		if (!cmd)
 			ft_exit(NULL, NULL);
 		else if (!*cmd)
 		{
-			free(cmd);
+			// free(cmd);
 			continue ;
 		}
 		tree = parse_cmd(cmd);
-		free(cmd);
+		// free(cmd);
 		if (!tree)
 			continue ;
 		execute(tree);
 		free_cmdtree(tree);
-		// ft_exit(NULL, NULL);
+		ft_exit(NULL, NULL);
 	}
 }
 
@@ -46,15 +46,17 @@ static char	*get_cmd(char *prompt)
 	char	**env;
 
 	env = environ;
-	if (!prompt)
-		cmd = readline("$ ");
-	else
-		cmd = readline(prompt);
+	// if (!prompt)
+	// 	cmd = readline("$ ");
+	// else
+	// 	cmd = readline(prompt);
 	environ = env;
 	free(prompt);
-	if (cmd && *cmd)
-		add_history(cmd);
-	return (cmd);
+	// if (cmd && *cmd)
+	// 	add_history(cmd);
+	return ("echo $a && cd ~asdfsd && cd ~ && cd $OLDPWD");
+	// return ("echo $a && ls  && export a=b && export a=b && export a && export a= && export +++v b df+=df dfdsf=dfs  && echo $a && echo $0 && echo -nl");
+	// return ("export a=bb && unset a && echo $a && export a=bb && echo $a | cat");
 }
 
 void	execute(t_node *node)

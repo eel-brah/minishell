@@ -90,8 +90,7 @@ char	*alloc_for_elem(t_elem *elem, int here_doc, char *word, char ***res)
 			d_free(*res);
 			return (free(word), free(elem->arr), perror("malloc"), NULL);
 		}
-		else
-			*res = tmp;
+		*res = tmp;
 	}
 	elem->index = 0;
 	ft_memset(elem->arr, 0, elem->capacity);
