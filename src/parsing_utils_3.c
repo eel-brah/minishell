@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing_utils_3.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:46:47 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:53:20 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/13 18:35:13 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,32 +64,28 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 {
 	char			*s;
 	char			**res;
-	unsigned int	len;
 	unsigned int	len_s;
+	t_tmp			tmp;
 	int				fd2;
-	char			**env;
 
-	res = heredoc_setup(delim, node, &len, &fd2);
+	res = heredoc_setup(delim, node, &tmp.len, &fd2);
 	if (!res)
 		return (false);
 	set_signal_handler(SIGINT, sigint_handler2);
 	while (1)
 	{
-		env = environ;
+		tmp.env = environ;
 		s = readline("> ");
-		environ = env;
+		environ = tmp.env;
 		if (got_sigint)
 			return (_reset(fd, fd2, s, res));
 		len_s = ft_strlen(s);
-		if (!s || (len == len_s && !ft_strncmp(s, res[0], len)))
+		if (!s || (tmp.len == len_s && !ft_strncmp(s, res[0], tmp.len)))
 			break ;
-		write(fd, s, len_s);
-		write(fd, "\n", 1);
-		free(s);
-		s = NULL;
+		(1) && (write(fd, s, len_s), write(fd, "\n", 1));
+		(1) && (free(s), s = NULL);
 	}
-	close_heredoc(fd, fd2, s, res);
-	return (true);
+	return (close_heredoc(fd, fd2, s, res), true);
 }
 
 bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd)

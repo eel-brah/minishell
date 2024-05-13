@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_2.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 13:29:37 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/13 20:38:04 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ int	ft_unset(char **env, char **args)
 	return (r);
 }
 
-static int ft_exit_2(t_node *tree, char *arg, bool *valid)
+static int	ft_exit_2(t_node *tree, char *arg, bool *valid)
 {
 	char	*p;
 	int		nb;
@@ -119,8 +119,7 @@ int	ft_exit(t_node *tree, char **args)
 	ssize_t			nb;
 
 	if (!in_pipe(3))
-		ft_putstr_fd("exit\n", 1);
-	// exit was print into stderr but i change it to stdout for test script
+		ft_putstr_fd("exit\n", 2);
 	count = count_args(args);
 	if (count == 0)
 	{
