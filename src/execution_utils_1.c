@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execution_utils_1.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:57:39 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/11 15:17:36 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:47:08 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	exec_type(t_node *node)
 		}
 		cmd->argv = tmp;
 		exec_cmd(node, cmd->argv[0], cmd->argv);
-		signal_exting(GET_STAUS);
+		signal_exting(exit_status(0, false, false));
 	}
 	else
 		exit_status(0, true, true);
@@ -56,7 +56,8 @@ bool	heredoc_type(t_redirection *red)
 
 	if (red->expand == true)
 	{
-		fd_read = expand_here_doc(red->here_fd, GET_STAUS, red->expand);
+		fd_read = expand_here_doc(red->here_fd,
+				exit_status(0, false, false), red->expand);
 		if (fd_read == -1)
 			return (false);
 		close(red->here_fd);
@@ -84,7 +85,6 @@ bool	red_type(t_redirection *red)
 	if (!tmp2)
 		return (false);
 	red->file = tmp2;
-	// S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); /* rw-rw-rw- 
 	or = open(red->file, red->flags, PREMISSIONS);
 	if (or == -1)
 		return (perror("open"), false);

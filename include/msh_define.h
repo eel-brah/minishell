@@ -3,22 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   msh_define.h                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 19:36:57 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 18:34:25 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:46:05 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MSH_DEFINE_H
 # define MSH_DEFINE_H
 
-extern volatile sig_atomic_t	got_sigint;
-extern char						**environ;
+extern volatile sig_atomic_t	g_got_sigint;
 
-int	ft_strcmp(char *s1, char *s2);
-
-typedef struct s_node 
+typedef struct s_node
 {
 	int	type;
 }	t_node;
@@ -34,7 +31,6 @@ typedef struct s_tmp
 	unsigned int	len;
 	char			**env;
 }	t_tmp;
-
 
 typedef struct s_div
 {
@@ -78,30 +74,28 @@ typedef struct wild_patt
 	int		q;
 }	t_wild_patt;
 
+# define WHITESPACES "\t\n\v\f\r "
+# define SYMBOL "<>|&()"
 
-#define WHITESPACES "\t\n\v\f\r "
-#define SYMBOL "<>|&()"
+# define EXEC	1
+# define PIPE	2
+# define RED		3
+# define AND		4
+# define OR		5
+# define HEREDOC 6
 
-#define EXEC	1
-#define PIPE	2
-#define RED		3
-#define AND		4
-#define OR		5
-#define HEREDOC 6
+# define PREMISSIONS 0644
 
-#define PREMISSIONS 0644
-#define GET_STAUS exit_status(0, false, false)
-
-#define WORD 'w'
-#define PIPELINE 'p'
-#define TAND 'a'
-#define TOR 'o'
-#define OUT_RED 'r'
-#define IN_RED 'R'
-#define APP_RED 'd'
-#define HERE_DOC 'h'
-#define OPEN_PER 't'
-#define CLOSE_PER 'T'
-#define ERROR 'e'
+# define WORD 'w'
+# define PIPELINE 'p'
+# define TAND 'a'
+# define TOR 'o'
+# define OUT_RED 'r'
+# define IN_RED 'R'
+# define APP_RED 'd'
+# define HERE_DOC 'h'
+# define OPEN_PER 't'
+# define CLOSE_PER 'T'
+# define ERROR 'e'
 
 #endif

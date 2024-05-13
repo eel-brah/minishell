@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:57:47 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:48:41 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:40:16 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,6 @@ static void	_child(t_node *node, int usingp, int closingp, int s)
 	close(closingp);
 	in_pipe(1);
 	execute(node);
-	// status = GET_STAUS;
-	// exit(WEXITSTATUS(status));
 }
 
 static void	wating_for_childs(pid_t *pid)
@@ -57,6 +55,37 @@ static void	wating_for_childs(pid_t *pid)
 	exit_status(s, true, false);
 }
 
+bool	first_child(pid_t *pid, int *p, t_div *div)
+{
+	*pid = fork();
+	if (*pid == -1)
+		return (close(p[0]), close(p[1]), perror("fork"), false);
+	if (*pid == 0)
+	{
+		_child(div->left, p[1], p[0], 1);
+		free_cmdtree((t_node *)div);
+		ft_exit(NULL, NULL);
+	}
+	return (true);
+}
+
+bool	second_child(pid_t *pid1, int *p, t_div *div, pid_t *pid0)
+{
+	*pid1 = fork();
+	if (*pid1 == -1)
+	{
+		kill(*pid0, SIGINT);
+		return (close(p[0]), close(p[1]), perror("fork"), false);
+	}
+	if (*pid1 == 0)
+	{
+		_child(div->right, p[0], p[1], 0);
+		free_cmdtree((t_node *)div);
+		ft_exit(NULL, NULL);
+	}
+	return (true);
+}
+
 bool	pipe_type(t_div *div)
 {
 	pid_t	pid[2];
@@ -65,45 +94,14 @@ bool	pipe_type(t_div *div)
 	if (pipe(p) == -1)
 		return (perror("pipe"), false);
 	set_signal_handler(SIGINT, SIG_IGN);
-	pid[0] = fork();
-	if (pid[0] == -1)
-		return (close(p[0]), close(p[1]), perror("fork"), false);
-	if (pid[0] == 0)
-	{
-		_child(div->left, p[1], p[0], 1);
-		free_cmdtree((t_node *)div);
-		ft_exit(NULL, NULL);
-	}
-	pid[1] = fork();
-	if (pid[1] == -1)
-	{
-		kill(pid[0], SIGINT);
-		return (close(p[0]), close(p[1]), perror("fork"), false);
-	}
-	if (pid[1] == 0)
-	{
-		_child(div->right, p[0], p[1], 0);
-		free_cmdtree((t_node *)div);
-		ft_exit(NULL, NULL);
-	}
+	if (!first_child(&pid[0], p, div))
+		return (false);
+	if (!second_child(&pid[1], p, div, &pid[0]))
+		return (false);
 	in_pipe(0);
 	close(p[0]);
 	close(p[1]);
 	wating_for_childs(pid);
 	set_signal_handler(SIGINT, sigint_handler);
 	return (true);
-}
-
-void	and_type(t_div *div)
-{
-	execute(div->left);
-	if (!GET_STAUS)
-		execute(div->right);
-}
-
-void	or_type(t_div *div)
-{
-	execute(div->left);
-	if (GET_STAUS)
-		execute(div->right);
 }

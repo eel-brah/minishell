@@ -6,11 +6,13 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/22 08:18:41 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 13:01:04 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:50:32 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
+
+static char	*get_cmd(char *prompt);
 
 int	main(int argc, char **argv, char **env)
 {
@@ -22,7 +24,6 @@ int	main(int argc, char **argv, char **env)
 	while (1)
 	{
 		cmd = get_cmd(get_prompt());
-		//  cmd = ft_strdup("ls | echo hi && ls");
 		if (!cmd)
 			ft_exit(NULL, NULL);
 		else if (!*cmd)
@@ -36,7 +37,6 @@ int	main(int argc, char **argv, char **env)
 			continue ;
 		execute(tree);
 		free_cmdtree(tree);
-		// ft_exit(NULL, NULL);
 	}
 }
 

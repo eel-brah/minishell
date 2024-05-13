@@ -3,17 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   setup.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 21:25:42 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/09 15:18:01 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:38:47 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
 
-volatile sig_atomic_t	got_sigint = 0;
-extern int				rl_catch_signals;
+volatile sig_atomic_t	g_got_sigint = 0;
 
 char	**setup(int argc, char **argv, char **env)
 {
@@ -48,9 +47,8 @@ void	sigint_handler(int sig)
 void	sigint_handler2(int sig)
 {
 	exit_status(1, true, true);
-	got_sigint = 1;
+	g_got_sigint = sig;
 	close(0);
-	(void)sig;
 }
 
 void	set_signal_handler(int signal, void (*fun)(int))

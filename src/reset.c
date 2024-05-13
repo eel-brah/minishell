@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   reset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/10 18:11:03 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/05/11 13:18:05 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:34:34 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/msh.h"
 
-bool	reset_term()
+bool	reset_term(void)
 {
 	struct termios	attr;
 

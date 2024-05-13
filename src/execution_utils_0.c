@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:57:39 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:47:52 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:44:49 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ char	**expand_args(char **args)
 	while (args[i])
 	{
 		count = 0;
-		ex = expander(args[i], 0, 1, GET_STAUS);
+		ex = expander(args[i], 0, 1, exit_status(0, false, false));
 		if (!ex)
 			return (NULL);
 		count = count_args(ex);
@@ -107,7 +107,7 @@ char	*expand_file(char *file)
 {
 	char	**ex;
 
-	ex = expander(file, 0, 1, GET_STAUS);
+	ex = expander(file, 0, 1, exit_status(0, false, false));
 	if (!ex)
 		return (NULL);
 	if (count_args(ex) == 1)

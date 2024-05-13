@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_2.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 20:38:04 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:44:49 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ int	ft_exit(t_node *tree, char **args)
 	{
 		free_cmdtree(tree);
 		double_free(environ);
-		exit(GET_STAUS >> 8);
+		exit(exit_status(0, false, false) >> 8);
 	}
 	nb = ft_exit_2(tree, *args, &valid);
 	if (!valid)

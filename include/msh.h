@@ -13,9 +13,9 @@
 #ifndef MSH_H
 # define MSH_H
 
-#include "msh_libs.h"
-#include "msh_define.h"
-#include <termios.h>
+# include "msh_libs.h"
+# include "msh_define.h"
+# include <termios.h>
 
 size_t	count_args(char **ptrs);
 void	free_cmdtree(t_node *tree);
@@ -54,7 +54,6 @@ bool	heredoc_type(t_redirection *red);
 void	exec_type(t_node *node);
 char	**expand_args(char **args);
 char	*expand_file(char *file);
-static char	*get_cmd(char *prompt);
 void	ft_printenv(char **env);
 char	**add_ptr_to_ptrs(char **ptrs, char *ptr);
 void	double_free(char **ptrs);
@@ -67,11 +66,11 @@ char	*get_prompt(void);
 int		exit_status(int	status, bool update, bool shift);
 void	set_signal_handler(int signal, void (*fun)(int));
 void	sigint_handler(int sig);
-void sigint_handler2(int sig);
+void	sigint_handler2(int sig);
 char	**expander(char *s, int here_doc, int expand, int status);
 char	**setup(int argc, char **argv, char **env);
-void sigint_handler(int sig);
-void sigint_handler2(int sig);
+void	sigint_handler(int sig);
+void	sigint_handler2(int sig);
 void	set_signal_handler(int signal, void (*fun)(int));
 char	**create_env(char **env, size_t size, int add, size_t i);
 char	**create_new_env();
@@ -129,5 +128,6 @@ t_node	*check_exec(t_exec *cmd, t_node *node, char *pcmd);
 t_node	*invalid_red(t_node *node, char *st, char *et);
 void	check_path_pwd(char **env, size_t *i, int *add);
 bool	handl_path_pwd(char **env, size_t *i, char **p);
-bool	reset_term();
+bool	reset_term(void);
+char	*read_heredoc_line(void);
 #endif

@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 22:28:00 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:30:38 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/13 21:40:40 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,4 +69,15 @@ void	ft_printenv_no_empty(char **env)
 			printf("%s\n", *env);
 		env++;
 	}
+}
+
+char	*read_heredoc_line(void)
+{
+	char	**env;
+	char	*s;
+
+	env = environ;
+	s = readline("> ");
+	environ = env;
+	return (s);
 }
