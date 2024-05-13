@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:44:34 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/13 13:29:37 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,12 +86,30 @@ int	ft_unset(char **env, char **args)
 	return (r);
 }
 
-static void	ft_exit_invalid_args(t_node *tree, char *arg)
+static int ft_exit_2(t_node *tree, char *arg, bool *valid)
 {
-	print_error_2("exit", arg, "numeric argument required");
-	free_cmdtree(tree);
-	double_free(environ);
-	exit(255);
+	char	*p;
+	int		nb;
+
+	*valid = true;
+	p = ft_strtrim(arg, WHITESPACES);
+	if (!p)
+	{
+		*valid = false;
+		perror("malloc");
+		return (0);
+	}
+	nb = ft_atoi_v2(p, valid);
+	if (!p || !valid)
+	{
+		free(p);
+		print_error_2("exit", arg, "numeric argument required");
+		free_cmdtree(tree);
+		double_free(environ);
+		exit(255);
+	}
+	free(p);
+	return (nb);
 }
 
 int	ft_exit(t_node *tree, char **args)
@@ -110,9 +128,9 @@ int	ft_exit(t_node *tree, char **args)
 		double_free(environ);
 		exit(GET_STAUS >> 8);
 	}
-	nb = ft_atoi_v2(*args, &valid);
-	if (!*args || !valid)
-		ft_exit_invalid_args(tree, *args);
+	nb = ft_exit_2(tree, *args, &valid);
+	if (!valid)
+		return (1);
 	if (count > 1)
 	{
 		print_error("exit", "too many arguments");
