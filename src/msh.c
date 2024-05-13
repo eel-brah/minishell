@@ -22,7 +22,7 @@ int	main(int argc, char **argv, char **env)
 	while (1)
 	{
 		cmd = get_cmd(get_prompt());
-		//  cmd = ft_strdup("ls -l | echo hi");
+		//  cmd = ft_strdup("ls | echo hi && ls");
 		if (!cmd)
 			ft_exit(NULL, NULL);
 		else if (!*cmd)
@@ -36,6 +36,7 @@ int	main(int argc, char **argv, char **env)
 			continue ;
 		execute(tree);
 		free_cmdtree(tree);
+		// ft_exit(NULL, NULL);
 	}
 }
 

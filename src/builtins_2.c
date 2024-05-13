@@ -100,7 +100,7 @@ static int ft_exit_2(t_node *tree, char *arg, bool *valid)
 		return (0);
 	}
 	nb = ft_atoi_v2(p, valid);
-	if (!p || !valid)
+	if (!p || !*valid)
 	{
 		free(p);
 		print_error_2("exit", arg, "numeric argument required");
@@ -136,6 +136,8 @@ int	ft_exit(t_node *tree, char **args)
 		print_error("exit", "too many arguments");
 		return (1);
 	}
+	free_cmdtree(tree);
+	double_free(environ);
 	exit(nb);
 	return (0);
 }
