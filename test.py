@@ -57,7 +57,7 @@ simple_tests = {
         "wildcard 32": "echo $USER''$USER",
         # "wildcard 32": "echo *hello'*\"'",
         # "wildcard 33": "touch 'hel*\'' && echo h*'*'",
-        # "wildcard 33": "touch fffff && echo hello",
+        "wildcard 33": "touch fffff && echo hello",
         "env arg with wildcards": 'echo *$sdf.c',
         "env arg with wildcards 2": 'export a="helloworld" && echo $a*',
         "env arg with wildcards 3": 'export a="helloworld" && echo $a*****',
@@ -164,6 +164,13 @@ simple_tests = {
         "permisions": 'cd /tmp && touch hello && chmod 000 hello && echo hello > hello || rm -fr hello',
         "permisions 2": 'cd /tmp && touch hello && chmod 000 hello && ls hello >> hello || rm -fr hello',
         "files with spaces": 'cd /tmp && ls -al >     "hello    world"   && ls -al && cat "hello    world" && rm -fr "hello    world"',
+        "quotes": "\'sdfas \'sfsf\"fsdf\" yuu",
+        "test 1": "$=5",
+        "test 2": "$+",
+        "test 3": "$-",
+        "test 4": "pwd dkfj kdjf kdjf",
+        # "test 5": "echo $USER\'\"$USER\'"
+        "test 6": "echo \'\'$USER"
 }
 
 sofisticated_tests = {
@@ -199,7 +206,7 @@ def run_tests(tests):
         # print(got_err + " error stderr")
         # print(got)
         got = got.split(b'\n')[1:-1]
-        got[-1] = got[-1][:-25] # remove b'minishell2.5>$ exit'
+        got[-1] = got[-1][:-19] # remove b'minishell2.5>$ exit'
         got = b'\n'.join(got)
 
         # adding \n to match expected
@@ -207,9 +214,9 @@ def run_tests(tests):
             # got += b'\n'
 
         if got == expected and (not got_err) == (not expected_err):
-            print(f"{key} sucesssssss")
+            print(f"\033[0;32m{key} sucesssssss\033[0m")
         else:
-            print(f"{key} failed\nexpeced ---------------\n{expected}\ngot --------------\n{got}")
+            print(f"\033[0;31m{key} failed\nexpeced ---------------\n{expected}\ngot --------------\n{got}\033[0m")
 # amokhtar minishelll$ 
 # eel-brah mini$
 if __name__ == '__main__':
@@ -224,16 +231,7 @@ if __name__ == '__main__':
 # // this one also should not work if it did then its broken
 # // (((ls d k f d s >> l && ls) > ls > l if_it_didnt_catch_this_then_it_is_not_workign << d | ls  > ls << l  && (cat | ls || l) >> ls < l ) || (ls a idn sndu >> kkd) >> l )  > ls < l  >> l << d
 
-# 'sdfas 'sfsf"fsdf" yuu
-# $=5
-# $+
-# $-
-# Pwd dkfj kdjf kdjf
 # Unset HOME && cd
-
-# \?=9
-# echo ?
-# echo ?
 
 # export
 # export ll*ll=99
@@ -284,8 +282,6 @@ if __name__ == '__main__':
 	#  cat << op ''
     
 	# unset a and in env a without =
-    #echo $USER'"$USER'
-    #echo ''$USER
     
 	# export b="*'*"*"'"
     
@@ -306,6 +302,7 @@ if __name__ == '__main__':
 
 # exit 88k 88
 # exit 88 88
+# exit "   88  "
 
 # ls > ls > l kk
 # (ls) > ls > l kk
