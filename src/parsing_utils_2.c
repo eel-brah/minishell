@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing_utils_2.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:46:50 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:14:23 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/14 13:24:14 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ t_node	*parse_exec(char **pcmd)
 	t_node	*node;
 	char	token;
 
+	node = NULL;
 	if (token_peek(*pcmd) == OPEN_PER)
 		return (parenthesis_handler(node, pcmd));
 	cmd = create_exec();

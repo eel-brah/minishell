@@ -17,6 +17,8 @@
 # include "msh_define.h"
 # include <termios.h>
 
+extern char	**environ;
+
 size_t	count_args(char **ptrs);
 void	free_cmdtree(t_node *tree);
 int		ft_echo(char **args);
@@ -58,12 +60,12 @@ void	ft_printenv(char **env);
 char	**add_ptr_to_ptrs(char **ptrs, char *ptr);
 void	double_free(char **ptrs);
 void	print_error(char *source, char *error);
-void	print_error_2(char *source, char *arg,char *error);
+void	print_error_2(char *source, char *arg, char *error);
 bool	is_valid_variable_name(char *s);
 int		expand_here_doc(int fd, int status, int expand);
 void	exec_cmd(t_node *tree, char *prg, char **args);
 char	*get_prompt(void);
-int		exit_status(int	status, bool update, bool shift);
+int		exit_status(int status, bool update, bool shift);
 void	set_signal_handler(int signal, void (*fun)(int));
 void	sigint_handler(int sig);
 void	sigint_handler2(int sig);
@@ -73,12 +75,12 @@ void	sigint_handler(int sig);
 void	sigint_handler2(int sig);
 void	set_signal_handler(int signal, void (*fun)(int));
 char	**create_env(char **env, size_t size, int add, size_t i);
-char	**create_new_env();
+char	**create_new_env(void);
 void	prg_with_path(char *prg, char **args);
 void	execute_prg(char *prg, char **args);
 t_node	*parse_cmd(char *cmd);
 void	execute(t_node *node);
-bool	in_pipe(int	i);
+bool	in_pipe(int i);
 bool	ft_setenv(char **env, char *name, char *val);
 bool	env_is_there(char **env, char *name);
 int		ft_close(int fd);
@@ -87,12 +89,12 @@ char	*delete_quotes(char *s, int i, int len);
 bool	itterate_pattern(t_wild_patt *pa, char **p, char **name, int h);
 int		check_pattern(char *pattern, char *name, int handle_quot);
 char	*patter_true(char *arr, char ***res, int *capacity, char *s);
-char	**match_pattern(char *pattern, int handle_quote, int flag, int capacity);
-char    *ft_strrealloc2(char *str, size_t size);
-char    **ft_realloc(char **lines, char *line);
+char	**match_pattern(char *pattern, int handle_q, int flag, int cpt);
+char	*ft_strrealloc2(char *str, size_t size);
+char	**ft_realloc(char **lines, char *line);
 char	*alloc_for_expand_without_q(char *s, t_elem ***elem);
 char	*set_caractere(t_elem *elem, int c);
-int    is_exist(int c, char *s);
+int		is_exist(int c, char *s);
 bool	handle_child_get_pid(char *file);
 void	d_free(char **ptr);
 char	*get_pid(int pid, int exitt);
@@ -130,4 +132,5 @@ void	check_path_pwd(char **env, size_t *i, int *add);
 bool	handl_path_pwd(char **env, size_t *i, char **p);
 bool	reset_term(void);
 char	*read_heredoc_line(void);
+void	print_error_3(char *source, char *arg, char *arg2, char *error);
 #endif

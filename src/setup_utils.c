@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/09 15:11:56 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/05/09 15:18:39 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/14 13:24:31 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,10 +52,8 @@ bool	handl_shlvl(char **spl, char **ptr, int i)
 
 bool	handle_shlvl(char *val, char **ptr, int i)
 {
-	int		shlvl;
 	char	**spl;
 	int		c;
-	char	*tmp;
 
 	spl = ft_split(val, '=');
 	if (!spl)

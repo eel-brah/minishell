@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_2.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 21:44:49 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/14 14:51:39 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int	ft_pwd(char **args)
 	s = getcwd(NULL, 0);
 	if (!s)
 	{
-		perror("pwd");
+		print_error_2("minishell", "pwd", strerror(errno));
 		return (1);
 	}
 	printf("%s\n", s);
@@ -96,7 +96,7 @@ static int	ft_exit_2(t_node *tree, char *arg, bool *valid)
 	if (!p)
 	{
 		*valid = false;
-		perror("malloc");
+		print_error_2("minishell", "malloc", strerror(errno));
 		return (0);
 	}
 	nb = ft_atoi_v2(p, valid);

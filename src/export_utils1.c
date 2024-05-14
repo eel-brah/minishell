@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/29 19:46:16 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/29 19:46:53 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/14 14:48:18 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ bool	add_to_env(char *vrbl)
 	new_env = malloc((size + 2) * sizeof(char *));
 	if (!new_env)
 	{
-		perror("malloc");
+		print_error_2("minishell", "malloc", strerror(errno));
 		return (false);
 	}
 	i = 0;

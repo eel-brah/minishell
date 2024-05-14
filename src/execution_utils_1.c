@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execution_utils_1.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:57:39 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 21:47:08 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/14 14:46:27 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,15 @@ bool	heredoc_type(t_redirection *red)
 	}
 	fd = dup(red->fd);
 	if (fd == -1)
-		return (perror("dup"), false);
+		return (print_error_2("minishell",
+				"dup", strerror(errno)), false);
 	if (dup2(red->here_fd, red->fd) == -1)
-		return (close(fd), perror("dup2"), false);
+		return (close(fd), print_error_2("minishell",
+				"dup2", strerror(errno)), false);
 	execute(red->node);
 	if (dup2(fd, red->fd) == -1)
-		return (close(fd), perror("dup2"), false);
+		return (close(fd), print_error_2("minishell",
+				"dup2", strerror(errno)), false);
 	close(fd);
 	return (true);
 }
@@ -87,7 +90,7 @@ bool	red_type(t_redirection *red)
 	red->file = tmp2;
 	or = open(red->file, red->flags, PREMISSIONS);
 	if (or == -1)
-		return (perror("open"), false);
+		return (print_error_2("minishell", "open", strerror(errno)), false);
 	fd = dup(red->fd);
 	if (fd == -1)
 		return (close(or), perror("dup"), false);

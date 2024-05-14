@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execution.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:57:47 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 21:40:16 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/05/14 14:47:13 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 static void	_child(t_node *node, int usingp, int closingp, int s)
 {
-	int	status;
-
 	if (dup2(usingp, s) == -1)
 	{
 		perror("dup2");
@@ -59,12 +57,14 @@ bool	first_child(pid_t *pid, int *p, t_div *div)
 {
 	*pid = fork();
 	if (*pid == -1)
-		return (close(p[0]), close(p[1]), perror("fork"), false);
+		return (close(p[0]), close(p[1]),
+			print_error_2("minishell", "fork", strerror(errno)), false);
 	if (*pid == 0)
 	{
 		_child(div->left, p[1], p[0], 1);
 		free_cmdtree((t_node *)div);
-		ft_exit(NULL, NULL);
+		double_free(environ);
+		exit(exit_status(0, false, false) >> 8);
 	}
 	return (true);
 }
@@ -81,7 +81,8 @@ bool	second_child(pid_t *pid1, int *p, t_div *div, pid_t *pid0)
 	{
 		_child(div->right, p[0], p[1], 0);
 		free_cmdtree((t_node *)div);
-		ft_exit(NULL, NULL);
+		double_free(environ);
+		exit(exit_status(0, false, false) >> 8);
 	}
 	return (true);
 }
@@ -92,7 +93,7 @@ bool	pipe_type(t_div *div)
 	int		p[2];
 
 	if (pipe(p) == -1)
-		return (perror("pipe"), false);
+		return (print_error_2("minishell", "pipe", strerror(errno)), false);
 	set_signal_handler(SIGINT, SIG_IGN);
 	if (!first_child(&pid[0], p, div))
 		return (false);
