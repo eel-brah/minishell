@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/29 14:04:04 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/04/29 18:43:48 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/05/14 18:47:34 by amokhtar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ char	*handl_other_carac(t_elem *elem, char ***res, char *s)
 
 	c = s[elem->i];
 	d = s[elem->i + 1];
-	if (c == '*' && elem->qoute == 0)
+	if (c == '*' && elem->qoute == 0 && elem->expand)
 		elem->wild = 1;
 	tmp = handle_spec_tild(elem, res, s);
 	if (!tmp)
