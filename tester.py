@@ -1,16 +1,15 @@
 import subprocess
-# import os
+import os
 import sys
 
 # if len(sys.argv) != 2:
 #     sys.exit(f"Usage: python3 {sys.argv[0]} minishell_prompt")
 
 tests = {
-	"normal test 1": "ls -l",
-	"normal test 2": "./sfsffff",
-	"normal test 3": "./sfsffff",
+	"normal test 1": "echo $?",
+	"normal test 2": "touch f1 f2 f3",
+	"normal test 3": "ls -l",
 	"normal test 4": "./sfsffff",
-	"normal test 5": "echo $?",
 
 	"expand 1": r"echo \"$HOME\"",
 	"expand 2": r"echo \"$HOME\"$\"$HOME\"",
@@ -146,7 +145,6 @@ tests = {
 	"ambiguous with builtins 16": 'cd /tmp && export a=\"hello world\" && (export) > $a',
 	"ambiguous with builtins 17": 'cd /tmp && export a=\"hello world\" && (export && ls) > $a',
 
-	# "echo": 'echo -n AAA BBB CCC DDD EEE FFFFFFFFF',
 	"export": 'export +++ && echo $?',
 	"cd status code": 'cd /exam && echo $?',
 	"cd status code 2": 'cd /aaaaaaaa && echo $?',
@@ -190,75 +188,60 @@ tests = {
 	"test 27": "export z=*z && echo hello > $z",
 	## "test 28": "export abcdef="*'*"*"'" && export | grep abcdef",
 	## "test 29": "export abcdef="*'*"*'*'"'" && export | grep abcdef",
-	"test 28": "mkdir /tmp/test && echo '#!/bin/bash' > /tmp/test/t5555 && echo ls >> /tmp/test/t5555 && export PATH+=\":/tmp/test\" && t5555",
-	"test 29": "mkdir /tmp/test && echo '#!/bin/bash' > /tmp/test/t5555 && echo ls >> /tmp/test/t5555 && chmod 766 /tmp/test/t5555 && export PATH+=\":/tmp/test\" && t5555",
-	"test 30": "mkdir /tmp/test2 && touch /tmp/test2/t5555 && export PATH+=\":/tmp/test2\" && mkdir /tmp/test && echo '#!/bin/bash' > /tmp/test/t5555 && echo ls >> /tmp/test/t5555 && chmod 766 /tmp/test/t5555 && export PATH+=\":/tmp/test\" && t5555",
+	"test 28": "mkdir /tmp/test00 && echo '#!/bin/bash' > /tmp/test00/t5555 && echo ls >> /tmp/test00/t5555 && export PATH+=\":/tmp/test00\" && t5555",
+	"test 29": "mkdir /tmp/test00 && echo '#!/bin/bash' > /tmp/test00/t5555 && echo ls >> /tmp/test00/t5555 && chmod 766 /tmp/test00/t5555 && export PATH+=\":/tmp/test00\" && t5555",
+	"test 30": "mkdir /tmp/test22 && touch /tmp/test22/t5555 && export PATH+=\":/tmp/test22\" && mkdir /tmp/test00 && echo '#!/bin/bash' > /tmp/test00/t5555 && echo ls >> /tmp/test00/t5555 && chmod 766 /tmp/test/t5555 && export PATH+=\":/tmp/test\" && t5555",
+	"test 31": "< l > p && ls",
+	"test 32": "exit",
+	"test 33": "exit 88k 88",
+	"test 34": "exit 88 88",
+	"test 35": "exit h",
+	"test 36": "exit 44",
+	"test 37": "exit 98909889687665765765786",
+	"test 38": "exit \"   88  \"",
+	"test 39": "fskdjfjlk || exit",
+
 }
 
-
-# cd /tmp && echo hello > test1 test2 && cat test1
-# echo hello > *z 
-# export z=*z && export | grep z=
-# export z=*z && echo hello > $z
-# cd /tmp && touch hell"**"* && echo hell"**"*
-# cd /tmp && touch hell"**"* hell"**"o hello && echo hell*
-# cd tmp && > file
-
-# mkdir /tmp/test && echo '#!/bin/bash' > /tmp/test/t5555 && echo ls >> /tmp/test/t5555 && export PATH+=":/tmp/test" && t5555
-# mkdir /tmp/test && echo '#!/bin/bash' > /tmp/test/t5555 && echo ls >> /tmp/test/t5555 && chmod 766 /tmp/test/t5555 && export PATH+=":/tmp/test" && t5555
-# mkdir /tmp/test2 && touch /tmp/test2/t5555 && export PATH+=":/tmp/test2" && mkdir /tmp/test && echo '#!/bin/bash' > /tmp/test/t5555 && echo ls >> /tmp/test/t5555 && chmod 766 /tmp/test/t5555 && export PATH+=":/tmp/test" && t5555
-# < l > p
-# exit 88k 88
-# exit 88 88
-# exit "   88  "
+# echo -n AAA BBB CCC DDD EEE FFFFFFFFF
+# echo -nnnnnn -nnn AAA BBB CCC 
 
 def run_tests(tests):
-	# text=True shell=True check=True
 	skip = ["test 21", "test 22"]
-	rmv = ["test 28", "test 29", "test 30"]
+	value = ["test 36", "test 38"]
+	subprocess.call(['mkdir', '/tmp/tmp'])
+	subprocess.call(['cp', 'minishell', '/tmp/tmp/minishell'])
+	os.chdir("/tmp/tmp")
 	for key in tests:
-		# s = "echo " + tests[key] + " | bash"
-		if key in skip:
-			command = tests[key]
-		else:
-			command = replace_sc(tests[key])
-		# print(command)
-		expected = subprocess.run(f"echo {command} | bash",
-			shell=True, capture_output=True, text=True)
-		# print(f"[{expected.stdout}]")
-		expected_stdout = expected.stdout
-		expected_stderr = expected.stderr
-		if (command == "."):
-			expected_rv = 127
-		else:
-			expected_rv = expected.returncode
-		
-		if key in rmv:
-			subprocess.run("rm -fr /tmp/test /tmp/test2", shell=True, capture_output=True)
-        
-		got = subprocess.run(f"echo {command} | ./minishell",
-			shell=True, capture_output=True, text=True)
-		# print(got.stdout)
-		got_stdout = remove_fl_lines(got.stdout)
-		got_stderr = got.stderr
-		got_rv = got.returncode
-		# print(f"[{got_stdout}]")
-		if got_stderr or expected_stderr:
-			print(f"{got_stderr}")
-		# expected = subprocess.run(['bash', '-c', f"echo -e \"export a=s && ls\" | bash"], text=True, capture_output=True)
-		# print(expected.stdout)
-
-		if key in rmv:
-			subprocess.run("rm -fr /tmp/test /tmp/test2", shell=True, capture_output=True)
-		
+		command = tests[key] if key in skip else replace_sc(tests[key])
+		expected_stdout, expected_stderr, expected_rv = get_bash_return(command)
+		rm_tests(key)
+		got_stdout, got_stderr, got_rv = get_minishell_return(command)
+		rm_tests(key)
+		if key in value and got_rv == expected_rv:
+			got_rv = 0
+			expected_rv = 0
 		if got_stdout == expected_stdout and got_rv == expected_rv and (got_rv == 0 or (got_stderr and expected_stderr)): #and (not got_err) == (not expected_err):
 			print(f"\033[0;32m{key} sucesssssss\033[0m")
 		else:
 			print(f"\033[0;31m{key} failed\n===>Expeced return -- value: {expected_rv}\n{expected_stdout}\n===>Got return -- value: {got_rv}\n{got_stdout}\033[0m")
+	subprocess.call(['rm', '-fr', '/tmp/tmp'])
+
+def get_bash_return(command):
+	expected = subprocess.run(f"echo {command} | bash",
+		shell=True, capture_output=True, text=True)
+	# print(f"[{expected.stdout}]")
+	return expected.stdout, expected.stderr, 127 if command == "." else expected.returncode
+
+def get_minishell_return(command):
+	got = subprocess.run(f"echo {command} | ./minishell",
+		shell=True, capture_output=True, text=True)
+	# print(f"[{got.stdout}]")
+	return remove_fl_lines(got.stdout), got.stderr, got.returncode
 
 def remove_fl_lines(text):
 	lines = text.split('\n')
-	lines = lines[1:-2]
+	lines = lines[1:-1]
 	if not lines:
 		return '\n'.join(lines)
 	return '\n'.join(lines)+'\n'
@@ -278,6 +261,11 @@ def replace_sc(s):
 	for char, replacement in replacements.items():
 		s = s.replace(char, replacement)
 	return s
+
+def rm_tests(key):
+	rmv = ["test 28", "test 29", "test 30"]
+	if key in rmv:
+		subprocess.run("rm -fr /tmp/test00 /tmp/test22", shell=True, capture_output=True)
 
 if __name__ == '__main__':
 	run_tests(tests)
