@@ -305,124 +305,123 @@ andorwild = {
 	"and or wildcard 14":r"cd /tmp && touch hell\"**\"* && echo hell\"**\"*",
 	"and or wildcard 15":r"cd /tmp && touch hell\"**\"* hell\"**\"o hello && echo hell*",
 }
-andor = {
-	"andor test 1":r"export a=a && export | grep \"a=\"",
-	"andor test 2":r"export a+=a && export | grep \"a=\"",
-	"andor test 3":r"export a=a && export a+=a && export | grep \"a=\"",
-	"andor test 4":r"export a++=a && export | grep \"a=\"",
-	"andor test 5":r"export a++=a && ls",
-	"andor test 6":r"export aaa && export | grep \"aaa\"",
-	"andor test 7":r"export a && export a+=b && echo $a",
-	"andor test 8":r"export =sdfsf ++ ++++ hello",
-	"andor test 9":r"export bbbcd && export | grep bbbcd$",
-	"andor test 10":r"export bbbcd && export bbbcd= && export | grep bbbcd=",
-	"andor test 11":r"export =sdfsf ++ ++++ hello || export | grep hello",
-	"andor test 12":r"export aaax=9 aaax+=8 aaax+=0 && export | grep aaax=",
-	"andor test 13":r"unset HOME && echo $HOME",
-	"andor test 14":r"export a=s && $''l''\"\"''\"\"''$a",
-	"andor test 15":r'sdfsdfdsf && ls -al',
-	"andor test 16":r'echo hello && sdfsdf && echo hello',
-	"andor test 17":r'echo hello && echo hello',
-	"andor test 18":r'echo hello || sdfsdf || echo hello',
-	"andor test 19":r'export sdfsdf=\"hello world\" && (echo hello && ls) > $sdfsdf',
-	"andor test 20":r'sdfsdf || sdfsdf || echo hello',
-	"andor test 21":r'sdfsdf || echo hello || echo hello',
-	"andor test 22":r'cd /tmp && ls',
-	"andor test 23":r'mkdir testdir && cd testdir && ls -al && cd .. && rm -r testdir && ls -al',
-	"andor test 24":r'ls -l && echo hello > $sdfsdf',
-	"andor test 25":r'(echo hello && ls) > $sdfsdf',
-	"andor test 26":r'(echo hello && ls) < $sdfsdf',
-	"andor test 27":r'ls && (echo hello && ls) > $sdfsdf',
-	"andor test 28":r'export sdfsdf=\"hello world\" && echo hello >> $sdfsdf',
-	"andor test 29":r'export sdfsdf=\"hello world\" && echo hello < $sdfsdf',
-	"andor test 30":r'export sdfsdf=\"hello world\" && ls && echo hello > $sdfsdf',
-	"andor test 31":r'export sdfsdf=\"hello world\" && ls && (echo hello && ls) > $sdfsdf',
-	#"andor test 32":r'export sdfsdf=\"hello world\" && ls && (echo hello && ls) >> $sdfsdf',
-	"andor test 33":r'export sdfsdf=\"hello world\" && ls && (echo hello && ls) < $sdfsdf',
-	"andor test 34":r'cd /tmp && touch file1 file2 && echo hello > file* && ls -al && rm -fr file1 file2',
-	"andor test 35":r'cd /tmp && touch file1 file2 && (echo hello) > file* && ls -al && rm -fr file1 file2',
-	"andor test 36":r"cd /tmp && mkdir testdir && cd testdir && echo hello >> \"$USER\" && ls -al && cd .. && rm -fr testdir",
-	"andor test 37":r'cd /tmp && echo hello > a > b > c > d && cat d && ls && rm -fr a b c d',
-	"andor test 38":r'cd /tmp && echo hello >> a >> b >> c >> d && cat d && ls && rm -fr a b c d',
-	"andor test 39":r'cd /tmp && (ls -a && echo hello) >> a >> b && ls -al && cat b && cat a && rm -fr a b',
-	"andor test 40":r'cd /tmp && echo hello > c &&echo >> a >> b > c hello world && ls -al && cat a b c && rm -fr a b c',
-	"andor test 41":r'cd /tmp && echo hello >     a    >b> c    >     d && cat d && ls && rm -fr a b c d',
-	"andor test 42":r'cd /tmp && echo hello >> a     >> b     >> c>>    d&& cat d && ls && rm -fr a b c d',
-	"andor test 43":r'cd /tmp &&     (  ls -a && echo hello)>>     a>> b && ls -a && cat b && cat a && rm -fr a b',
-	"andor test 44":r'cd /tmp && echo hello > c &&echo >>a    >> b  >    c hello world && ls -al && cat a b c && rm -fr a b c',
-	"andor test 45":r'export a=\"hello\" && echo hello > sdfsdf $a && cat sdfsdf && rm sdfsdf',
-	"andor test 46":r'export a=\"hello\" && echo hello > sdfsdf > $a && cat $a && rm $a',
-	"andor test 47":r'cd /tmp && touch file1 file2 && echo hello >> file* && rm -fr file1 file2',
-	"andor test 48":r'cd /tmp && touch file1 file2 && export >> file* && rm -fr file1 file2',
-	"andor test 49":r'cd /tmp && touch file1 file2 && echo hello > file* && rm -fr file1 file2',
-	"andor test 50":r'cd /tmp && touch file1 file2 && export > file* && rm -fr file1 file2',
-	"andor test 51":r'cd /tmp && export a=\"hello world\" && echo hello >> $a',
-	"andor test 52":r'cd /tmp && export a=\"hello world\" && export >> $a',
-	"andor test 53":r'cd /tmp && export a=\"hello world\" && echo hello > $a',
-	"andor test 54":r'cd /tmp && export a=\"hello world\" && export > $a',
-	"andor test 55":r'cd /tmp && touch file1 file2 && echo hello >> file* && rm -fr file1 file2',
-	"andor test 56":r'cd /tmp && touch file1 file2 && export >> file* && rm -fr file1 file2',
-	"andor test 57":r'cd /tmp && touch file1 file2 && (echo hello) > file* && rm -fr file1 file2',
-	"andor test 57":r'cd /tmp && touch file1 file2 && (export) > file* && rm -fr file1 file2',
-	"andor test 58":r'cd /tmp && export a=\"hello world\" && (echo hello) >> $a',
-	"andor test 59":r'cd /tmp && export a=\"hello world\" && (export) >> $a',
-	"andor test 60":r'cd /tmp && export a=\"hello world\" && (echo hello) > $a',
-	"andor test 61":r'cd /tmp && export a=\"hello world\" && (export) > $a',
-	"andor test 62":r'cd /tmp && export a=\"hello world\" && (export && ls) > $a',
-	"andor test 63":r'export +++ && echo $?',
-	"andor test 64":r'cd /exam && echo $?',
-	"andor test 65":r'cd /aaaaaaaa && echo $?',
-	"andor test 66":r'()',
-	"andor test 67":r' << ()',
-	"andor test 68":r'cd /tmp && touch hello && chmod 000 hello && echo hello > hello',
-	"andor test 69":r'cd /tmp && touch hello && chmod 000 hello && ls hello >> hello',
-	"andor test 70":r'cd /tmp && ls -al >     \"hello    world\"   && ls -al && cat \"hello    world\" && rm -fr \"hello    world\"',
-	"andor test 71":r"'sdfas 'sfsf\"fsdf\" yuu",
-	"andor test 72":r'cd \"\" && ls',
-	"andor test 73":r"$=5",
-	"andor test 74":r"$+",
-	"andor test 75":r"$-",
-	"andor test 76":r"pwd dkfj kdjf kdjf",
-	"andor test 77":r"echo $USER'\"$USER'",
-	"andor test 78":r"echo ''$USER",
-	"andor test 79":r"((ls && ls | ls) > a ) > t && ls",
-	"andor test 80":r"((ls < k < g | nl < mm|| echo a < nn) > ll >> o && (cat Makefile) <k >o || echo ooooo) < h < l > q",
-	"andor test 81":r"(((ls d k f d s >> l && ls) | ls  > ls < l  && (cat | ls || l)) || (ls a idn sndu >> kkd) >> l )))) a > ls < l  >> l < d",
-	"andor test 82":r"unset HOME && cd || pwd",
-	"andor test 83":r"export 66=99 || echo $?",
-	"andor test 84":r"export 8kkk=99 || echo $?",
-	"andor test 85":r"export XX=99 KK=00 99xx=99 LLL=8989 || export | grep LLL=",
-	"andor test 86":r"cd /tmp && echo hello > test1 test2 && cat test1",
-	"andor test 87":r"echo hello > *z",
-	"andor test 88":r"export z=*z && export | grep z=",
-	"andor test 89":r"export z=*z && echo hello > $z",
-	"andor test 90":r"cd /tmp && > file && ls",
-	"andor test 91":r"cd /tmp && echo hello > test1 test2 && cat test1",
-	"andor test 92":r"echo hello > *z",
-	"andor test 93":r"export z=*z && export | grep z=",
-	"andor test 94":r"export z=*z && echo hello > $z",
+mix = {
+	"mix test 1":r"export a=a && export | grep \"a=\"",
+	"mix test 2":r"export a+=a && export | grep \"a=\"",
+	"mix test 3":r"export a=a && export a+=a && export | grep \"a=\"",
+	"mix test 4":r"export a++=a && export | grep \"a=\"",
+	"mix test 5":r"export a++=a && ls",
+	"mix test 6":r"export aaa && export | grep \"aaa\"",
+	"mix test 7":r"export a && export a+=b && echo $a",
+	"mix test 8":r"export =sdfsf ++ ++++ hello",
+	"mix test 9":r"export bbbcd && export | grep bbbcd$",
+	"mix test 10":r"export bbbcd && export bbbcd= && export | grep bbbcd=",
+	"mix test 11":r"export =sdfsf ++ ++++ hello || export | grep hello",
+	"mix test 12":r"export aaax=9 aaax+=8 aaax+=0 && export | grep aaax=",
+	"mix test 13":r"unset HOME && echo $HOME",
+	"mix test 14":r"export a=s && $''l''\"\"''\"\"''$a",
+	"mix test 15":r'sdfsdfdsf && ls -al',
+	"mix test 16":r'echo hello && sdfsdf && echo hello',
+	"mix test 17":r'echo hello && echo hello',
+	"mix test 18":r'echo hello || sdfsdf || echo hello',
+	"mix test 19":r'export sdfsdf=\"hello world\" && (echo hello && ls) > $sdfsdf',
+	"mix test 20":r'sdfsdf || sdfsdf || echo hello',
+	"mix test 21":r'sdfsdf || echo hello || echo hello',
+	"mix test 22":r'cd /tmp && ls',
+	"mix test 23":r'mkdir testdir && cd testdir && ls -al && cd .. && rm -r testdir && ls -al',
+	"mix test 24":r'ls -l && echo hello > $sdfsdf',
+	"mix test 25":r'(echo hello && ls) > $sdfsdf',
+	"mix test 26":r'(echo hello && ls) < $sdfsdf',
+	"mix test 27":r'ls && (echo hello && ls) > $sdfsdf',
+	"mix test 28":r'export sdfsdf=\"hello world\" && echo hello >> $sdfsdf',
+	"mix test 29":r'export sdfsdf=\"hello world\" && echo hello < $sdfsdf',
+	"mix test 30":r'export sdfsdf=\"hello world\" && ls && echo hello > $sdfsdf',
+	"mix test 31":r'export sdfsdf=\"hello world\" && ls && (echo hello && ls) > $sdfsdf',
+	#"mix test 32":r'export sdfsdf=\"hello world\" && ls && (echo hello && ls) >> $sdfsdf',
+	"mix test 33":r'export sdfsdf=\"hello world\" && ls && (echo hello && ls) < $sdfsdf',
+	"mix test 34":r'cd /tmp && touch file1 file2 && echo hello > file* && ls -al && rm -fr file1 file2',
+	"mix test 35":r'cd /tmp && touch file1 file2 && (echo hello) > file* && ls -al && rm -fr file1 file2',
+	"mix test 36":r"cd /tmp && mkdir testdir && cd testdir && echo hello >> \"$USER\" && ls -al && cd .. && rm -fr testdir",
+	"mix test 37":r'cd /tmp && echo hello > a > b > c > d && cat d && ls && rm -fr a b c d',
+	"mix test 38":r'cd /tmp && echo hello >> a >> b >> c >> d && cat d && ls && rm -fr a b c d',
+	"mix test 39":r'cd /tmp && (ls -a && echo hello) >> a >> b && ls -al && cat b && cat a && rm -fr a b',
+	"mix test 40":r'cd /tmp && echo hello > c &&echo >> a >> b > c hello world && ls -al && cat a b c && rm -fr a b c',
+	"mix test 41":r'cd /tmp && echo hello >     a    >b> c    >     d && cat d && ls && rm -fr a b c d',
+	"mix test 42":r'cd /tmp && echo hello >> a     >> b     >> c>>    d&& cat d && ls && rm -fr a b c d',
+	"mix test 43":r'cd /tmp &&     (  ls -a && echo hello)>>     a>> b && ls -a && cat b && cat a && rm -fr a b',
+	"mix test 44":r'cd /tmp && echo hello > c &&echo >>a    >> b  >    c hello world && ls -al && cat a b c && rm -fr a b c',
+	"mix test 45":r'export a=\"hello\" && echo hello > sdfsdf $a && cat sdfsdf && rm sdfsdf',
+	"mix test 46":r'export a=\"hello\" && echo hello > sdfsdf > $a && cat $a && rm $a',
+	"mix test 47":r'cd /tmp && touch file1 file2 && echo hello >> file* && rm -fr file1 file2',
+	"mix test 48":r'cd /tmp && touch file1 file2 && export >> file* && rm -fr file1 file2',
+	"mix test 49":r'cd /tmp && touch file1 file2 && echo hello > file* && rm -fr file1 file2',
+	"mix test 50":r'cd /tmp && touch file1 file2 && export > file* && rm -fr file1 file2',
+	"mix test 51":r'cd /tmp && export a=\"hello world\" && echo hello >> $a',
+	"mix test 52":r'cd /tmp && export a=\"hello world\" && export >> $a',
+	"mix test 53":r'cd /tmp && export a=\"hello world\" && echo hello > $a',
+	"mix test 54":r'cd /tmp && export a=\"hello world\" && export > $a',
+	"mix test 55":r'cd /tmp && touch file1 file2 && echo hello >> file* && rm -fr file1 file2',
+	"mix test 56":r'cd /tmp && touch file1 file2 && export >> file* && rm -fr file1 file2',
+	"mix test 57":r'cd /tmp && touch file1 file2 && (echo hello) > file* && rm -fr file1 file2',
+	"mix test 57":r'cd /tmp && touch file1 file2 && (export) > file* && rm -fr file1 file2',
+	"mix test 58":r'cd /tmp && export a=\"hello world\" && (echo hello) >> $a',
+	"mix test 59":r'cd /tmp && export a=\"hello world\" && (export) >> $a',
+	"mix test 60":r'cd /tmp && export a=\"hello world\" && (echo hello) > $a',
+	"mix test 61":r'cd /tmp && export a=\"hello world\" && (export) > $a',
+	"mix test 62":r'cd /tmp && export a=\"hello world\" && (export && ls) > $a',
+	"mix test 63":r'export +++ && echo $?',
+	"mix test 64":r'cd /exam && echo $?',
+	"mix test 65":r'cd /aaaaaaaa && echo $?',
+	"mix test 66":r'()',
+	"mix test 67":r' << ()',
+	"mix test 68":r'cd /tmp && touch hello && chmod 000 hello && echo hello > hello',
+	"mix test 69":r'cd /tmp && touch hello && chmod 000 hello && ls hello >> hello',
+	"mix test 70":r'cd /tmp && ls -al >     \"hello    world\"   && ls -al && cat \"hello    world\" && rm -fr \"hello    world\"',
+	"mix test 71":r"'sdfas 'sfsf\"fsdf\" yuu",
+	"mix test 72":r'cd \"\" && ls',
+	"mix test 73":r"$=5",
+	"mix test 74":r"$+",
+	"mix test 75":r"$-",
+	"mix test 76":r"pwd dkfj kdjf kdjf",
+	"mix test 77":r"echo $USER'\"$USER'",
+	"mix test 78":r"echo ''$USER",
+	"mix test 79":r"((ls && ls | ls) > a ) > t && ls",
+	"mix test 80":r"((ls < k < g | nl < mm|| echo a < nn) > ll >> o && (cat Makefile) <k >o || echo ooooo) < h < l > q",
+	"mix test 81":r"(((ls d k f d s >> l && ls) | ls  > ls < l  && (cat | ls || l)) || (ls a idn sndu >> kkd) >> l )))) a > ls < l  >> l < d",
+	"mix test 82":r"unset HOME && cd || pwd",
+	"mix test 83":r"export 66=99 || echo $?",
+	"mix test 84":r"export 8kkk=99 || echo $?",
+	"mix test 85":r"export XX=99 KK=00 99xx=99 LLL=8989 || export | grep LLL=",
+	"mix test 86":r"cd /tmp && echo hello > test1 test2 && cat test1",
+	"mix test 87":r"echo hello > *z",
+	"mix test 88":r"export z=*z && export | grep z=",
+	"mix test 89":r"export z=*z && echo hello > $z",
+	"mix test 90":r"cd /tmp && > file && ls",
+	"mix test 91":r"cd /tmp && echo hello > test1 test2 && cat test1",
+	"mix test 92":r"echo hello > *z",
+	"mix test 93":r"export z=*z && export | grep z=",
+	"mix test 94":r"export z=*z && echo hello > $z",
 	## "test 28": "export abcdef="*'*"*"'" && export | grep abcdef",
 	## "test 29": "export abcdef="*'*"*'*'"'" && export | grep abcdef",
-	"andor test 95":r"mkdir /tmp/test00 && echo '#!/bin/bash' > /tmp/test00/t5555 && echo ls >> /tmp/test00/t5555 && export PATH+=\":/tmp/test00\" && t5555",
-	"andor test 96":"mkdir /tmp/test00 && echo '#!/bin/bash' > /tmp/test00/t5555 && echo ls >> /tmp/test00/t5555 && chmod 766 /tmp/test00/t5555 && export PATH+=\":/tmp/test00\" && t5555",
-	"andor test 97":r"mkdir /tmp/test22 && touch /tmp/test22/t5555 && export PATH+=\":/tmp/test22\" && mkdir /tmp/test00 && echo '#!/bin/bash' > /tmp/test00/t5555 && echo ls >> /tmp/test00/t5555 && chmod 766 /tmp/test/t5555 && export PATH+=\":/tmp/test\" && t5555",
-	"andor test 98":r"< l > p && ls",
-	"andor test 99":r"&&",
-	"andor test 100":r"&& ||",
-	"andor test 101":r"< && >",
-	"andor test 102":r"()",
-	"andor test 103":r"(ls) (ls)",
-	"andor test 104":r"(ls) > (ls)",
-	"andor test 105":r"\"(ls)\"",
-	"andor test 106":r"(ls) && (ls)",
-	"andor test 107":r"fskdjfjlk || exit",
-	"andor test 108":r"./sfsffff",
-	"andor test 109":r"export s=\"   hi      hel       l        o\" && echo $s",
+	"mix test 95":r"mkdir /tmp/tmp/test00 && echo '#!/bin/bash' > /tmp/tmp/test00/t5555 && echo ls >> /tmp/tmp/test00/t5555 && export PATH+=\":/tmp/tmp/test00\" && t5555",
+	"mix test 96":r"mkdir /tmp/tmp/test00 && echo '#!/bin/bash' > /tmp/tmp/test00/t5555 && echo ls >> /tmp/tmp/test00/t5555 && chmod 766 /tmp/tmp/test00/t5555 && export PATH+=\":/tmp/tmp/test00\" && t5555",
+	"mix test 97":r"mkdir /tmp/tmp/test22 && touch /tmp/tmp/test22/t5555 && export PATH+=\":/tmp/tmp/test22\" && mkdir /tmp/tmp/test00 && echo '#!/bin/bash' > /tmp/tmp/test00/t5555 && echo ls >> /tmp/tmp/test00/t5555 && chmod 766 /tmp/test/t5555 && export PATH+=\":/tmp/test\" && t5555",
+	"mix test 98":r"< l > p && ls",
+	"mix test 99":r"&&",
+	"mix test 100":r"&& ||",
+	"mix test 101":r"< && >",
+	"mix test 102":r"()",
+	"mix test 103":r"(ls) (ls)",
+	"mix test 104":r"(ls) > (ls)",
+	"mix test 105":r"\"(ls)\"",
+	"mix test 106":r"(ls) && (ls)",
+	"mix test 107":r"fskdjfjlk || exit",
+	"mix test 108":r"./sfsffff",
+	"mix test 109":r"export s=\"   hi      hel       l        o\" && echo $s",
 }
 
 def set_up():
-	subprocess.call(['mkdir', '/tmp/tmp'])
-	subprocess.call(['mkdir', 'outfiles'])
+	subprocess.call(['mkdir', '-p', '/tmp/tmp/outfiles'])
 	subprocess.call(['cp', '-r', 'test_files', '/tmp/tmp'])
 	subprocess.call(['cp', 'minishell', '/tmp/tmp/minishell'])
 	os.chdir("/tmp/tmp")
@@ -449,7 +448,6 @@ def run_tests(tests):
 			test = tests[key].replace('\\', '')
 			print(f"\033[1;31m{key} ❌ \033[0m{test}\033[0;31m\n===>Expeced return -- value: {expected_rv}\n{expected_stdout}\n===>Got return -- value: {got_rv}\n{got_stdout}\033[0m")
 		sleep(0.02)
-	# subprocess.call(['cd', '-'])
 
 
 
@@ -493,96 +491,74 @@ def replace_sc(s):
 
 
 def rm_tests(key):
-	rmv = ["test 28", "test 29", "test 30"]
+	rmv = ["mix test 95", "mix test 96", "mix test 77"]
 	if key in rmv:
-		subprocess.run("rm -fr /tmp/test00 /tmp/test22", shell=True, capture_output=True)
+		subprocess.run("rm -fr /tmp/tmp/test00 /tmp/tmp/test22", shell=True, capture_output=True)
 
-if __name__ == '__main__':
-	set_up()
-	# print(
-	# 	"""
-	# 	\033[1;35m.______    __    __   __   __      .___________. __  .__   __.      _______.   .___________. _______      _______..___________.  _______.
-	# 	|   _  \  |  |  |  | |  | |  |     |           ||  | |  \ |  |     /       |   |           ||   ____|    /       ||           | /       |
-	# 	|  |_)  | |  |  |  | |  | |  |     `---|  |----`|  | |   \|  |    |   (----`   `---|  |----`|  |__      |   (----``---|  |----`|   (----`
-	# 	|   _  <  |  |  |  | |  | |  |         |  |     |  | |  . `  |     \   \           |  |     |   __|      \   \        |  |      \   \ 
-	# 	|  |_)  | |  `--'  | |  | |  `----.    |  |     |  | |  |\   | .----)   |          |  |     |  |____ .----)   |       |  |  .----)   |
-	# 	|______/   \______/  |__| |_______|    |__|     |__| |__| \__| |_______/           |__|     |_______||_______/        |__|  |_______/\033[0m 
-	# """,
-	# )
-	print(
-		"""
-		\033[1;35m
-		███╗░░░███╗░█████╗░███╗░░██╗██████╗░░█████╗░████████╗░█████╗░██████╗░██╗░░░██╗
-		████╗░████║██╔══██╗████╗░██║██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗██╔══██╗╚██╗░██╔╝
-		██╔████╔██║███████║██╔██╗██║██║░░██║███████║░░░██║░░░██║░░██║██████╔╝░╚████╔╝░
-		██║╚██╔╝██║██╔══██║██║╚████║██║░░██║██╔══██║░░░██║░░░██║░░██║██╔══██╗░░╚██╔╝░░
-		██║░╚═╝░██║██║░░██║██║░╚███║██████╔╝██║░░██║░░░██║░░░╚█████╔╝██║░░██║░░░██║░░░
-		╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░\033[0m 
-	""",
-	)
-	print(
-		"""
-		\033[0;36m
+mandatory = """\033[1;35m
+	███╗░░░███╗░█████╗░███╗░░██╗██████╗░░█████╗░████████╗░█████╗░██████╗░██╗░░░██╗
+	████╗░████║██╔══██╗████╗░██║██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗██╔══██╗╚██╗░██╔╝
+	██╔████╔██║███████║██╔██╗██║██║░░██║███████║░░░██║░░░██║░░██║██████╔╝░╚████╔╝░
+	██║╚██╔╝██║██╔══██║██║╚████║██║░░██║██╔══██║░░░██║░░░██║░░██║██╔══██╗░░╚██╔╝░░
+	██║░╚═╝░██║██║░░██║██║░╚███║██████╔╝██║░░██║░░░██║░░░╚█████╔╝██║░░██║░░░██║░░░
+	╚═╝░░░░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░╚═╝░░╚═╝░░░╚═╝░░░░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░\033[0m 
+"""
+
+builtins = """\033[0;36m
 █▄▄ █░█ █ █░░ ▀█▀ █▀   █ █▄░█
 █▄█ █▄█ █ █▄▄ ░█░ ▄█   █ █░▀█\033[0m 
-	""",
-	)
-	run_tests(builts)
-	print(
-		"""
-		\033[0;36m
+	"""
+
+redirections = """\033[0;36m
 █▀█ █▀▀ █▀▄ █ █▀█ █▀▀ █▀▀ ▀█▀ █ █▀█ █▄░█
 █▀▄ ██▄ █▄▀ █ █▀▄ ██▄ █▄▄ ░█░ █ █▄█ █░▀█\033[0m 
-	""",
-	)
-	run_tests(tests_red)
-	print(
-		"""
-		\033[0;36m
+"""
+
+syntaxerror = """\033[0;36m
 █▀ █▄█ █▄░█ ▄▀█ ▀█▀ ▄▀█ ▀▄▀
 ▄█ ░█░ █░▀█ █▀█ ░█░ █▀█ █░█\033[0m 
-	""",
-	)
+"""
 
-	run_tests(syntax)
-	# run_tests(rederction)
-	# run_tests(tests_red)
-	if (len(sys.argv) >= 2 and sys.argv[1] == "bonus"):
-		print(
-			"""
-			\033[1;35m
-			
-			██████╗░░█████╗░███╗░░██╗██╗░░░██╗░██████╗
-			██╔══██╗██╔══██╗████╗░██║██║░░░██║██╔════╝
-			██████╦╝██║░░██║██╔██╗██║██║░░░██║╚█████╗░
-			██╔══██╗██║░░██║██║╚████║██║░░░██║░╚═══██╗
-			██████╦╝╚█████╔╝██║░╚███║╚██████╔╝██████╔╝
-			╚═════╝░░╚════╝░╚═╝░░╚══╝░╚═════╝░╚═════╝░\033[0m 
-		""",
-		)
-		print(
-			"""
-			\033[0;36m
+bonus = """\033[1;35m
+	██████╗░░█████╗░███╗░░██╗██╗░░░██╗░██████╗
+	██╔══██╗██╔══██╗████╗░██║██║░░░██║██╔════╝
+	██████╦╝██║░░██║██╔██╗██║██║░░░██║╚█████╗░
+	██╔══██╗██║░░██║██║╚████║██║░░░██║░╚═══██╗
+	██████╦╝╚█████╔╝██║░╚███║╚██████╔╝██████╔╝
+	╚═════╝░░╚════╝░╚═╝░░╚══╝░╚═════╝░╚═════╝░\033[0m 
+"""
+
+wildcards = """\033[0;36m
 █░█░█ █ █░░ █▀▄ █▀▀ ▄▀█ █▀█ █▀▄
 ▀▄▀▄▀ █ █▄▄ █▄▀ █▄▄ █▀█ █▀▄ █▄▀\033[0m 
-		""",
-		)
-		run_tests(wildcard)
-		print(
-			"""
-			\033[0;36m
+"""
+
+mixed = """\033[0;36m
 ▄▀█ █▄░█ █▀▄     █▀█ █▀█
 █▀█ █░▀█ █▄▀     █▄█ █▀▄\033[0m 
-		""",
-		)
-		run_tests(andor)
-		print(
-			"""
-			\033[0;36m
+"""
 
+andorwilds = """\033[0;36m
 ▄▀█ █▄░█ █▀▄   █▀█ █▀█   █░█░█ █ █░░ █▀▄ █▀▀ ▄▀█ █▀█ █▀▄
 █▀█ █░▀█ █▄▀   █▄█ █▀▄   ▀▄▀▄▀ █ █▄▄ █▄▀ █▄▄ █▀█ █▀▄ █▄▀\033[0m 
-		""",
-		)
+"""
+		
+if __name__ == '__main__':
+	set_up()
+	print(mandatory)
+	print(builtins)
+	run_tests(builts)
+	print(redirections)
+	run_tests(tests_red)
+	print(syntaxerror)
+	run_tests(syntax)
+
+	if (len(sys.argv) >= 2 and sys.argv[1] == "bonus"):
+		print(bonus)
+		print(wildcards)
+		run_tests(wildcard)
+		print(mixed)
+		run_tests(mix)
+		print(andorwilds)
 		run_tests(andorwild)
 	clean_up()
