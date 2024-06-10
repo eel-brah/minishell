@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 21:14:50 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/03 22:46:18 by eel-brah         ###   ########.fr       */
+/*   Updated: 2024/06/10 07:21:22 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,10 @@ void	prg_with_path(char *prg, char **args)
 	if (stat(prg, &statbuf))
 	{
 		print_error_2("minishell", prg, strerror(errno));
-		exit_status(127, true, true);
+		if (errno == 20)
+			exit_status(126, true, true);
+		else
+			exit_status(127, true, true);
 		return ;
 	}
 	errno = 0;

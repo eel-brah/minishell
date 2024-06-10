@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtins.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/23 05:37:05 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/14 14:43:19 by amokhtar         ###   ########.fr       */
+/*   Updated: 2024/06/10 07:32:25 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int	ft_echo(char **args)
 		i = 1;
 		while (args[0][i] == 'n')
 			i++;
-		if (args[0][i] && args[0][i] != ' ')
+		if (args[0][i])
 			break ;
 		if (!args[0][i])
 		{
