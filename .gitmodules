@@ -1,0 +1,3 @@
+[submodule "minishell_42_tester"]
+	path = minishell_42_tester
+	url = git@github.com:eel-brah/minishell_42_tester.git
