@@ -1,7 +1,5 @@
 CC := cc
-# CFLAGS := -Wall -Wextra -Werror -g
-CFLAGS := -Wall -Wextra -Werror -g 
-# -fsanitize=address
+CFLAGS := #-Wall -Wextra -Werror 
 
 PARN_DIR := .
 SRC_DIR := $(PARN_DIR)/src
