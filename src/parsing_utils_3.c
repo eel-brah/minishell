@@ -6,7 +6,7 @@
 /*   By: eel-brah <eel-brah@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 20:46:47 by eel-brah          #+#    #+#             */
-/*   Updated: 2024/05/13 21:41:40 by eel-brah         ###   ########.fr       */
+/*   Updated: 2025/02/06 21:24:20 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 
 bool	open_herdoc_file(t_redirection *red, t_node *node, int *fd)
 {
-	red->file = name_file_rand((int)&open_herdoc_file);
+	red->file = name_file_rand((long int)&open_herdoc_file);
 	if (!red->file)
 		return (false);
 	red->here_fd = open(red->file, red->flags, PREMISSIONS);

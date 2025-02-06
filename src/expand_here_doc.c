@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/29 16:37:43 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/05/01 21:13:30 by amokhtar         ###   ########.fr       */
+/*   Updated: 2025/02/06 21:26:31 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,14 @@ int	expand_here_doc(int fd, int status, int expand)
 	int		fd_res;
 	int		fd_ret;
 
-	(1) && (name = name_file_rand((int)&expand_here_doc), count = 42);
+	(1) && (name = name_file_rand((long int)&expand_here_doc), count = 42);
 	if (!name)
 		return (-1);
 	fd_res = open(name, O_CREAT | O_RDWR | O_TRUNC | O_EXCL, PREMISSIONS);
 	while (fd_res == -1 && errno == EEXIST)
 	{
 		free(name);
-		name = name_file_rand((int)&expand_here_doc + count);
+		name = name_file_rand((long int)&expand_here_doc + count);
 		if (!name)
 			return (-1);
 		fd_res = open(name, O_CREAT | O_RDWR | O_TRUNC | O_EXCL, PREMISSIONS);

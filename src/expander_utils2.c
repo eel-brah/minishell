@@ -6,7 +6,7 @@
 /*   By: amokhtar <amokhtar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 18:27:08 by amokhtar          #+#    #+#             */
-/*   Updated: 2024/05/01 21:11:32 by amokhtar         ###   ########.fr       */
+/*   Updated: 2025/02/06 21:27:06 by eel-brah         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ char	*get_pid(int pid, int exitt)
 	char	*line;
 	int		fd;
 
-	file = name_file_rand((int)&get_pid);
+	file = name_file_rand((long int)&get_pid);
 	if (!file)
 		return (NULL);
 	pid = fork();
