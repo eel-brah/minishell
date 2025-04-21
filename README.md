@@ -207,7 +207,5 @@ As a result, some behaviors — particularly the exit statuses of built-in comma
 
 ---
 
-## 👨‍💻 Authors
-
 > This project was built as part of the 42 curriculum to learn system programming, shell design, and C fundamentals.
 
