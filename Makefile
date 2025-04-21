@@ -40,7 +40,6 @@ $(NAME): $(OBJ) $(LIBFT) $(INCLUDE)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDE)
 	@$(CC) $(CFLAGS) -c $< -o $@
-	@echo "\033[1;34m[CC]\033[0m $<"
 
 builddir:
 	@mkdir -p $(BUILD_DIR)

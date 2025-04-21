@@ -1,98 +1,213 @@
-# Minishell
+# 🐚 Minishell  
+> As beautiful as a shell
 
-As beautiful as a shell
+---
 
-## About
+## 📘 About
 
-This project is about creating a simple shell, akin to a basic version of bash. <br>
-The main goal is to have a good understanding of process creation and file descriptors using the C programmming language.
+**Minishell** is a simplified shell project, built in C, that mimics core features of `bash`. The goal is to gain a deep understanding of:
+- Process creation & management  
+- File descriptors  
+- Shell parsing & execution  
 
-## Allowed External Functions
-Input/Output: printf write read perror<br>
-Memory Management: malloc free<br>
-File System: access open read close unlink opendir readdir closedir stat lstat fstat getcwd chdir<br>
-Process Control: fork wait waitpid wait3 wait4 execve exit<br>
-Signal Handling: signal sigaction sigemptyset sigaddset kill<br>
-Terminal I/O: isatty ttyname ttyslot ioctl tcsetattr tcgetattr tgetent tgetflag tgetnum tgetstr tgoto tputs<br>
-Readline Library: readline rl_clear_history rl_on_new_line rl_replace_line rl_redisplay add_history
+It's part of the curriculum at **42**, designed to teach you how the internals of a Unix shell work.
 
-## Shell Requirements
-Display a prompt when waiting for a new command.<br>
-Maintain a working history.<br>
-Execute the correct executable based on the PATH variable or relative/absolute paths.<br>
-Limit global variable usage to indicate a received signal.<br>
-Handle special characters and quotes correctly.<br>
-Implement input/output redirections and pipes.<br>
-Manage environment variables and special variables like $?.<br>
-Handle ctrl-C, ctrl-D, and ctrl-\ appropriately in interactive mode.<br>
-Implement built-in commands: echo with -n, cd, pwd, export, unset, env, and exit.<br>
-Implement logical operators && and || with parenthesis for priority.<br>
-Handle wildcards * in the current working directory.<br>
+---
 
-# How It Work
+## 🛠️ Building & Running
 
-## Overview
-It parses and executes commands using a structured approach involving recursive descent parsing and a command execution tree. This method ensures efficient parsing and execution of complex command sequences.
-
-## Parsing with Recursive Descent
-
-### Lexical Analysis/Tokenization:
-The first step involves breaking the input command string into tokens (e.g., keywords, operators, arguments).<br>
-Tokens are typically identified using a tokenizer which recognizes elements like commands, arguments, pipes, and redirection operators.
-
-### Recursive Descent Parsing:
-This parsing technique is a top-down method where each grammar rule is represented by a function in the parser.<br>
-The parser functions call each other recursively to process the input tokens and build a syntax tree.<br>
-The grammar rules define how commands are structured, including how pipes and redirections are handled.<br>
-
-### Syntax Tree Construction:
-As the parser processes the input, it constructs a syntax tree, also known as a parse tree.<br>
-Each node in the tree represents a command, an argument, or an operator.<br>
-For instance, a pipe operator would create a node with two child nodes representing the commands on either side of the pipe.
-
-## Command Execution
-
-### Tree Traversal:
-Once the syntax tree is built, the execution phase begins by traversing this tree.<br>
-The traversal method depends on the type of operation represented by each node (e.g., simple command, pipe, redirection).
-
-### Command Expansion:
-During traversal, any necessary expansions are performed (e.g., replacing $VAR with its value or expanding *).
-
-### Execution:
-
-The commands are executed in a bottom-up manner, starting from the leaf nodes of the tree.<br>
-For simple commands, the shell uses system calls like execve to run the program.<br>
-For pipelines, the output of one command is passed as input to the next using pipes.<br>
-For redirections, file descriptors are manipulated to redirect input/output as specified.
-
-### Handling Built-ins and External Commands:
-The shell differentiates between built-in commands (like cd, echo) and external programs.<br>
-Built-in commands are handled internally within the shell process.<br>
-External commands are executed by forking a new process and using execve.
-
-### Error Handling
-The shell ensures robust(^_-) error handling by checking for common errors such as syntax errors, command not found, and invalid arguments.<br>
-It provides meaningful error messages to the user to aid in debugging command input issues.
-
-## Example Workflow
-Input: ls -l | grep "test" > output.txt<br>
-Tokens: [ls, -l, |, grep, "test", >, output.txt]<br>
-Parsing:<br>
->ls -l parsed as a command node.<br>
->grep "test" parsed as another command node.<br>
->| creates a pipe node with ls -l and grep "test" as children.<br>
->\> creates a redirection node parent to grep "test".<br>
-Tree Construction:<br>
-```
-Copy code
-   |   
-  / \
-ls   > output.txt
-      \
-   grep "test"
+```bash
+make              # Compile minishell (release mode)
+make MODE=debug   # Compile with debug flags and sanitizers
+./minishell       # Run the shell
 ```
 
-Execution:<br>
-Traverse the tree and execute ls -l, pipe its output to grep "test", and redirect the final output to output.txt.<br>
+---
+
+## ✅ Allowed External Functions
+
+**Input/Output:**  
+`printf`, `write`, `read`, `perror`
+
+**Memory Management:**  
+`malloc`, `free`
+
+**File System:**  
+`access`, `open`, `read`, `close`, `unlink`, `opendir`, `readdir`, `closedir`, `stat`, `lstat`, `fstat`, `getcwd`, `chdir`
+
+**Process Control:**  
+`fork`, `wait`, `waitpid`, `wait3`, `wait4`, `execve`, `exit`
+
+**Signal Handling:**  
+`signal`, `sigaction`, `sigemptyset`, `sigaddset`, `kill`
+
+**Terminal I/O:**  
+`isatty`, `ttyname`, `ttyslot`, `ioctl`, `tcsetattr`, `tcgetattr`, `tgetent`, `tgetflag`, `tgetnum`, `tgetstr`, `tgoto`, `tputs`
+
+**Readline Library:**  
+`readline`, `rl_clear_history`, `rl_on_new_line`, `rl_replace_line`, `rl_redisplay`, `add_history`
+
+---
+
+## 🧩 Shell Features
+
+- Custom interactive prompt
+- Command history (via `readline`)
+- Execution of binaries via `PATH` or absolute/relative paths
+- Environment variable handling (`$VAR`, `$?`)
+- Input/output redirection (`<`, `>`, `>>`)
+- Pipelines (`|`)
+- Logical operators: `&&`, `||`
+- Built-in commands:
+  - `echo` (with `-n`)
+  - `cd`
+  - `pwd`
+  - `export`
+  - `unset`
+  - `env`
+  - `exit`
+- Proper signal handling:
+  - `Ctrl-C` → interrupts current command
+  - `Ctrl-D` → exits the shell
+  - `Ctrl-\` → ignored or handled appropriately
+- Wildcard expansion (`*`) in the current directory
+- Syntax support for parentheses to manage operator precedence
+
+---
+
+## ⚙️ How It Works
+
+### 🧩 Overview  
+Minishell parses and executes commands using a structured approach involving **recursive descent parsing** and a **command execution tree**. This method enables efficient parsing and execution of even complex command sequences like pipelines, redirections, and logical operators.
+
+---
+
+### 🧱 Parsing with Recursive Descent
+
+#### 🔹 Lexical Analysis / Tokenization  
+The first step involves breaking the input command string into **tokens** — keywords, operators, arguments, and more.  
+Tokens are typically identified using a **tokenizer**, which recognizes elements like:
+- Commands (e.g. `ls`)
+- Arguments (e.g. `-l`)
+- Operators (`|`, `>`, `&&`, etc.)
+- Redirection symbols
+- Quotes and subshells
+
+#### 🔹 Recursive Descent Parsing  
+This technique is a **top-down parsing** method where each grammar rule is represented by a function in the parser.  
+Each parser function may call other functions recursively to process nested or dependent components.
+
+The grammar defines the structure of valid shell input — including how sequences of commands, pipelines, and redirections must be formed.  
+This allows support for nested constructs like:
+
+```bash
+(cmd1 && cmd2) || cmd3 | cmd4 > file
+```
+
+#### 🔹 Syntax Tree Construction  
+As the parser processes the tokens, it builds a **syntax tree** (also known as an **abstract syntax tree** or AST).  
+Each node represents:
+- A command or argument
+- A redirection
+- A logical operator (`&&`, `||`)
+- A pipe (`|`)
+
+For example, a pipe operator creates a node with **two child nodes**, one for each command it connects.  
+This tree represents the **logical structure** of the input and dictates the order of execution.
+
+---
+
+### 🚀 Command Execution
+
+#### 🔹 Tree Traversal  
+Once the syntax tree is built, the shell enters the **execution phase**.  
+It traverses the tree recursively — the method of traversal depends on the type of node:
+- **Simple command**: Execute directly
+- **Pipe**: Connect two subcommands via pipe
+- **Redirection**: Adjust file descriptors
+- **Logical op**: Evaluate based on previous command's result
+
+#### 🔹 Command Expansion  
+During traversal, expansions are performed:
+- Replace `$VAR` with its value from the environment
+- Expand `*` (wildcards) to match filenames in the current directory
+- Replace special variables like `$?` (last command exit code)
+
+#### 🔹 Execution  
+
+The execution follows a **bottom-up** approach:
+- Leaf nodes (simple commands) are executed first
+- Their outputs are passed through pipes or redirected as specified
+
+Execution uses low-level system calls like:
+- `fork()` – to create child processes
+- `execve()` – to run external programs
+- `dup2()` – for I/O redirection
+- `pipe()` – to connect commands via pipes
+
+#### 🔹 Handling Built-ins vs External Commands  
+- **Built-ins** (`cd`, `echo`, `export`, etc.) are executed **inside the shell process** (no `fork`)
+- **External commands** (`ls`, `cat`, etc.) are executed in a **child process** using `execve()`
+
+The shell must first **check** if a command is a built-in before deciding how to execute it.
+
+#### 🔹 Error Handling  
+The shell implements robust (and maybe even a bit cheeky 😉) error handling:
+- Syntax errors (e.g., unmatched quotes, invalid operator usage)
+- Command not found
+- Invalid arguments or paths
+- Permission denied
+- Invalid redirections or file descriptor usage
+
+Meaningful error messages are printed to help the user debug issues easily.
+
+---
+
+### 🧪 Example Workflow
+
+**Input:**  
+```bash
+ls -l | grep "test" > output.txt
+```
+
+**Tokens:**  
+```text
+[ls, -l, |, grep, "test", >, output.txt]
+```
+
+**Parsing:**  
+- `ls -l` is parsed as a command node  
+- `grep "test"` is parsed as another command node  
+- `|` creates a pipe node with `ls -l` and `grep "test"` as children  
+- `>` creates a redirection node parent to `grep "test"`  
+
+**Tree Construction:**
+```
+       |   
+      / \
+    ls   >
+          \
+         grep "test"
+              \
+           output.txt
+```
+
+**Execution Steps:**
+1. Execute `ls -l`
+2. Pipe its output to `grep "test"`
+3. Redirect the final result to `output.txt`
+
+Each step is managed by traversing and interpreting the syntax tree, respecting the structure, order, and redirections implied by the parsed input.
+
+---
+
+**Note** 
+Minishell was developed on a system running bash version 3.2.57, and it mimics its core features. 
+As a result, some behaviors — particularly the exit statuses of built-in commands — may differ slightly from those in newer versions of Bash.
+
+---
+
+## 👨‍💻 Authors
+
+> This project was built as part of the 42 curriculum to learn system programming, shell design, and C fundamentals.
 
