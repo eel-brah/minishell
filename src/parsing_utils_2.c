@@ -40,7 +40,7 @@ t_node	*parse_redirection(t_node *node, char **pcmd)
 
 t_node	*parse_parenthesis(char **pcmd)
 {
-	t_node	*node;
+	t_node	*node = NULL;
 
 	get_token(pcmd, NULL, NULL);
 	if (**pcmd)

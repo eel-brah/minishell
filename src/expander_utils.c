@@ -37,15 +37,15 @@ char	*alloc_without_quotes(char *s, int len, int i, int qo)
 	while (s && s[i])
 	{
 		if (s[i] == 20 && f == 1)
-			(1) && (i++, f = 0);
+    {i++; f = 0;}
 		else if (s[i] == 20 && f == 0)
-			(1) && (i++, f = 1);
+    {i++; f = 1;}
 		else if ((s[i] == '\'' || s[i] == '\"' ) && (qo == 0 || q == s[i]) && f)
 		{
 			if (qo == 0)
-				(1) && (qo = 1, q = s[i]);
+      {qo = 1; q = s[i];}
 			else
-				(1) && (qo = 0, q = '\0');
+				{qo = 0; q = '\0';}
 			i++;
 		}
 		else

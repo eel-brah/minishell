@@ -41,11 +41,9 @@ char	*handle_spec_tild(t_elem *elem, char ***res, char *s)
 char	*handl_other_carac(t_elem *elem, char ***res, char *s)
 {
 	char	c;
-	char	d;
 	char	*tmp;
 
 	c = s[elem->i];
-	d = s[elem->i + 1];
 	if (c == '*' && elem->qoute == 0 && elem->expand)
 		elem->wild = 1;
 	tmp = handle_spec_tild(elem, res, s);

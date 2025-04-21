@@ -25,7 +25,9 @@ int	vo_name(int fd, int expand, int status, int fd_res)
 		res = expander(s, 1, expand, status);
 		if (!res)
 			return (free(s), 0);
-		write(fd_res, *res, ft_strlen(*res));
+		ssize_t ret = write(fd_res, *res, ft_strlen(*res));
+    if (ret == -1)
+      perror("write failed");
 		double_free(res);
 		free(s);
 	}

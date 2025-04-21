@@ -73,10 +73,8 @@ static char	*alloc(t_elem *elem, char **word, char ***res, int here_doc)
 char	*alloc_for_elem(t_elem *elem, int here_doc, char *word, char ***res)
 {
 	char	**tmp;
-	char	**concat;
 
 	tmp = NULL;
-	concat = NULL;
 	elem->i = 1;
 	if (!alloc(elem, &word, res, here_doc))
 		return (NULL);

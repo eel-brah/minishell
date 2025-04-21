@@ -16,7 +16,7 @@ char	*join_variabl(char *old, char *new, char *ptr)
 {
 	char	*tmp;
 	char	*res;
-	char	*addplus;
+	char	*addplus = NULL;
 
 	tmp = ft_strdup(ptr);
 	if (!tmp)

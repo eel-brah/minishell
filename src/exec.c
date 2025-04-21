@@ -36,7 +36,7 @@ static bool	create_paths_and_slashed(char *prg, char *path,
 static char	*look_for_prg(char *slashed,
 		char **paths, char **pr_denied, bool *end)
 {
-	char		*full_path;
+	char		*full_path = NULL;
 	struct stat	statbuf;
 
 	while (*paths)

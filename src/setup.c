@@ -38,7 +38,9 @@ void	sigint_handler(int sig)
 {
 	exit_status(1, true, true);
 	(void)sig;
-	write(1, "\n", 1);
+	ssize_t ret = write(1, "\n", 1);
+  if (ret == -1)
+    perror("write failed");
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();

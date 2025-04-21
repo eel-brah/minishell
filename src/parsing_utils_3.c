@@ -80,8 +80,10 @@ bool	fill_file_heredoc(t_redirection *node, char *delim, int fd)
 		len_s = ft_strlen(s);
 		if (!s || (len == len_s && !ft_strncmp(s, res[0], len)))
 			break ;
-		write(fd, s, len_s);
-		write(fd, "\n", 1);
+		ssize_t ret1 = write(fd, s, len_s);
+		ssize_t ret2 = write(fd, "\n", 1);
+    if (ret1 == -1 || ret2 == -1)
+      perror("write failed");
 		free(s);
 		s = NULL;
 	}

@@ -1,54 +1,64 @@
-CC := cc
-CFLAGS := #-Wall -Wextra -Werror 
+CC := gcc
+NAME := minishell
 
+# Directories
 PARN_DIR := .
 SRC_DIR := $(PARN_DIR)/src
 INCLUDE_DIR := $(PARN_DIR)/include
 BUILD_DIR := $(PARN_DIR)/build
-LIBFTDIR := ./libft
+LIBFT_DIR := ./libft
 
-INCLUDE := msh.h
-INCLUDE := $(addprefix $(INCLUDE_DIR)/,$(INCLUDE))
+# Compilation flags
+CFLAGS := #-Wall -Wextra -Werror 
 
-SRC := msh.c exec.c exec_utils.c prompt.c setup.c \
-	builtins.c expander.c export.c get_next_line.c \
-	parsing.c execution.c execution_utils_0.c \
-	utils.c utils_0.c utils_1.c utils_2.c \
-	execution_utils_1.c free.c errors.c builtins_2.c\
-	parsing_utils_0.c parsing_utils_1.c parsing_utils_2.c \
-	parsing_utils_3.c ft_setenv.c expander_utils.c expander_utils1.c\
-	expander_utils2.c expander_utils3.c expander_utils4.c \
-	expand_here_doc.c expander_utils6.c expander_utils7.c \
-	export_utils.c export_utils1.c setup_utils.c setup_utils1.c \
-	reset.c expander_utils5.c execution_utils_2.c
-OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
+DEBUG_FLAGS := -g3 -O0 -fsanitize=address,undefined -DDEBUG
+RELEASE_FLAGS := -O2 -flto -march=native -D_FORTIFY_SOURCE=2 -fstack-protector-strong
 
-LIBFT := $(LIBFTDIR)/libft.a
+# Select mode (default to release)
+MODE ?= release
+ifeq ($(MODE),debug)
+	CFLAGS += $(DEBUG_FLAGS)
+else
+	CFLAGS += $(RELEASE_FLAGS)
+endif
 
-NAME := minishell
+# Source and object files
+SRC := $(wildcard $(SRC_DIR)/*.c)
+OBJ := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC))
 
-all: lib $(NAME)
+INCLUDE := $(wildcard $(INCLUDE_DIR)/*.h)
 
+# Libraries
+LIBFT := $(LIBFT_DIR)/libft.a
+LDFLAGS := -lreadline
+
+all: builddir lib $(NAME)
 
 $(NAME): $(OBJ) $(LIBFT) $(INCLUDE)
-	@$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME) -lreadline -L $${HOME}/.brew/opt/readline/lib
-	@echo "\033[1;34m$(NAME) \033[0;34mhas been compiled"
+	@$(CC) $(CFLAGS) $(OBJ) $(LIBFT) -o $(NAME) $(LDFLAGS)
+	@echo "\033[1;32m[OK]\033[0m Compiled \033[1m$(NAME)\033[0m in \033[1m$(MODE)\033[0m mode"
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDE)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $${HOME}/.brew/opt/readline/include
+	@$(CC) $(CFLAGS) -c $< -o $@
+	@echo "\033[1;34m[CC]\033[0m $<"
+
+builddir:
+	@mkdir -p $(BUILD_DIR)
 
 lib:
-	@[ -d "$(BUILD_DIR)" ] || mkdir "$(BUILD_DIR)"
-	@$(MAKE) -C $(LIBFTDIR)
+	@$(MAKE) -C $(LIBFT_DIR)
 
 clean:
-	@$(MAKE) clean -C $(LIBFTDIR)
+	@$(MAKE) clean -C $(LIBFT_DIR)
 	@rm -f $(OBJ)
+	@echo "\033[1;33m[clean]\033[0m Object files removed"
 
 fclean: clean
-	@$(MAKE) fclean -C $(LIBFTDIR)
-	@rm -rf $(NAME) $(BUILD_DIR)
+	@$(MAKE) fclean -C $(LIBFT_DIR)
+	@rm -f $(NAME)
+	@rm -rf $(BUILD_DIR)
+	@echo "\033[1;31m[fclean]\033[0m Binary and build directory removed"
 
 re: fclean all
 
-.PHONY: all clean fclean re lib
+.PHONY: all clean fclean re lib builddir
